@@ -13,12 +13,13 @@ export default function ResultsScreen() {
   const isRefund = finalRefund > 0;
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950 flex items-center justify-center p-6">
+    <div className="h-screen overflow-y-auto bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950">
       {/* Ambient glow */}
-      <div className="pointer-events-none absolute top-1/4 -left-32 w-96 h-96 rounded-full bg-emerald-500/15 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-1/4 -right-32 w-96 h-96 rounded-full bg-amber-400/15 blur-3xl" />
+      <div className="pointer-events-none fixed top-1/4 -left-32 w-96 h-96 rounded-full bg-emerald-500/15 blur-3xl" />
+      <div className="pointer-events-none fixed bottom-1/4 -right-32 w-96 h-96 rounded-full bg-amber-400/15 blur-3xl" />
 
-      <div className="relative max-w-2xl w-full">
+      <div className="relative min-h-full flex items-start sm:items-center justify-center p-6">
+       <div className="max-w-2xl w-full">
         <div className="text-center mb-6">
           <div className="text-6xl mb-3 drop-shadow-[0_0_30px_rgba(34,197,94,0.5)]">
             {isRefund ? "🎉" : "📬"}
@@ -124,6 +125,7 @@ export default function ResultsScreen() {
             Play Again
           </button>
         </div>
+       </div>
       </div>
     </div>
   );

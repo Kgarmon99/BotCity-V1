@@ -95,14 +95,18 @@ function NPC({ centerX, centerZ, radius, speed, phase, scale = 0.7, color, emiss
   );
 }
 
+// All NPCs use the BotCity emerald palette with amber accent bots for variety —
+// chassis is dark slate/emerald, visor/aura emits a green or gold glow.
 const npcs: NPCProps[] = [
-  { centerX: 0, centerZ: 0, radius: 9, speed: 0.3, phase: 0, color: "#1e40af", emissive: "#60a5fa" },
-  { centerX: 0, centerZ: 0, radius: 11, speed: -0.25, phase: 2, color: "#7e22ce", emissive: "#c084fc" },
-  { centerX: 0, centerZ: 0, radius: 13, speed: 0.2, phase: 4, color: "#be123c", emissive: "#fb7185" },
-  { centerX: -8, centerZ: -8, radius: 4, speed: 0.4, phase: 1, scale: 0.6, color: "#0e7490", emissive: "#67e8f9" },
-  { centerX: 8, centerZ: 8, radius: 4, speed: -0.4, phase: 3, scale: 0.6, color: "#a16207", emissive: "#fde047" },
-  { centerX: -8, centerZ: 8, radius: 3.5, speed: 0.5, phase: 1.5, scale: 0.55, color: "#9d174d", emissive: "#f9a8d4" },
-  { centerX: 8, centerZ: -8, radius: 3.5, speed: -0.5, phase: 2.5, scale: 0.55, color: "#365314", emissive: "#bef264" },
+  // Plaza orbiters
+  { centerX: 0, centerZ: 0, radius: 9,  speed:  0.30, phase: 0,   color: "#064e3b", emissive: "#22c55e" },
+  { centerX: 0, centerZ: 0, radius: 11, speed: -0.25, phase: 2,   color: "#0f172a", emissive: "#86efac" },
+  { centerX: 0, centerZ: 0, radius: 13, speed:  0.20, phase: 4,   color: "#052e16", emissive: "#fbbf24" },
+  // Block-corner stragglers
+  { centerX: -8, centerZ: -8, radius: 4,   speed:  0.40, phase: 1,   scale: 0.6,  color: "#022c22", emissive: "#4ade80" },
+  { centerX:  8, centerZ:  8, radius: 4,   speed: -0.40, phase: 3,   scale: 0.6,  color: "#0f172a", emissive: "#fcd34d" },
+  { centerX: -8, centerZ:  8, radius: 3.5, speed:  0.50, phase: 1.5, scale: 0.55, color: "#064e3b", emissive: "#86efac" },
+  { centerX:  8, centerZ: -8, radius: 3.5, speed: -0.50, phase: 2.5, scale: 0.55, color: "#052e16", emissive: "#22c55e" },
 ];
 
 export default function NPCBots() {
