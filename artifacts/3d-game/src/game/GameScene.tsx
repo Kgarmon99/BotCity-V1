@@ -14,6 +14,7 @@ import CitizenBots from "./CitizenBots";
 import Billboards from "./Billboards";
 import MoneyRain from "./MoneyRain";
 import Weather, { fogForWeather } from "./Weather";
+import Traffic from "./Traffic";
 import CityDetails from "./CityDetails";
 import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
@@ -593,6 +594,7 @@ export default function GameScene() {
           <CitizenBots />
           <MoneyRain />
           <Weather mode={weather} />
+          <Traffic />
 
           {buildings.map((b) => (
             <Building

@@ -12,8 +12,12 @@ import * as THREE from "three";
 // ─────────────────────────────────────────────────────────────────────
 
 const TRACK_Z = 15.5;
-const RAIL_LENGTH = 14;
-const RAIL_CENTER_X = 9; // spans x = 2 .. 16 (clear of x=0 main avenue band -1.5..1.5)
+// Rails extended to span the full corridor the moving train uses
+// (train cycles x ≈ -42 .. 43), so the consist is always over visible
+// track. Tracks cross several roads at grade — visually natural for a
+// rail line and the rails sit at y=0.1 above the road surface (y=0.015).
+const RAIL_LENGTH = 88;
+const RAIL_CENTER_X = 1; // spans x = -43 .. 45
 
 function TrainCar({
   x,
@@ -89,9 +93,9 @@ function TrainCar({
 function TrainTracks() {
   return (
     <group>
-      {/* Ties */}
-      {Array.from({ length: 18 }).map((_, i) => {
-        const x = RAIL_CENTER_X - RAIL_LENGTH / 2 + i * (RAIL_LENGTH / 17);
+      {/* Ties — spacing ~1.5u keeps the count reasonable across the long rail */}
+      {Array.from({ length: 60 }).map((_, i) => {
+        const x = RAIL_CENTER_X - RAIL_LENGTH / 2 + i * (RAIL_LENGTH / 59);
         return (
           <mesh key={`tie-${i}`} position={[x, 0.04, TRACK_Z]}>
             <boxGeometry args={[0.35, 0.08, 1.4]} />
@@ -115,6 +119,37 @@ function TrainTracks() {
           />
         </mesh>
       ))}
+    </group>
+  );
+}
+
+// Animated train — three cars travelling east along the rails. The group
+// wrapper translates the whole consist; each `TrainCar` is placed at a
+// relative x-offset inside the group so they stay rigidly coupled. We
+// move along x and wrap around once the lead car clears the visible span,
+// re-entering from the west.
+function MovingTrain() {
+  const ref = useRef<THREE.Group>(null!);
+  // Travel span well beyond the visible rails so the train appears to come
+  // from somewhere and head somewhere, instead of popping into the middle.
+  const RANGE_MIN = -30;
+  const RANGE_MAX = 35;
+  const TRAIN_LEN = 12; // 3 cars × 4u spacing + body overhang
+  const SPEED = 4.5;
+  const TOTAL = RANGE_MAX - RANGE_MIN + TRAIN_LEN;
+  useFrame((state) => {
+    if (!ref.current) return;
+    const raw = state.clock.elapsedTime * SPEED;
+    // Wrap so the train cycles continuously left-to-right.
+    const x = ((raw % TOTAL) + TOTAL) % TOTAL + (RANGE_MIN - TRAIN_LEN);
+    ref.current.position.x = x;
+  });
+  return (
+    <group ref={ref}>
+      {/* Locomotive (red roof, brighter headlight) + two coaches */}
+      <TrainCar x={0} z={TRACK_Z} color="#7c2d12" accent="#fde68a" />
+      <TrainCar x={4} z={TRACK_Z} color="#fb923c" accent="#fde68a" />
+      <TrainCar x={8} z={TRACK_Z} color="#fb923c" accent="#fde68a" />
     </group>
   );
 }
@@ -335,6 +370,115 @@ function Airplane({ position }: { position: [number, number, number] }) {
   );
 }
 
+// Takeoff plane — same mesh body as Airplane, but instead of bobbing in
+// place it cycles through taxi → takeoff roll → climb → fly out → reset.
+// One full cycle is CYCLE_SEC; the plane spends most of the loop airborne
+// so the player almost always sees something happening at the airport.
+function TakeoffPlane() {
+  const ref = useRef<THREE.Group>(null!);
+  const lightRef = useRef<THREE.Mesh>(null!);
+  const CYCLE_SEC = 22;
+
+  useFrame((state) => {
+    const t = (state.clock.elapsedTime % CYCLE_SEC) / CYCLE_SEC; // 0..1
+    let x: number;
+    let y: number;
+    let pitch: number; // radians, 0 = level, positive = nose up
+    if (t < 0.15) {
+      // Holding at west end of runway (pre-roll pause)
+      x = RUNWAY_X_MIN + 10; // -55
+      y = 0.75;
+      pitch = 0;
+    } else if (t < 0.4) {
+      // Takeoff roll — accelerate east along the runway, still on the ground.
+      // Pitch eases up smoothly so the transition into climb is continuous
+      // (no attitude snap at the phase boundary).
+      const u = (t - 0.15) / 0.25;
+      x = (RUNWAY_X_MIN + 10) + u * 25; // -55 → -30
+      y = 0.75;
+      pitch = u * 0.2; // 0 → 0.2 rad over the roll
+    } else if (t < 0.95) {
+      // Climb out — continue east while ascending into the sky.
+      // pitch(u=0) = 0.2 (matches roll end), arcs up to ~0.35 mid-climb,
+      // then eases back to ~0.1 as the plane levels off at altitude.
+      const u = (t - 0.4) / 0.55;
+      x = -30 + u * 90; // -30 → 60
+      y = 0.75 + u * 27;
+      pitch = 0.2 + Math.sin(u * Math.PI) * 0.15 - u * 0.1;
+    } else {
+      // Off-screen / reset window — park well outside the visible area so
+      // the plane "reappears" cleanly at the west end on the next cycle.
+      x = 100;
+      y = 40;
+      pitch = 0;
+    }
+
+    if (ref.current) {
+      ref.current.position.set(x, y, RUNWAY_Z);
+      // Base orientation aligns local +Y with world +X (rotation.z = -π/2);
+      // adding `pitch` rotates nose up around world +Z.
+      ref.current.rotation.z = -Math.PI / 2 + pitch;
+    }
+    if (lightRef.current) {
+      const mat = lightRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.5 + Math.sin(state.clock.elapsedTime * 4) * 1.2;
+    }
+  });
+
+  return (
+    <group ref={ref}>
+      {/* Fuselage */}
+      <mesh castShadow>
+        <capsuleGeometry args={[0.45, 3.2, 8, 16]} />
+        <meshStandardMaterial color="#e2e8f0" metalness={0.6} roughness={0.35} />
+      </mesh>
+      {/* Cockpit windows */}
+      <mesh position={[0, 1.55, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.4, 0.3, 0.5, 16]} />
+        <meshStandardMaterial
+          color="#0c4a6e"
+          emissive="#38bdf8"
+          emissiveIntensity={0.9}
+          metalness={0.7}
+          roughness={0.2}
+        />
+      </mesh>
+      {/* Wings */}
+      <mesh position={[0, 0, 0]} castShadow>
+        <boxGeometry args={[1.1, 0.14, 4.4]} />
+        <meshStandardMaterial color="#cbd5e1" metalness={0.55} roughness={0.4} />
+      </mesh>
+      {/* Tail vertical fin */}
+      <mesh position={[0, -1.5, 0.45]} castShadow>
+        <boxGeometry args={[0.08, 0.7, 0.7]} />
+        <meshStandardMaterial color="#0c4a6e" metalness={0.5} roughness={0.4} />
+      </mesh>
+      {/* Tail horizontal stabilizer */}
+      <mesh position={[0, -1.55, 0.1]} castShadow>
+        <boxGeometry args={[0.08, 0.5, 1.4]} />
+        <meshStandardMaterial color="#cbd5e1" metalness={0.55} roughness={0.4} />
+      </mesh>
+      {/* Engines under wings */}
+      {[-1.6, 1.6].map((zOff) => (
+        <mesh key={`eng-${zOff}`} position={[0, 0.1, zOff]} castShadow>
+          <cylinderGeometry args={[0.18, 0.16, 0.7, 12]} />
+          <meshStandardMaterial color="#1f2937" metalness={0.9} roughness={0.25} />
+        </mesh>
+      ))}
+      {/* Tail beacon (blinking) */}
+      <mesh ref={lightRef} position={[0, -1.5, 0.85]}>
+        <sphereGeometry args={[0.07, 8, 8]} />
+        <meshStandardMaterial
+          color="#ef4444"
+          emissive="#ef4444"
+          emissiveIntensity={2}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 function ControlTower() {
   // Sits on the airport apron between terminal and runway.
   return (
@@ -366,15 +510,15 @@ export default function CityExpansion() {
     <group>
       {/* ─── Train station district (SE inner block) ─── */}
       <TrainTracks />
-      <TrainCar x={5} z={TRACK_Z} color="#fb923c" accent="#fde68a" />
-      <TrainCar x={9} z={TRACK_Z} color="#7c2d12" accent="#fde68a" />
-      <TrainCar x={13} z={TRACK_Z} color="#fb923c" accent="#fde68a" />
+      <MovingTrain />
       <TrainStationSign />
 
       {/* ─── Airport district (far SW edge) ─── */}
       <Runway />
-      <Airplane position={[-55, 0.75, RUNWAY_Z]} />
-      <Airplane position={[-40, 0.75, RUNWAY_Z]} />
+      {/* One plane parked on the apron in front of the terminal, one on the
+          runway actively cycling through takeoff. */}
+      <Airplane position={[-47, 0.75, 50]} />
+      <TakeoffPlane />
       <ControlTower />
     </group>
   );
