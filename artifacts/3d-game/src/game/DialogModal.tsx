@@ -39,6 +39,9 @@ export default function DialogModal() {
     } else if (dialog.action === "shops") {
       visitBuilding("botshops");
       closeDialog();
+    } else if (dialog.action === "farm") {
+      visitBuilding("botfarm");
+      closeDialog();
     } else {
       closeDialog();
     }
@@ -157,6 +160,8 @@ export default function DialogModal() {
                 ? "Back to Work 🏖️"
                 : dialog.action === "shops"
                 ? "Open for Business 🏪"
+                : dialog.action === "farm"
+                ? "Yeehaw 🚜"
                 : "Got it!"}
             </button>
           )}

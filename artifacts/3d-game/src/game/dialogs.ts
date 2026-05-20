@@ -113,6 +113,13 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "shops",
   }),
 
+  botfarm: () => ({
+    buildingId: "botfarm",
+    title: "🚜 BotFarm — Farming & Schedule F",
+    body: `Welcome to BotFarm! Farming has its own corner of the tax code. Here's what every grower needs to know.\n\n📖 SCHEDULE F (NOT SCHEDULE C):\nFarmers report profits and losses on Schedule F, not Schedule C. It covers crops, livestock, dairy, poultry — anything raised for sale. Hobby gardens don't qualify; you need a profit motive.\n\n📖 CASH vs ACCRUAL ACCOUNTING:\nMost farms use the cash method — income when you receive it, expenses when you pay. Accrual method matches income to the year it was earned. Cash is simpler and most family farms stick with it.\n\n📖 SECTION 179 + BONUS DEPRECIATION:\nNew tractor? Combine? Grain bin? You can often deduct a huge chunk (or all) of the cost in year one via Section 179 or bonus depreciation, instead of spreading it over 5-7 years. Powerful, but the deduction can't exceed your farm income (the excess carries forward).\n\n📖 INCOME AVERAGING (SCHEDULE J):\nFarming income swings wildly with weather and prices. Schedule J lets a farmer "average" a great year's income over the prior 3 years' brackets — softening the bracket-jump hit when one harvest is huge.\n\n📖 CROP INSURANCE & DISASTER PAYMENTS:\nCrop insurance proceeds are TAXABLE income, but a farmer can often defer them one year if the crop would've sold next year. Disaster relief payments work similarly. Document everything.\n\n📖 CONSERVATION RESERVE PROGRAM (CRP):\nPayments for taking acreage out of production are taxable. They may or may not be subject to self-employment tax depending on whether you're materially involved.\n\n📖 ESTATE PLANNING (THE FAMILY-FARM ANGLE):\nWhen a farm passes to heirs, the assets get a "stepped-up basis" to fair market value at death — wiping out decades of unrealized gain. Special-use valuation (§2032A) can further reduce estate tax for working farms passed within the family.\n\n💡 Lesson: Schedule F. Section 179 for equipment. Schedule J for swings. Crop insurance is taxable. Estate stepped-up basis is huge for family farms.`,
+    action: "farm",
+  }),
+
   botdealer: () => ({
     buildingId: "botdealer",
     title: "🚗 BotDealer — Buy a BotMobile",

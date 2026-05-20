@@ -25,7 +25,8 @@ export interface DialogContent {
     | "stadium"
     | "market"
     | "beach"
-    | "shops";
+    | "shops"
+    | "farm";
   amount?: number;
 }
 

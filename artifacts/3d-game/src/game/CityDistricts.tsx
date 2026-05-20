@@ -571,6 +571,196 @@ function Dealer() {
   );
 }
 
+// ===== BotFarm @ (-40, 0, -41) =======================================
+// Far NW corner, outside the outer-ring streets. Barn is rendered by
+// Building.tsx via BUILDING_DEFS at (-40, 2, -41), footprint w=5 d=4 →
+// world x∈[-42.5,-37.5], z∈[-43,-39]. All farm decorations MUST stay
+// inside the corner envelope:
+//   world x ∈ [-44, -37.1]   (±44 player bound and clear of outer
+//   world z ∈ [-44, -37.1]    street at x/z = -36, band -37.1..-34.9)
+// → local x ∈ [-4, +2.9], local z ∈ [-3, +3.9] (group origin at -40,-41).
+// Nearest landmarks: outer-ring building at (-41,-23) is 18u north; the
+// statue at (-36,-36) sits at the road intersection, outside our zone.
+function Farm() {
+  const scarecrowRef = useRef<THREE.Mesh>(null!);
+  const beaconRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    if (scarecrowRef.current) {
+      // Lazy turn — scarecrow swivels gently like it's surveying the field.
+      scarecrowRef.current.rotation.y = Math.sin(t * 0.6) * 0.4;
+    }
+    if (beaconRef.current) {
+      const mat = beaconRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(t * 2.4) * 0.6;
+    }
+  });
+  return (
+    <group position={[-40, 0, -41]}>
+      {/* ── Soil patch under the barn (darker brown so the barn pops) ── */}
+      {/* 5×4 (matches barn footprint) → world x[-42.5,-37.5], z[-43,-39] */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <planeGeometry args={[5, 4]} />
+        <meshStandardMaterial color="#3f2a1d" emissive="#7c2d12" emissiveIntensity={0.12} />
+      </mesh>
+
+      {/* ── Crop fields surrounding the barn ───────────────────────── */}
+      {/* South field — leafy green crops, between barn front and street.
+          local z[+2.2,+3.8] → world z[-38.8,-37.2] ✓ (street starts -37.1) */}
+      <group position={[0, 0, 3]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+          <planeGeometry args={[5, 1.6]} />
+          <meshStandardMaterial color="#365314" emissive="#65a30d" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Green crop rows (depth 1.4 keeps within field) */}
+        {[-2, -1, 0, 1, 2].map((rx) => (
+          <mesh key={`south-row-${rx}`} position={[rx * 0.85, 0.16, 0]}>
+            <boxGeometry args={[0.35, 0.32, 1.4]} />
+            <meshStandardMaterial color="#16a34a" emissive="#22c55e" emissiveIntensity={0.4} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* North field — corn-yellow rows behind the barn.
+          local z[-3,-2] → world z[-44,-43] ✓ (right at -44 bound) */}
+      <group position={[0, 0, -2.5]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+          <planeGeometry args={[5, 1]} />
+          <meshStandardMaterial color="#854d0e" emissive="#a16207" emissiveIntensity={0.2} />
+        </mesh>
+        {/* Yellow corn rows (depth 0.9 keeps within field) */}
+        {[-2, -1, 0, 1, 2].map((rx) => (
+          <mesh key={`north-row-${rx}`} position={[rx * 0.85, 0.18, 0]}>
+            <boxGeometry args={[0.2, 0.4, 0.9]} />
+            <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.5} toneMapped={false} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* West field — fresh-tilled earth with sprouts.
+          local x[-3.95,-2.55], z[-1.9,+1.9] → world x[-43.95,-42.55],
+          z[-42.9,-39.1] ✓ (gap of 0.05 from barn left edge at -42.5) */}
+      <group position={[-3.25, 0, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+          <planeGeometry args={[1.4, 3.8]} />
+          <meshStandardMaterial color="#451a03" emissive="#78350f" emissiveIntensity={0.15} />
+        </mesh>
+        {/* Sprout dots — 3 cols × 4 rows, kept inside the 1.4×3.8 plot */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const x = ((i % 3) - 1) * 0.4;
+          const z = (Math.floor(i / 3) - 1.5) * 0.8;
+          return (
+            <mesh key={`sprout-${i}`} position={[x, 0.12, z]}>
+              <sphereGeometry args={[0.08, 6, 6]} />
+              <meshStandardMaterial color="#4ade80" emissive="#22c55e" emissiveIntensity={0.6} />
+            </mesh>
+          );
+        })}
+      </group>
+
+      {/* ── Silo — gray cylinder with conical roof, NW of the barn ── */}
+      {/* local center (-3.15, -1.7), max radius 0.78 → world x min
+          ≈-43.93 ✓ (≥0.05u margin from -44 bound); right edge ≈-42.37,
+          clears barn left edge at -42.5 by 0.13u */}
+      <group position={[-3.15, 0, -1.7]}>
+        <mesh position={[0, 2.2, 0]} castShadow>
+          <cylinderGeometry args={[0.7, 0.7, 4.4, 16]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.4} roughness={0.55} />
+        </mesh>
+        {/* Hoop bands (outer radius 0.72+0.04 = 0.76) */}
+        {[0.6, 1.5, 2.4, 3.3, 4.2].map((y, i) => (
+          <mesh key={`band-${i}`} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.72, 0.04, 6, 24]} />
+            <meshStandardMaterial color="#64748b" metalness={0.7} roughness={0.35} />
+          </mesh>
+        ))}
+        {/* Conical roof (radius 0.78) */}
+        <mesh position={[0, 4.85, 0]} castShadow>
+          <coneGeometry args={[0.78, 0.8, 16]} />
+          <meshStandardMaterial color="#475569" metalness={0.5} roughness={0.4} />
+        </mesh>
+        {/* Beacon */}
+        <mesh ref={beaconRef} position={[0, 5.45, 0]}>
+          <sphereGeometry args={[0.12, 10, 10]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={2} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ── Scarecrow in the south field ───────────────────────────── */}
+      {/* local (1.4, 0, 3), shirt width 0.55 → world x[-39.3,-38.3],
+          z≈-38 ✓ (well inside corner envelope) */}
+      <group position={[1.4, 0, 3]}>
+        {/* Post */}
+        <mesh position={[0, 0.9, 0]} castShadow>
+          <cylinderGeometry args={[0.05, 0.05, 1.8, 6]} />
+          <meshStandardMaterial color="#78350f" roughness={0.8} />
+        </mesh>
+        {/* Crossbar (arms) */}
+        <mesh position={[0, 1.4, 0]}>
+          <boxGeometry args={[1.1, 0.06, 0.06]} />
+          <meshStandardMaterial color="#78350f" roughness={0.8} />
+        </mesh>
+        {/* Shirt — turns with scarecrow */}
+        <mesh ref={scarecrowRef} position={[0, 1.15, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.55, 0.25]} />
+          <meshStandardMaterial color="#16a34a" emissive="#22c55e" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Head — straw-stuffed pillow */}
+        <mesh position={[0, 1.7, 0]} castShadow>
+          <sphereGeometry args={[0.22, 12, 12]} />
+          <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={0.3} />
+        </mesh>
+        {/* Hat */}
+        <mesh position={[0, 1.95, 0]} castShadow>
+          <coneGeometry args={[0.28, 0.3, 12]} />
+          <meshStandardMaterial color="#451a03" roughness={0.7} />
+        </mesh>
+      </group>
+
+      {/* ── Wooden fence: 4 posts + 2 horizontal rails on the south edge ── */}
+      {/* local z=+3.85 → world z=-37.15 (just inside street edge -37.1) */}
+      {[-2, -0.7, 0.7, 2].map((fx, i) => (
+        <mesh key={`fence-post-${i}`} position={[fx, 0.4, 3.85]} castShadow>
+          <boxGeometry args={[0.12, 0.8, 0.12]} />
+          <meshStandardMaterial color="#78350f" roughness={0.85} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.55, 3.85]}>
+        <boxGeometry args={[4.2, 0.08, 0.06]} />
+        <meshStandardMaterial color="#92400e" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.25, 3.85]}>
+        <boxGeometry args={[4.2, 0.08, 0.06]} />
+        <meshStandardMaterial color="#92400e" roughness={0.8} />
+      </mesh>
+
+      {/* ── Big neon farm sign above the barn ─────────────────────── */}
+      <Text
+        position={[0, 5.4, 2.2]}
+        fontSize={0.45}
+        color="#fde047"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#b91c1c"
+      >
+        🚜 BOTFARM 🌽
+      </Text>
+      <Text
+        position={[0, 4.95, 2.2]}
+        fontSize={0.2}
+        color="#86efac"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#0b1220"
+      >
+        Schedule F · Fresh Crops · Section 179
+      </Text>
+    </group>
+  );
+}
+
 export default function CityDistricts() {
   return (
     <group>
@@ -579,6 +769,7 @@ export default function CityDistricts() {
       <Beach />
       <ShopsCluster />
       <Dealer />
+      <Farm />
     </group>
   );
 }

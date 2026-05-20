@@ -68,6 +68,12 @@ const FEATURES = [
     accent: "from-fuchsia-500/12 to-emerald-500/5 border-fuchsia-400/30",
   },
   {
+    emoji: "🚜",
+    title: "Farm",
+    desc: "Schedule F & Section 179 at BotFarm",
+    accent: "from-lime-500/12 to-amber-500/10 border-lime-400/30",
+  },
+  {
     emoji: "📋",
     title: "File",
     desc: "Submit your return at the IRS",

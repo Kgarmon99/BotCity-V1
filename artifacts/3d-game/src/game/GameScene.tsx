@@ -154,6 +154,21 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "🏪",
   },
   {
+    id: "botfarm",
+    label: "BotFarm",
+    // Far NW corner — outside the outer ring streets (±36), away from all
+    // other buildings. Door faces +z (south, toward the city) so players
+    // approach from the secondary/main avenues. Surrounded by crop fields
+    // and a silo rendered in CityDistricts.tsx.
+    position: [-40, 2, -41],
+    color: "#dc2626",
+    roofColor: "#fef3c7",
+    width: 5,
+    depth: 4,
+    height: 4,
+    emoji: "🚜",
+  },
+  {
     id: "botdealer",
     label: "BotDealer",
     // North middle-ring, replaces the removed filler at (-9, -27). Showroom
