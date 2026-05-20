@@ -216,9 +216,20 @@ function ActionButtons() {
     const cleanupJet = wireHoldButton(jetRef.current, (h) => {
       touchInput.jetHeld = h;
     });
+    // If the browser steals focus mid-press (alt-tab, app switcher, modal),
+    // we can miss the pointerup and the flag stays latched. Force-clear on
+    // any window-level focus loss so the player doesn't fly off forever.
+    const forceRelease = () => {
+      touchInput.rideHeld = false;
+      touchInput.jetHeld = false;
+    };
+    window.addEventListener("blur", forceRelease);
+    document.addEventListener("visibilitychange", forceRelease);
     return () => {
       cleanupRide();
       cleanupJet();
+      window.removeEventListener("blur", forceRelease);
+      document.removeEventListener("visibilitychange", forceRelease);
     };
   }, []);
 

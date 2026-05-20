@@ -1,7 +1,80 @@
-import { useRef } from "react";
+import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { Billboard, Text } from "@react-three/drei";
 import { MoneyBotModel, type MoneyBotAnim } from "./MoneyBotModel";
+
+// Tax / finance one-liners the citizen bots chatter while wandering. Kept
+// short (≤ ~60 chars) so the chat bubble doesn't dwarf the bot.
+const CHATTER: string[] = [
+  "Did you max your Roth IRA this year?",
+  "401(k) match is free money — grab it!",
+  "Bracket creep hit me again 😤",
+  "Long-term capital gains > short-term, always.",
+  "Standard deduction or itemize?",
+  "Don't forget the EITC if you qualify!",
+  "HSA: triple tax advantage 🏥",
+  "529 plan for the little bots 👶",
+  "Wash sale rule got me last April.",
+  "Estimated taxes due April 15 / June 15 / Sep 15 / Jan 15",
+  "Bonds laddered, stocks indexed, sleep soundly 😴",
+  "Compound interest = 8th wonder of the world",
+  "Filed an extension, not a forgiveness.",
+  "Cap gains harvesting before year-end!",
+  "Mega backdoor Roth? Talk to HR.",
+  "Section 179 = instant write-off 🚜",
+  "Mileage log or actual expenses?",
+  "Audit-proof your receipts!",
+  "Tax-loss harvesting saved my year.",
+  "FSA money expires — use it!",
+  "Inflation is a tax nobody voted for.",
+  "Diversify, don't gamble.",
+  "Dollar-cost averaging > timing the market.",
+  "Read the prospectus. Yes, all of it.",
+  "Credits > deductions, every time.",
+  "Saver's Credit if your AGI is low!",
+  "QBI deduction — 20% off pass-through income.",
+  "Don't sleep on the dependent care FSA.",
+  "RMDs start at 73 now. Plan ahead!",
+  "Beep boop, your fridge is a depreciating asset.",
+];
+
+function ChatBubble({ text, y }: { text: string; y: number }) {
+  // Width auto-derived from the message length so short quips don't get a
+  // huge plane behind them. (Each char ≈ 0.13 world units at fontSize 0.28.)
+  const width = useMemo(() => Math.min(7, Math.max(2.4, text.length * 0.14 + 0.6)), [text]);
+  return (
+    <Billboard position={[0, y, 0]}>
+      {/* Backing plate */}
+      <mesh>
+        <planeGeometry args={[width, 0.9]} />
+        <meshBasicMaterial color="#0b1220" transparent opacity={0.85} depthWrite={false} />
+      </mesh>
+      {/* Border / glow */}
+      <mesh position={[0, 0, -0.001]}>
+        <planeGeometry args={[width + 0.12, 1.02]} />
+        <meshBasicMaterial color="#22c55e" transparent opacity={0.55} depthWrite={false} />
+      </mesh>
+      <Text
+        position={[0, 0, 0.01]}
+        fontSize={0.28}
+        color="#86efac"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={width - 0.3}
+        outlineWidth={0.015}
+        outlineColor="#0b1220"
+      >
+        {text}
+      </Text>
+      {/* Speech-bubble tail */}
+      <mesh position={[-width * 0.25, -0.55, 0]} rotation={[0, 0, Math.PI / 4]}>
+        <planeGeometry args={[0.3, 0.3]} />
+        <meshBasicMaterial color="#0b1220" transparent opacity={0.85} depthWrite={false} />
+      </mesh>
+    </Billboard>
+  );
+}
 
 // Wandering MoneyBot citizens. The GLB doesn't ship a walk cycle, so we
 // style them as hovering courier bots — small bob + ground glow. They patrol
@@ -29,7 +102,34 @@ function CitizenBot({ waypoints, speed, scale, anim, phase, hover }: Citizen) {
   const segT = useRef(phase % 1);
   const yawRef = useRef(0);
 
+  // Chatter state — each bot independently cycles between "say a line" and
+  // "stay quiet". Visible for ~4s, hidden for ~6-10s, then picks a new line.
+  // `chatRef` mirrors `chat` so the useFrame timer can decide what to do next
+  // without depending on the React state updater (which is scheduled async).
+  // That avoids stacking `setChat` calls across frames before React flushes.
+  const [chat, setChat] = useState<string | null>(null);
+  const chatRef = useRef<string | null>(null);
+  // Stagger the initial silence so 6 bots don't all start talking at once.
+  const nextChangeRef = useRef(2 + phase * 8 + Math.random() * 4);
+
   useFrame((state, delta) => {
+    // Chat scheduler — refs only, with exactly one setChat per threshold cross.
+    nextChangeRef.current -= delta;
+    if (nextChangeRef.current <= 0) {
+      if (chatRef.current === null) {
+        // Pick a fresh line, hold for ~4 seconds
+        const line = CHATTER[Math.floor(Math.random() * CHATTER.length)];
+        chatRef.current = line;
+        nextChangeRef.current = 3.5 + Math.random() * 1.5;
+        setChat(line);
+      } else {
+        // Go quiet for 6–10 seconds
+        chatRef.current = null;
+        nextChangeRef.current = 6 + Math.random() * 4;
+        setChat(null);
+      }
+    }
+
     if (waypoints.length < 2) return;
     const i = segIdx.current;
     const next = (i + 1) % waypoints.length;
@@ -78,6 +178,7 @@ function CitizenBot({ waypoints, speed, scale, anim, phase, hover }: Citizen) {
       <group ref={innerRef}>
         <MoneyBotModel scale={scale} animation={anim} phase={phase} />
       </group>
+      {chat && <ChatBubble text={chat} y={2 + scale * 1.8} />}
     </group>
   );
 }
