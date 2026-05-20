@@ -416,7 +416,7 @@ function ShopsCluster() {
 // Showroom is rendered by Building.tsx via BUILDING_DEFS; this component
 // adds the parking lot, cars, flagpole, and signage around it. Cars sit
 // south of the showroom in a parking lot from z=-26..-22.
-function BotMobile({
+export function BotMobile({
   pos,
   color,
   accent,

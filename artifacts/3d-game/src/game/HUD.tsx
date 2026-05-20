@@ -143,6 +143,10 @@ export default function HUD() {
           <kbd className="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/40 font-mono text-[10px] text-cyan-300">C</kbd>
           <span className="text-emerald-200/60">Camera view</span>
         </div>
+        <div className="flex items-center gap-2 text-emerald-100 mt-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-400/40 font-mono text-[10px] text-rose-300">SPACE</kbd>
+          <span className="text-emerald-200/60">Ride BotMobile 🚗</span>
+        </div>
       </div>
       <CameraModeIndicator />
     </div>

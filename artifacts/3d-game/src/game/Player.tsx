@@ -1,7 +1,8 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import MoneyBot from "./MoneyBot";
+import { BotMobile } from "./CityDistricts";
 
 interface Keys {
   forward: boolean;
@@ -16,14 +17,31 @@ interface PlayerProps {
   isMoving: React.MutableRefObject<boolean>;
 }
 
+const WALK_SPEED = 7;
+const RIDE_SPEED = 17; // BotMobile boost (~2.4x walking)
+
 export default function Player({ onPositionChange, onInteract, isMoving }: PlayerProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const velocity = useRef(new THREE.Vector3());
   const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false });
-  const speed = 7;
+  const ridingRef = useRef(false);
+  const [riding, setRiding] = useState(false);
 
   useEffect(() => {
+    // Ignore game keys while the user is typing in a form input.
+    const isTypingInForm = (target: EventTarget | null) => {
+      const t = target as HTMLElement | null;
+      return !!t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+    };
+    const stopRiding = () => {
+      if (ridingRef.current) {
+        ridingRef.current = false;
+        setRiding(false);
+      }
+    };
+
     const down = (e: KeyboardEvent) => {
+      if (isTypingInForm(e.target)) return;
       if (e.key === "ArrowUp"    || e.key === "w" || e.key === "W") keys.current.forward = true;
       if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") keys.current.back    = true;
       if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") keys.current.left    = true;
@@ -31,19 +49,41 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       if (e.key === "e" || e.key === "E") {
         if (groupRef.current) onInteract(groupRef.current.position.clone());
       }
+      if (e.code === "Space" || e.key === " ") {
+        // Prevent the browser from scrolling the page while we drive.
+        e.preventDefault();
+        if (!ridingRef.current) {
+          ridingRef.current = true;
+          setRiding(true);
+        }
+      }
     };
     const up = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp"    || e.key === "w" || e.key === "W") keys.current.forward = false;
       if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") keys.current.back    = false;
       if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") keys.current.left    = false;
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.current.right   = false;
+      if (e.code === "Space" || e.key === " ") {
+        stopRiding();
+      }
+    };
+    // If the window loses focus (Alt+Tab, etc) we never get the keyup —
+    // clear all held keys so the player doesn't run off / get stuck in the car.
+    const onBlur = () => {
+      keys.current.forward = false;
+      keys.current.back = false;
+      keys.current.left = false;
+      keys.current.right = false;
+      stopRiding();
     };
 
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
+    window.addEventListener("blur", onBlur);
     return () => {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", onBlur);
     };
   }, [onInteract]);
 
@@ -57,6 +97,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
     if (right)   dir.x += 1;
 
     if (dir.length() > 0) dir.normalize();
+    const speed = ridingRef.current ? RIDE_SPEED : WALK_SPEED;
     dir.multiplyScalar(speed * delta);
     velocity.current.lerp(dir, 0.3);
 
@@ -86,7 +127,16 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
       <PlayerIndicator />
-      <MoneyBot isMoving={isMoving} />
+      {riding ? (
+        // BotMobile's headlights are along its local +X axis. Rotating by
+        // -π/2 around Y maps local +X → local +Z, aligning the car's front
+        // with the player's "forward" convention so it drives nose-first.
+        <group rotation={[0, -Math.PI / 2, 0]}>
+          <BotMobile pos={[0, 0, 0]} color="#dc2626" accent="#fde047" />
+        </group>
+      ) : (
+        <MoneyBot isMoving={isMoving} />
+      )}
     </group>
   );
 }
