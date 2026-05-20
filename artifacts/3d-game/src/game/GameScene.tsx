@@ -23,6 +23,8 @@ import CityDistricts from "./CityDistricts";
 import CityHallPlaza from "./CityHallPlaza";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
+import Streetscape from "./Streetscape";
+import BuildingAccents from "./BuildingAccents";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -665,6 +667,8 @@ export default function GameScene() {
           <CityBuildings />
           <CityExpansion />
           <CityDistricts />
+          <Streetscape />
+          <BuildingAccents />
           <CityHallPlaza />
           <Blimp />
           <Statues />
