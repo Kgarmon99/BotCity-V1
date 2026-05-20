@@ -21,8 +21,8 @@ const FEATURES = [
   },
   {
     emoji: "🎓",
-    title: "Credits",
-    desc: "Learn tax credits at MoneyBot U",
+    title: "Loans",
+    desc: "Master student loans at MoneyBot U",
     accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
   },
   {
