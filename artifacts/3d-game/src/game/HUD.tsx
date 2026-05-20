@@ -2,6 +2,7 @@ import { useGameStore } from "./gameStore";
 import { calculateTax } from "./types";
 import { sound } from "./sound";
 import { useEffect, useState } from "react";
+import TouchControls from "./TouchControls";
 
 const BUILDINGS = [
   { id: "workcorp", emoji: "💼", label: "WorkCorp" },
@@ -179,6 +180,7 @@ export default function HUD() {
       </div>
 
       <SoundToggle />
+      <TouchControls />
 
       {/* Controls */}
       <div className="fixed bottom-4 left-4 bg-slate-950/80 text-white text-xs rounded-xl px-3.5 py-3 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)]">

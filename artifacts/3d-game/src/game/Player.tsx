@@ -5,6 +5,7 @@ import MoneyBot from "./MoneyBot";
 import { BotMobile } from "./CityDistricts";
 import { useGameStore } from "./gameStore";
 import { cameraInput } from "./cameraInput";
+import { touchInput } from "./touchInput";
 
 interface Keys {
   forward: boolean;
@@ -29,6 +30,12 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   const ridingRef = useRef(false);
   const [riding, setRiding] = useState(false);
   const cameraMode = useGameStore((s) => s.cameraMode);
+  // Track the last touch interact tick we've consumed so a single tap fires
+  // onInteract exactly once.
+  const lastInteractTick = useRef(touchInput.interactTick);
+  // Latch the on-screen ride button state so we can stop riding on release
+  // even when the keyboard space-bar isn't involved.
+  const lastTouchRide = useRef(false);
 
   useEffect(() => {
     // Ignore game keys while the user is typing in a form input.
@@ -91,32 +98,57 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   }, [onInteract]);
 
   useFrame((_state, delta) => {
+    // Touch interact button — edge-triggered (tap once, fire once).
+    if (touchInput.interactTick !== lastInteractTick.current) {
+      lastInteractTick.current = touchInput.interactTick;
+      if (groupRef.current) onInteract(groupRef.current.position.clone());
+    }
+    // Touch ride button — held = riding, released = stop.
+    if (touchInput.rideHeld !== lastTouchRide.current) {
+      lastTouchRide.current = touchInput.rideHeld;
+      if (touchInput.rideHeld) {
+        if (!ridingRef.current) {
+          ridingRef.current = true;
+          setRiding(true);
+        }
+      } else if (ridingRef.current) {
+        ridingRef.current = false;
+        setRiding(false);
+      }
+    }
+
     const { forward, back, left, right } = keys.current;
+    // Merge keyboard (binary) with joystick (analog). Take the larger
+    // magnitude per axis so holding the joystick fully forward + tapping W
+    // doesn't double up.
+    const kbX = (right ? 1 : 0) - (left ? 1 : 0);
+    const kbZ = (back ? 1 : 0) - (forward ? 1 : 0); // back = +Z, forward = -Z
+    const pickAxis = (kb: number, touch: number) =>
+      Math.abs(kb) >= Math.abs(touch) ? kb : touch;
+    const inX = pickAxis(kbX, touchInput.moveX);
+    const inZ = pickAxis(kbZ, touchInput.moveZ * -1); // joystick fwd = -Z
     const dir = new THREE.Vector3();
 
     if (cameraMode === 4) {
-      // Orbit mode: WASD is camera-relative — pressing W moves the player
-      // "into the screen" regardless of which way the camera is yawed.
-      // Camera sits at offset (sin(yaw), *, cos(yaw)) from player, so the
-      // "away from camera" direction is -(sin(yaw), cos(yaw)).
+      // Orbit mode: input is camera-relative. inZ < 0 = forward (away from
+      // camera), inX > 0 = right. Build movement vector in world space using
+      // the camera's yaw.
       const yaw = cameraInput.yaw;
       const fx = -Math.sin(yaw);
       const fz = -Math.cos(yaw);
-      // Right vector = forward rotated 90° clockwise (viewed from above)
       const rx = -fz;
       const rz = fx;
-      if (forward) { dir.x += fx; dir.z += fz; }
-      if (back)    { dir.x -= fx; dir.z -= fz; }
-      if (right)   { dir.x += rx; dir.z += rz; }
-      if (left)    { dir.x -= rx; dir.z -= rz; }
+      // -inZ because inZ "back" is +Z in world; we want forward to drive +f.
+      dir.x += fx * -inZ + rx * inX;
+      dir.z += fz * -inZ + rz * inX;
     } else {
-      if (forward) dir.z -= 1;
-      if (back)    dir.z += 1;
-      if (left)    dir.x -= 1;
-      if (right)   dir.x += 1;
+      dir.x += inX;
+      dir.z += inZ;
     }
 
-    if (dir.length() > 0) dir.normalize();
+    // Cap magnitude at 1 so analog joystick + keyboard combo never moves
+    // faster than the speed limit.
+    if (dir.length() > 1) dir.normalize();
     const speed = ridingRef.current ? RIDE_SPEED : WALK_SPEED;
     dir.multiplyScalar(speed * delta);
     velocity.current.lerp(dir, 0.3);
