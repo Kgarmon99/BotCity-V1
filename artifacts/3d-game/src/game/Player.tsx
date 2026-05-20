@@ -1,7 +1,9 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, Suspense } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useKeyboardControls } from "@react-three/drei";
+import { useKeyboardControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+
+useGLTF.preload("/SilverSkin.glb");
 
 enum Controls {
   forward = "forward",
@@ -15,8 +17,37 @@ interface PlayerProps {
   onInteract: (pos: THREE.Vector3) => void;
 }
 
+function SilverSkinModel() {
+  const { scene } = useGLTF("/SilverSkin.glb");
+  const cloned = scene.clone(true);
+
+  cloned.traverse((child) => {
+    if ((child as THREE.Mesh).isMesh) {
+      (child as THREE.Mesh).castShadow = true;
+      (child as THREE.Mesh).receiveShadow = true;
+    }
+  });
+
+  return <primitive object={cloned} scale={[1, 1, 1]} position={[0, -0.75, 0]} />;
+}
+
+function FallbackCharacter() {
+  return (
+    <group>
+      <mesh castShadow>
+        <boxGeometry args={[0.6, 1.2, 0.4]} />
+        <meshStandardMaterial color="#c0c0c0" metalness={0.8} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 0.8, 0]} castShadow>
+        <sphereGeometry args={[0.28, 12, 12]} />
+        <meshStandardMaterial color="#a0a0b0" metalness={0.9} roughness={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
 export default function Player({ onPositionChange, onInteract }: PlayerProps) {
-  const meshRef = useRef<THREE.Mesh>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
   const velocity = useRef(new THREE.Vector3());
   const [, getKeys] = useKeyboardControls<Controls>();
   const speed = 6;
@@ -24,8 +55,8 @@ export default function Player({ onPositionChange, onInteract }: PlayerProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "e" || e.key === "E") {
-        if (meshRef.current) {
-          onInteract(meshRef.current.position.clone());
+        if (groupRef.current) {
+          onInteract(groupRef.current.position.clone());
         }
       }
     };
@@ -45,41 +76,32 @@ export default function Player({ onPositionChange, onInteract }: PlayerProps) {
     dir.normalize().multiplyScalar(speed * delta);
     velocity.current.lerp(dir, 0.2);
 
-    if (meshRef.current) {
-      meshRef.current.position.add(velocity.current);
+    if (groupRef.current) {
+      groupRef.current.position.add(velocity.current);
 
       const bound = 22;
-      meshRef.current.position.x = Math.max(-bound, Math.min(bound, meshRef.current.position.x));
-      meshRef.current.position.z = Math.max(-bound, Math.min(bound, meshRef.current.position.z));
-      meshRef.current.position.y = 0.75;
+      groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
+      groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
+      groupRef.current.position.y = 0.75;
 
       if (dir.length() > 0.001) {
         const angle = Math.atan2(dir.x, dir.z);
-        meshRef.current.rotation.y = THREE.MathUtils.lerp(
-          meshRef.current.rotation.y,
+        groupRef.current.rotation.y = THREE.MathUtils.lerp(
+          groupRef.current.rotation.y,
           angle,
           0.15
         );
       }
 
-      onPositionChange(meshRef.current.position.clone());
+      onPositionChange(groupRef.current.position.clone());
     }
   });
 
   return (
-    <group ref={meshRef} position={[0, 0.75, 0]}>
-      <mesh castShadow>
-        <boxGeometry args={[0.6, 1.2, 0.4]} />
-        <meshStandardMaterial color="#4ade80" />
-      </mesh>
-      <mesh position={[0, 0.8, 0]} castShadow>
-        <sphereGeometry args={[0.28, 12, 12]} />
-        <meshStandardMaterial color="#fbbf24" />
-      </mesh>
-      <mesh position={[0, 0.35, 0.22]}>
-        <boxGeometry args={[0.5, 0.55, 0.05]} />
-        <meshStandardMaterial color="#1e40af" />
-      </mesh>
+    <group ref={groupRef} position={[0, 0.75, 0]}>
+      <Suspense fallback={<FallbackCharacter />}>
+        <SilverSkinModel />
+      </Suspense>
     </group>
   );
 }

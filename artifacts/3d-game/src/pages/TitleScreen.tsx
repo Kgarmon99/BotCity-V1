@@ -11,7 +11,7 @@ export default function TitleScreen() {
           Tax Quest <span className="text-yellow-400">3D</span>
         </h1>
         <p className="text-blue-300 text-lg mb-8 leading-relaxed">
-          Explore Tax Town, earn income, discover deductions, and file your first tax return!
+          Explore BotCity, earn income, discover deductions, and file your first tax return!
         </p>
 
         <div className="grid grid-cols-2 gap-4 mb-8 text-left">
@@ -32,7 +32,7 @@ export default function TitleScreen() {
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6 text-left">
           <div className="font-bold text-yellow-300 mb-1">How to Play</div>
           <div className="text-yellow-100/80 text-sm space-y-1">
-            <div>🕹️ <strong>WASD</strong> or <strong>Arrow Keys</strong> to move around Tax Town</div>
+            <div>🕹️ <strong>WASD</strong> or <strong>Arrow Keys</strong> to move around BotCity</div>
             <div>🚪 Walk up to a building and press <strong>E</strong> to enter and interact</div>
             <div>🎯 Visit all 4 buildings and file your taxes to complete the level!</div>
           </div>
