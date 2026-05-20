@@ -42,6 +42,10 @@ export default function FollowCamera({ target }: FollowCameraProps) {
   const cameraMode = useGameStore((s) => s.cameraMode);
   const cycleCamera = useGameStore((s) => s.cycleCamera);
   const setCameraMode = useGameStore((s) => s.setCameraMode);
+  const dialogOpenTick = useGameStore((s) => s.dialogOpenTick);
+  // Cinematic FOV punch on dialog open — drops to a tight FOV then eases
+  // back to the preset. `flourishStart` is wall-clock time of the last open.
+  const flourishStart = useRef(-Infinity);
 
   const smoothedPos = useRef(new THREE.Vector3());
   const smoothedLook = useRef(new THREE.Vector3());
@@ -53,6 +57,13 @@ export default function FollowCamera({ target }: FollowCameraProps) {
   const tmpDesired = useRef(new THREE.Vector3());
   const tmpLook = useRef(new THREE.Vector3());
   const tmpOrbit = useRef(new THREE.Vector3());
+
+  // Stamp the start time on every dialog-open tick so the FOV-punch in
+  // useFrame can run its sine-bump window.
+  useEffect(() => {
+    if (dialogOpenTick === 0) return;
+    flourishStart.current = performance.now() / 1000;
+  }, [dialogOpenTick]);
 
   // Keyboard: C cycles, 1-5 selects directly. Ignore when typing in inputs
   // or when a modifier (Ctrl/Meta/Alt) is held — those belong to the browser.
@@ -174,7 +185,19 @@ export default function FollowCamera({ target }: FollowCameraProps) {
     const offsetLerp = cameraMode === ORBIT_MODE ? 0.5 : 0.07;
     currentOffset.current.lerp(targetOffset, offsetLerp);
     currentLookY.current += (preset.lookAtY - currentLookY.current) * 0.07;
-    currentFov.current += (preset.fov - currentFov.current) * 0.07;
+    // Cinematic FOV punch: for ~0.55s after a dialog opens, drop FOV by 8°
+    // then ease back. Outside the window the FOV just glides to the preset.
+    const tNow = performance.now() / 1000;
+    const dt = tNow - flourishStart.current;
+    if (dt >= 0 && dt < 0.55) {
+      const k = dt / 0.55;
+      // Half-sine bump: 0→1→0 → produces a smooth zoom-in/out flourish.
+      const bump = Math.sin(k * Math.PI);
+      const target = preset.fov - bump * 8;
+      currentFov.current += (target - currentFov.current) * 0.25;
+    } else {
+      currentFov.current += (preset.fov - currentFov.current) * 0.07;
+    }
 
     // desired = target + currentOffset (reusing scratch vector — no GC churn)
     tmpDesired.current.copy(target.current).add(currentOffset.current);

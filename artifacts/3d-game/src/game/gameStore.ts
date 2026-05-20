@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GameState, DialogContent, PurchaseOption, calculateTax } from "./types";
+import { GameState, DialogContent, PurchaseOption, TaxDocument, calculateTax } from "./types";
 
 export type CameraMode = 0 | 1 | 2 | 3 | 4;
 
@@ -13,6 +13,7 @@ interface GameStore extends GameState {
   earnIncome: (amount: number, withheld: number) => void;
   makePurchase: (item: PurchaseOption) => void;
   visitBuilding: (id: string) => void;
+  collectDocument: (doc: TaxDocument) => void;
   fileTaxes: () => void;
   restart: () => void;
 }
@@ -24,9 +25,11 @@ const initialState: GameState = {
   withheld: 0,
   purchases: [],
   visitedBuildings: [],
+  documents: [],
   level: 1,
   score: 0,
   dialog: null,
+  dialogOpenTick: 0,
   taxFiled: false,
   finalRefund: 0,
   finalOwed: 0,
@@ -42,7 +45,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   startGame: () => set({ ...initialState, screen: "game" }),
 
-  openDialog: (dialog) => set({ dialog }),
+  openDialog: (dialog) =>
+    set((s) => ({ dialog, dialogOpenTick: s.dialogOpenTick + 1 })),
+
+  collectDocument: (doc) =>
+    set((s) =>
+      s.documents.some((d) => d.id === doc.id)
+        ? s
+        : { documents: [...s.documents, doc], score: s.score + 5 },
+    ),
 
   closeDialog: () => set({ dialog: null }),
 

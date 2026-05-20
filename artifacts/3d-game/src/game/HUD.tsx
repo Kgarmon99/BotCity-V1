@@ -1,5 +1,7 @@
 import { useGameStore } from "./gameStore";
 import { calculateTax } from "./types";
+import { sound } from "./sound";
+import { useEffect, useState } from "react";
 
 const BUILDINGS = [
   { id: "workcorp", emoji: "💼", label: "WorkCorp" },
@@ -9,6 +11,10 @@ const BUILDINGS = [
   { id: "bottrain", emoji: "🚆", label: "BotTrain" },
   { id: "botplane", emoji: "✈️", label: "BotPlane" },
   { id: "botdealer", emoji: "🚗", label: "BotDealer" },
+  { id: "bothospital", emoji: "🏥", label: "BotHospital" },
+  { id: "botretirement", emoji: "🏛️", label: "BotRetirement" },
+  { id: "botcrypto", emoji: "₿", label: "BotCrypto" },
+  { id: "botcharity", emoji: "❤️", label: "BotCharity" },
   { id: "botstadium", emoji: "🏟️", label: "BotStadium" },
   { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
   { id: "botbeach", emoji: "🏖️", label: "BotBeach" },
@@ -50,7 +56,7 @@ function PanelHeader({ children }: { children: React.ReactNode }) {
 }
 
 export default function HUD() {
-  const { income, deductions, withheld, visitedBuildings, score } = useGameStore();
+  const { income, deductions, withheld, visitedBuildings, score, documents } = useGameStore();
   const { tax, bracket } = calculateTax(income, deductions);
   const standardDeduction = 14600;
   const totalDed = standardDeduction + deductions;
@@ -128,7 +134,12 @@ export default function HUD() {
             <span className="text-amber-300 font-bold font-mono tabular-nums">{score}</span>
           </div>
         </div>
+
+        {/* Documents / 1040 Backpack Panel */}
+        <DocumentsPanel docs={documents} income={income} deductions={deductions} withheld={withheld} tax={tax} />
       </div>
+
+      <SoundToggle />
 
       {/* Controls */}
       <div className="fixed bottom-4 left-4 bg-slate-950/80 text-white text-xs rounded-xl px-3.5 py-3 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)]">
@@ -153,6 +164,126 @@ export default function HUD() {
       </div>
       <CameraModeIndicator />
     </div>
+  );
+}
+
+// ── Documents / Form 1040 backpack ─────────────────────────────────────────
+// Shows the player which IRS forms they've collected and previews how the
+// 1040 lines fill in. Educational, not a real calculator — the live numbers
+// pull from the existing tax math so it stays consistent with the summary.
+interface DocsPanelProps {
+  docs: { id: string; code: string; label: string; icon: string; line: string }[];
+  income: number;
+  deductions: number;
+  withheld: number;
+  tax: number;
+}
+
+function DocumentsPanel({ docs, income, deductions, withheld, tax }: DocsPanelProps) {
+  // Mirror `calculateTax` in types.ts — extra deductions stack ON TOP of the
+  // standard deduction. Keeping the math in sync prevents the Form 1040
+  // preview from disagreeing with the live tax summary above.
+  const standardDeduction = 14600;
+  const totalDeduction = standardDeduction + deductions;
+  const taxable = Math.max(0, income - totalDeduction);
+  const net = withheld - tax;
+  return (
+    <div className="bg-slate-950/85 text-white rounded-2xl p-4 min-w-[230px] max-w-[260px] border border-amber-500/20 backdrop-blur-md shadow-[0_0_30px_-10px_rgba(251,191,36,0.4)]">
+      <PanelHeader>📋 Form 1040 — Live Preview</PanelHeader>
+      <div className="space-y-1 text-[12px]">
+        <FormLine line="1a" label="Wages (W-2)" value={income} />
+        <FormLine line="11" label="AGI" value={income} />
+        <FormLine line="12" label="Std. ded." value={-standardDeduction} />
+        {deductions > 0 && <FormLine line="12b" label="Other ded." value={-deductions} />}
+        <div className="border-t border-amber-500/15 pt-1">
+          <FormLine line="15" label="Taxable income" value={taxable} bold />
+        </div>
+        <FormLine line="16" label="Tax" value={-tax} />
+        <FormLine line="25a" label="Withheld" value={withheld} />
+        <div className="border-t border-amber-500/15 pt-1">
+          <FormLine
+            line={net >= 0 ? "34" : "37"}
+            label={net >= 0 ? "Refund" : "Owe"}
+            value={Math.abs(net)}
+            bold
+            highlight={net >= 0 ? "good" : "bad"}
+          />
+        </div>
+      </div>
+      <div className="mt-3 pt-2 border-t border-amber-500/15">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-amber-300/80 font-bold mb-1.5">
+          Backpack ({docs.length})
+        </div>
+        {docs.length === 0 ? (
+          <div className="text-[11px] text-emerald-200/40 italic">
+            Visit buildings to collect IRS documents…
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {docs.map((d) => (
+              <div
+                key={d.id}
+                title={`${d.code} — ${d.label} (Line ${d.line})`}
+                className="px-2 py-1 rounded-md bg-amber-900/20 border border-amber-500/30 text-[10px] font-mono text-amber-200 flex items-center gap-1"
+              >
+                <span>{d.icon}</span>
+                <span>{d.code}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FormLine({
+  line,
+  label,
+  value,
+  bold = false,
+  highlight,
+}: {
+  line: string;
+  label: string;
+  value: number;
+  bold?: boolean;
+  highlight?: "good" | "bad";
+}) {
+  const tone =
+    highlight === "good"
+      ? "text-emerald-400"
+      : highlight === "bad"
+      ? "text-rose-400"
+      : value < 0
+      ? "text-emerald-200/60"
+      : "text-emerald-100";
+  const sign = value < 0 ? "-" : "";
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <span className="text-emerald-200/45 font-mono text-[10px] w-7 shrink-0">{line}</span>
+      <span className="text-emerald-200/70 flex-1 truncate">{label}</span>
+      <span className={`font-mono tabular-nums ${tone} ${bold ? "font-bold" : ""}`}>
+        {sign}${Math.abs(value).toLocaleString()}
+      </span>
+    </div>
+  );
+}
+
+function SoundToggle() {
+  const [muted, setMuted] = useState<boolean>(() => sound.isMuted());
+  useEffect(() => {
+    sound.setMuted(muted);
+  }, [muted]);
+  return (
+    <button
+      type="button"
+      onClick={() => setMuted((m) => !m)}
+      className="fixed top-4 right-4 z-20 pointer-events-auto bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)] hover:bg-slate-900/90 transition-colors"
+      title={muted ? "Unmute sound" : "Mute sound"}
+    >
+      {muted ? "🔇" : "🔊"}
+    </button>
   );
 }
 

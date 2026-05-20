@@ -172,6 +172,34 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "plane",
   }),
 
+  bothospital: () => ({
+    buildingId: "bothospital",
+    title: "🏥 BotHospital — HSAs, FSAs & Medical Deductions",
+    body: `Welcome to BotHospital! Health care has its own tax playbook. Three big ideas:\n\n📖 HSA (Health Savings Account) — the triple-tax-advantaged unicorn:\n• Contributions: pre-tax (or above-the-line if you contribute yourself)\n• Growth: tax-free\n• Withdrawals: tax-free if used for qualified medical expenses\nYou must be enrolled in a High-Deductible Health Plan (HDHP) to contribute. 2024 limits: $4,150 self-only / $8,300 family. After age 65 you can use HSA funds for anything (just pay regular income tax, no penalty).\n\n📖 FSA (Flexible Spending Account):\nAlso pre-tax dollars for medical (or dependent-care) expenses, but USE IT OR LOSE IT each year. Limited rollover (typically up to $640). Funded via payroll deduction; lowers your W-2 wages directly.\n\n📖 MEDICAL EXPENSE DEDUCTION (Schedule A):\nIf you itemize, you can deduct unreimbursed medical expenses ABOVE 7.5% of AGI. So at $50k AGI, only costs above $3,750 count. High threshold — most filers can't use it.\n\n💡 Lesson: Max your HSA if you have an HDHP — it's the most tax-efficient account in the code. FSAs are decent but volatile. The Schedule A medical deduction is real but rarely triggers.`,
+    action: "hospital",
+  }),
+
+  botcharity: () => ({
+    buildingId: "botcharity",
+    title: "❤️ BotCharity Center — Giving & Tax Deductions",
+    body: `Welcome to the BotCharity Center! Generosity has tax consequences — usually good ones.\n\n📖 ONLY ITEMIZERS GET THE DEDUCTION:\nCharitable contributions are an ITEMIZED deduction (Schedule A). If you take the standard deduction ($14,600 single), donations don't reduce your tax bill. The COVID-era $300 above-the-line allowance has expired.\n\n📖 QUALIFIED ORGANIZATIONS ONLY:\n501(c)(3) public charities count. GoFundMe campaigns for individuals do NOT. Political donations do NOT. Check the IRS Tax Exempt Organization Search.\n\n📖 CASH vs PROPERTY:\n• Cash: deduct up to 60% of AGI\n• Long-term appreciated stock: deduct FAIR MARKET VALUE up to 30% of AGI — and skip capital gains entirely. This is a power move for high earners.\n• Used goods: deduct fair market value, not original price. Need a receipt for anything $250+.\n\n📖 BUNCHING + DAFs:\nSince the standard deduction is high, many filers "bunch" 2-3 years of donations into one year to clear the standard-deduction hurdle. A Donor-Advised Fund (DAF) lets you take the deduction now and dole grants out over time.\n\n📖 QCDs (QUALIFIED CHARITABLE DISTRIBUTIONS):\nAge 70½+? Donate directly from your IRA (up to $105k/yr). It counts toward your RMD and is excluded from income — even if you don't itemize. Best deal in the tax code for retirees who give.\n\n💡 Lesson: Bunch donations to clear the standard deduction. Give appreciated stock, not cash. Use a DAF or QCD if it fits.`,
+    action: "charity",
+  }),
+
+  botcrypto: () => ({
+    buildingId: "botcrypto",
+    title: "₿ BotCrypto Exchange — Capital Gains & 1099-B",
+    body: `Welcome to BotCrypto! Trading digital assets means you're a taxpayer with extra paperwork.\n\n📖 EVERY SALE IS A TAXABLE EVENT:\nSelling crypto, swapping one coin for another, spending crypto on goods — all trigger CAPITAL GAINS or LOSSES. The IRS treats crypto as PROPERTY, not currency.\n\n📖 SHORT-TERM vs LONG-TERM:\n• Held ≤ 1 year → taxed as ORDINARY INCOME (your regular bracket: 10-37%)\n• Held > 1 year → LONG-TERM capital gains: 0%, 15%, or 20% (most filers: 15%)\nHolding period matters enormously. A 1-day-shy-of-a-year sale can cost you double.\n\n📖 COST BASIS — TRACK EVERY LOT:\nYour gain = sale price − cost basis. If you bought 1 BTC at $30k and sold at $60k, that's a $30k gain. Exchanges issue Form 1099-B (or 1099-DA going forward) but historically the basis info has been spotty. Keep your own records.\n\n📖 WASH SALE RULES (currently STOCKS only):\nThe 30-day wash sale rule applies to securities. Crypto is NOT a security, so as of now you CAN sell at a loss and immediately re-buy. (Congress has flirted with closing this loophole — watch this space.)\n\n📖 TAX-LOSS HARVESTING:\nSell losers to offset winners. Up to $3,000 of net capital losses can offset ORDINARY income each year; the rest carries forward indefinitely.\n\n📖 STAKING, MINING, AIRDROPS:\nAll treated as ORDINARY INCOME at fair market value when received. Then a separate capital gain/loss when you eventually sell.\n\n💡 Lesson: Hold > 1 year for the cap-gains rate. Track basis obsessively. Harvest losses. Staking income is ordinary, not capital.`,
+    action: "crypto",
+  }),
+
+  botretirement: () => ({
+    buildingId: "botretirement",
+    title: "🏛️ BotRetirement Plaza — 401(k), IRA & Roth",
+    body: `Welcome to BotRetirement Plaza! Retirement accounts are the biggest tax break most people will ever use. Pick the wrong one and you leave thousands on the table.\n\n📖 401(k) — EMPLOYER PLAN:\nContribute pre-tax dollars from your paycheck. 2024 limit: $23,000 (under 50) / $30,500 (50+). Lowers your CURRENT taxable income. Many employers match a percentage — that match is FREE MONEY, always grab at least the full match.\n\n📖 TRADITIONAL IRA:\nContribute up to $7,000 ($8,000 if 50+) on your own. May be deductible (income-dependent if you also have a workplace plan). Same idea as 401(k): tax now, pay later.\n\n📖 ROTH 401(k) / ROTH IRA — THE FLIP:\nContribute POST-tax dollars. Growth is tax-free. Qualified withdrawals are tax-free. Best for younger filers who expect higher tax rates in retirement. Roth IRA has income limits ($161k single / $240k joint, 2024) — but the BACKDOOR ROTH (contribute to Traditional, immediately convert) sidesteps the limit.\n\n📖 RMDs (REQUIRED MINIMUM DISTRIBUTIONS):\nTraditional accounts force you to withdraw starting at age 73 (rising to 75) — and pay tax on every dollar. Roth IRAs have NO RMD during the owner's life. Roth wins on flexibility.\n\n📖 THE FRAMEWORK (in order):\n1. 401(k) up to the employer match\n2. Max HSA if you have one ($4,150 / $8,300)\n3. Max Roth IRA ($7,000) if eligible\n4. Back to 401(k) up to $23,000\n5. After-tax 401(k) → mega-backdoor Roth (advanced)\n\n📖 EARLY WITHDRAWAL PENALTY:\nPulling from a Traditional 401(k)/IRA before age 59½ usually costs you a 10% penalty + ordinary income tax. Roth contributions (not earnings) can come out anytime, tax- and penalty-free.\n\n💡 Lesson: Grab the employer match first. Tax-now (Roth) vs tax-later (Traditional) depends on your future bracket — when in doubt, split. HSAs beat both for medical costs.`,
+    action: "retirement",
+  }),
+
   irs: ({ income, withheld, visitedBuildings }) => ({
     buildingId: "irs",
     title: "📋 IRS Tax Office — File Your Return",

@@ -10,6 +10,7 @@ import HUD from "./HUD";
 import DialogModal from "./DialogModal";
 import Skybox from "./Skybox";
 import NPCBots from "./NPCBots";
+import CitizenBots from "./CitizenBots";
 import Billboards from "./Billboards";
 import MoneyRain from "./MoneyRain";
 import CityDetails from "./CityDetails";
@@ -199,6 +200,61 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 5,
     emoji: "🚗",
   },
+  // ─── Cardinal-axis middle ring (offset from the main avenues at x=0/z=0) ───
+  // Sit in the band between secondary streets (±18) and the outer ring (±36),
+  // offset 5u from the axis so they don't block the main avenues themselves.
+  {
+    id: "bothospital",
+    label: "BotHospital",
+    // North middle ring, east half. botdealer occupies x[-11.5..-6.5] z[-29..-25];
+    // hospital at x=5 keeps a 5.5u gap. Footprint x[2.5..7.5] z[-29..-25].
+    position: [5, 2.5, -27],
+    color: "#ef4444",
+    roofColor: "#fecaca",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🏥",
+  },
+  {
+    id: "botretirement",
+    label: "BotRetirement Plaza",
+    // South middle ring. Empty band; place west of S-N axis so it doesn't sit
+    // on the central avenue (x=0). Footprint x[-7.5..-2.5] z[25..29].
+    position: [-5, 2.5, 27],
+    color: "#7c3aed",
+    roofColor: "#fde68a",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🏛️",
+  },
+  {
+    id: "botcrypto",
+    label: "BotCrypto Exchange",
+    // East middle ring. Avoid main E-W avenue at z=0 by offsetting north.
+    // Footprint x[24.5..29.5] z[-7..-3].
+    position: [27, 2.5, -5],
+    color: "#f59e0b",
+    roofColor: "#78350f",
+    width: 5,
+    depth: 4,
+    height: 6,
+    emoji: "₿",
+  },
+  {
+    id: "botcharity",
+    label: "BotCharity Center",
+    // West middle ring. Offset south to clear the main avenue at z=0.
+    // Footprint x[-29.5..-24.5] z[3..7].
+    position: [-27, 2.5, 5],
+    color: "#ec4899",
+    roofColor: "#fce7f3",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "❤️",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;
@@ -355,6 +411,7 @@ export default function GameScene() {
           <Statues />
           <Billboards />
           <NPCBots />
+          <CitizenBots />
           <MoneyRain />
 
           {buildings.map((b) => (

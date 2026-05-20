@@ -27,8 +27,25 @@ export interface DialogContent {
     | "beach"
     | "shops"
     | "farm"
-    | "tower";
+    | "tower"
+    | "hospital"
+    | "charity"
+    | "crypto"
+    | "retirement";
   amount?: number;
+}
+
+export interface TaxDocument {
+  /** Unique id (e.g. "w2-workcorp"). */
+  id: string;
+  /** IRS form name shown on the document tile ("W-2"). */
+  code: string;
+  /** Short human label ("Wages from WorkCorp"). */
+  label: string;
+  /** Emoji glyph for the document tile. */
+  icon: string;
+  /** Which 1040 line / area the document feeds. */
+  line: string;
 }
 
 export interface GameState {
@@ -38,9 +55,13 @@ export interface GameState {
   withheld: number;
   purchases: PurchaseOption[];
   visitedBuildings: string[];
+  documents: TaxDocument[];
   level: number;
   score: number;
   dialog: DialogContent | null;
+  /** Monotonic counter — every dialog open bumps this so the camera can
+      trigger a one-shot cinematic FOV punch without depending on identity. */
+  dialogOpenTick: number;
   taxFiled: boolean;
   finalRefund: number;
   finalOwed: number;
