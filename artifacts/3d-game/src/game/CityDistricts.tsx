@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text, useGLTF, useAnimations } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { MoneyBotModel } from "./MoneyBotModel";
 
 // ─────────────────────────────────────────────────────────────────────
 // 4 new districts at the middle-ring corners (±27, ±27).
@@ -761,53 +762,6 @@ function Farm() {
   );
 }
 
-// ===== Official MoneyBot character statue (GLB) =====================
-// Loads the official MoneyBot 3D model (SilverSkin) from /public, plays the
-// "UpPoint" animation, and casts shadows. Used as a giant branded statue
-// atop MoneyBot Towers. The model ships with materials Face/Coin/Silver/
-// Hat/eyes and animations: Flip, FlyDown, FlyUp, Idle, LeftHand, RightHand,
-// TwistJump, UpPoint.
-const MONEYBOT_MODEL_URL = `${import.meta.env.BASE_URL}moneybot.glb`;
-
-interface MoneyBotStatueProps {
-  scale?: number;
-  animation?: "Idle" | "UpPoint" | "Flip" | "FlyUp" | "FlyDown" | "TwistJump" | "LeftHand" | "RightHand";
-}
-
-function MoneyBotStatue({ scale = 3, animation = "UpPoint" }: MoneyBotStatueProps) {
-  const groupRef = useRef<THREE.Group>(null!);
-  const { scene, animations } = useGLTF(MONEYBOT_MODEL_URL);
-  const { actions } = useAnimations(animations, groupRef);
-
-  // Ensure every mesh casts/receives shadows for proper grounding.
-  useEffect(() => {
-    scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        obj.castShadow = true;
-        obj.receiveShadow = true;
-      }
-    });
-  }, [scene]);
-
-  useEffect(() => {
-    const action = actions[animation];
-    if (!action) return;
-    action.reset().fadeIn(0.4).play();
-    return () => {
-      action.fadeOut(0.2);
-      action.stop();
-    };
-  }, [actions, animation]);
-
-  return (
-    <group ref={groupRef} scale={scale}>
-      <primitive object={scene} />
-    </group>
-  );
-}
-
-useGLTF.preload(MONEYBOT_MODEL_URL);
-
 // ===== MoneyBot Towers @ (13, 0, -13) ================================
 // Futuristic HQ for MoneyBot Inc., occupying the NE inner block. Main
 // interactive tower comes from BUILDING_DEFS (slate body, gold roof, h=12,
@@ -976,7 +930,7 @@ function MoneyBotTowers() {
           />
         </mesh>
         {/* The actual MoneyBot character — pointing up like a HQ mascot */}
-        <MoneyBotStatue scale={2.4} animation="UpPoint" />
+        <MoneyBotModel scale={2.4} animation="UpPoint" />
       </group>
 
       {/* ── MONEYBOT TOWERS sign band above the main entrance ──────── */}
