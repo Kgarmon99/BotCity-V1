@@ -22,8 +22,10 @@ const PRESETS: CamPreset[] = [
   { offset: new THREE.Vector3(0, 10, 14), lookAtY: 1, fov: 55 },
   // 1: Cinematic — pulled back, see more city
   { offset: new THREE.Vector3(0, 18, 24), lookAtY: 1, fov: 60 },
-  // 2: Top-down — bird's-eye tactical view
-  { offset: new THREE.Vector3(0, 32, 0.01), lookAtY: 0, fov: 50 },
+  // 2: Aerial — high tilted tactical view (RTS-style). Tilted (not pure
+  // top-down) so forward/-Z still maps to "up" on screen and WASD stays
+  // intuitive; high enough to see most of the city at once.
+  { offset: new THREE.Vector3(0, 22, 9), lookAtY: 1, fov: 60 },
   // 3: Side-iso — dramatic diagonal angle on the city
   { offset: new THREE.Vector3(16, 12, 16), lookAtY: 1, fov: 55 },
 ];

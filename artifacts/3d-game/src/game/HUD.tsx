@@ -152,7 +152,7 @@ export default function HUD() {
 const CAMERA_MODES = [
   { label: "Chase",     icon: "🎯" },
   { label: "Cinematic", icon: "🎬" },
-  { label: "Top-Down",  icon: "🛰️" },
+  { label: "Aerial",    icon: "🛰️" },
   { label: "Side-Iso",  icon: "📐" },
 ] as const;
 
