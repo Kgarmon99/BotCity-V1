@@ -71,6 +71,13 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "bank",
   }),
 
+  university: () => ({
+    buildingId: "university",
+    title: "🎓 MoneyBot University — Tax Credits 101",
+    body: `Welcome to MoneyBot U! Today's lecture: TAX CREDITS — the most powerful tool in the tax code.\n\n📖 CREDITS vs DEDUCTIONS:\nA $1,000 deduction in the 12% bracket saves you ~$120. A $1,000 CREDIT saves you the full $1,000 — they reduce your tax bill dollar-for-dollar.\n\n📖 COMMON CREDITS:\n• Child Tax Credit — up to $2,000 per qualifying child\n• Earned Income Tax Credit (EITC) — for lower-income workers\n• American Opportunity Credit — up to $2,500 for college costs\n• Saver's Credit — for contributing to retirement accounts\n\n📖 REFUNDABLE vs NON-REFUNDABLE:\nRefundable credits (like the EITC) can give you money back even if you owe $0 in tax. Non-refundable credits can only zero out your bill — they don't create a refund on their own.\n\n💡 Lesson: When tax-planning, hunt for credits FIRST. They're far more valuable per dollar than deductions.`,
+    action: "study",
+  }),
+
   irs: ({ income, withheld, visitedBuildings }) => ({
     buildingId: "irs",
     title: "📋 IRS Tax Office — File Your Return",

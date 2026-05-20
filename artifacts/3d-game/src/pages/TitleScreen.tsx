@@ -15,9 +15,15 @@ const FEATURES = [
   },
   {
     emoji: "🏦",
-    title: "Learn",
+    title: "Brackets",
     desc: "Study brackets at First Bank",
     accent: "from-violet-500/10 to-emerald-500/5 border-emerald-500/25",
+  },
+  {
+    emoji: "🎓",
+    title: "Credits",
+    desc: "Learn tax credits at MoneyBot U",
+    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
   },
   {
     emoji: "📋",
@@ -46,7 +52,7 @@ export default function TitleScreen() {
       />
 
       <div className="relative min-h-full flex items-start sm:items-center justify-center px-6 py-8">
-        <div className="text-center w-full max-w-xl">
+        <div className="text-center w-full max-w-2xl">
           {/* Branding row */}
           <div className="inline-flex items-center gap-3 mb-1">
             <span className="text-4xl drop-shadow-[0_0_24px_rgba(34,197,94,0.5)]" aria-hidden>
@@ -68,8 +74,8 @@ export default function TitleScreen() {
             file your first tax return.
           </p>
 
-          {/* Feature row — compact 4-up */}
-          <div className="grid grid-cols-4 gap-2.5 mb-5 text-left">
+          {/* Feature row — compact 5-up */}
+          <div className="grid grid-cols-5 gap-2 mb-5 text-left">
             {FEATURES.map(({ emoji, title, desc, accent }, i) => (
               <div
                 key={title}

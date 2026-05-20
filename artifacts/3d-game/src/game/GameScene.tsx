@@ -63,6 +63,18 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 6,
     emoji: "📋",
   },
+  {
+    id: "university",
+    label: "MoneyBot University",
+    // NW inner-block corner — clear of roads (main x/z=0, secondary ±18) and other buildings.
+    position: [-14, 4, -14],
+    color: "#22c55e",
+    roofColor: "#fbbf24",
+    width: 5,
+    depth: 5,
+    height: 8,
+    emoji: "🎓",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;

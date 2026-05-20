@@ -18,6 +18,9 @@ export default function DialogModal() {
     } else if (dialog.action === "bank") {
       visitBuilding("firstbank");
       closeDialog();
+    } else if (dialog.action === "study") {
+      visitBuilding("university");
+      closeDialog();
     } else {
       closeDialog();
     }
@@ -119,6 +122,8 @@ export default function DialogModal() {
                   : "Collect $48,000 Paycheck"
                 : dialog.action === "file"
                 ? "File My Taxes!"
+                : dialog.action === "study"
+                ? "Lesson Complete 🎓"
                 : "Got it!"}
             </button>
           )}
