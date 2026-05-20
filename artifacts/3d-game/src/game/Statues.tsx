@@ -86,9 +86,10 @@ function Statue({ position, rotation = 0, pose = "hero", plaque }: StatueProps) 
       >
         — MoneyBot Hall of Fame —
       </Text>
-      {/* Official MoneyBot model on top of the pedestal */}
+      {/* Official MoneyBot model frozen on top of the pedestal — pose
+          comes from the animation clip evaluated at a fixed frame. */}
       <group position={[0, 2, 0]}>
-        <MoneyBotModel scale={1.5} animation={POSE_TO_ANIM[pose]} phase={phase} />
+        <MoneyBotModel scale={0.75} animation={POSE_TO_ANIM[pose]} phase={phase} paused />
       </group>
       {/* Green up-light */}
       <pointLight position={[0, 3, 0]} intensity={1.5} color="#22c55e" distance={8} />

@@ -23,9 +23,11 @@ interface Props {
   animation?: MoneyBotAnim;
   /** 0..1 phase offset so multiple instances don't move in lock-step. */
   phase?: number;
+  /** Hold the animation as a static pose (no motion). Used for statues. */
+  paused?: boolean;
 }
 
-export function MoneyBotModel({ scale = 1.5, animation = "Idle", phase = 0 }: Props) {
+export function MoneyBotModel({ scale = 1.5, animation = "Idle", phase = 0, paused = false }: Props) {
   const groupRef = useRef<THREE.Group>(null!);
   const { scene, animations } = useGLTF(MONEYBOT_MODEL_URL);
 
@@ -49,15 +51,23 @@ export function MoneyBotModel({ scale = 1.5, animation = "Idle", phase = 0 }: Pr
   useEffect(() => {
     const action = actions[animation];
     if (!action) return;
-    action.reset().fadeIn(0.4).play();
-    // Stagger start time so an 8-statue lineup doesn't beat in unison.
+    action.reset().play();
     const dur = action.getClip().duration;
-    if (dur > 0) action.time = (phase % 1) * dur;
+    if (paused) {
+      // Snap to the frame we want to freeze on and stop the mixer ticking.
+      // phase∈[0,1] picks which frame of the clip becomes the static pose.
+      if (dur > 0) action.time = (phase % 1) * dur;
+      action.paused = true;
+    } else {
+      // Animated: stagger start time so duplicates don't beat in unison.
+      if (dur > 0) action.time = (phase % 1) * dur;
+      action.fadeIn(0.4);
+    }
     return () => {
       action.fadeOut(0.2);
       action.stop();
     };
-  }, [actions, animation, phase]);
+  }, [actions, animation, phase, paused]);
 
   return (
     <group ref={groupRef} scale={scale}>
