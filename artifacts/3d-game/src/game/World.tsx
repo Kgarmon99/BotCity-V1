@@ -233,54 +233,69 @@ function PlazaAura() {
   );
 }
 
+// All decorative positions are kept off the road grid:
+//   main avenues at x=0 and z=0 (width 3), secondary streets at x/z=±18 (width 2.2).
+// Items are placed inside city blocks or in safe diagonal corridors.
+
 const coinPositions: [number, number, number][] = [
-  [3, 1.2, -3], [-3, 1.2, 3], [5, 1.2, 5], [-5, 1.2, -5],
-  [0, 1.5, -15], [-15, 1.5, 0], [15, 1.5, 0], [0, 1.5, 15],
+  [4, 1.2, -4], [-4, 1.2, 4], [5, 1.2, 5], [-5, 1.2, -5],
   [12, 1.2, 12], [-12, 1.2, -12], [12, 1.2, -12], [-12, 1.2, 12],
+  [22, 1.5, -22], [-22, 1.5, 22], [22, 1.5, 22], [-22, 1.5, -22],
 ];
 
 const spirePositions: { pos: [number, number, number]; height: number }[] = [
+  // Inner blocks — placed diagonally inside the 4 quadrants
   { pos: [-14, 0, -14], height: 4 },
-  { pos: [-16, 0, 6], height: 5 },
-  { pos: [14, 0, -16], height: 4.5 },
-  { pos: [16, 0, 12], height: 5.5 },
-  { pos: [-19, 0, -6], height: 4 },
-  { pos: [12, 0, 18], height: 4.5 },
-  { pos: [-9, 0, 18], height: 5 },
-  { pos: [19, 0, -10], height: 4.5 },
-  { pos: [4, 0, 21], height: 3.5 },
-  { pos: [-21, 0, 9], height: 4 },
-  { pos: [-14, 0, 14], height: 4 },
-  { pos: [14, 0, 4], height: 4.5 },
+  { pos: [-15, 0,  5], height: 5 },
+  { pos: [ 14, 0, -15], height: 4.5 },
+  { pos: [ 15, 0,  12], height: 5.5 },
+  { pos: [-15, 0, -5], height: 4 },
+  { pos: [ 12, 0,  15], height: 4.5 },
+  { pos: [-12, 0,  15], height: 5 },
+  { pos: [ 15, 0, -10], height: 4.5 },
+  // Mid-ring accent spires (in blocks, off all roads)
+  { pos: [ 4, 0,  22], height: 3.5 },
+  { pos: [-22, 0,  9], height: 4 },
+  { pos: [-13, 0,  13], height: 4 },
+  { pos: [ 13, 0,  4], height: 4.5 },
 ];
 
 const distantTowers: { pos: [number, number, number]; height: number; color: string }[] = [
-  { pos: [-30, 0, -25], height: 12, color: "#22c55e" },
-  { pos: [30, 0, -25], height: 15, color: "#4ade80" },
-  { pos: [-30, 0, 25], height: 13, color: "#fbbf24" },
-  { pos: [30, 0, 25], height: 11, color: "#22c55e" },
-  { pos: [-35, 0, 0], height: 16, color: "#16a34a" },
-  { pos: [35, 0, 0], height: 14, color: "#4ade80" },
-  { pos: [0, 0, -35], height: 18, color: "#22c55e" },
-  { pos: [0, 0, 35], height: 15, color: "#fbbf24" },
+  // Pushed beyond outer ring (x/z = ±36 streets) and off main axes
+  { pos: [-44, 0, -32], height: 14, color: "#22c55e" },
+  { pos: [ 44, 0, -32], height: 17, color: "#4ade80" },
+  { pos: [-44, 0,  32], height: 15, color: "#86efac" },
+  { pos: [ 44, 0,  32], height: 13, color: "#22c55e" },
+  { pos: [-44, 0, -12], height: 18, color: "#16a34a" },
+  { pos: [ 44, 0,  12], height: 16, color: "#4ade80" },
+  { pos: [-32, 0, -44], height: 19, color: "#22c55e" },
+  { pos: [ 32, 0,  44], height: 17, color: "#86efac" },
 ];
 
 const lampPositions: [number, number, number][] = [
+  // Sit in block interiors near the plaza, not on roads
   [-4, 0, -4], [4, 0, -4], [-4, 0, 4], [4, 0, 4],
-  [0, 0, -10], [0, 0, 10], [-10, 0, 0], [10, 0, 0],
   [-8, 0, -8], [8, 0, -8], [-8, 0, 8], [8, 0, 8],
+  [-14, 0, -4], [14, 0, -4], [-14, 0, 4], [14, 0, 4],
 ];
 
 const dollarHolos: [number, number, number][] = [
+  // Float high above block centers (off road centerlines)
   [-8, 4, -8], [8, 5, -8], [-8, 4.5, 8], [8, 5, 8],
-  [0, 6, -18], [0, 6, 18], [-18, 5, 0], [18, 5, 0],
+  [-22, 6, -22], [22, 6, -22], [-22, 6, 22], [22, 6, 22],
 ];
 
-const particlePositions: [number, number, number][] = Array.from({ length: 30 }).map((_, i) => [
-  Math.cos((i / 30) * Math.PI * 2) * (8 + (i % 5) * 2),
-  2 + (i % 4),
-  Math.sin((i / 30) * Math.PI * 2) * (8 + (i % 5) * 2),
-]);
+// Particles ring around the plaza; nudge any sample that lands on a main avenue
+// (|x|<=1.5 or |z|<=1.5) outward so they never overlap the road grid.
+const particlePositions: [number, number, number][] = Array.from({ length: 30 }).map((_, i) => {
+  const angle = (i / 30) * Math.PI * 2 + Math.PI / 12;
+  const r = 8 + (i % 5) * 2; // 8..16 — always inside the ±18 secondary streets
+  let x = Math.cos(angle) * r;
+  let z = Math.sin(angle) * r;
+  if (Math.abs(x) < 2) x = (x >= 0 ? 1 : -1) * 2;
+  if (Math.abs(z) < 2) z = (z >= 0 ? 1 : -1) * 2;
+  return [x, 2 + (i % 4), z];
+});
 
 export default function World() {
   return (

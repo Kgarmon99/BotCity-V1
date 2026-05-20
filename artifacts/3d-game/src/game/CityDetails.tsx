@@ -117,27 +117,27 @@ function Bench({ position, rotation = 0 }: { position: [number, number, number];
 export default function CityDetails() {
   return (
     <group>
-      {/* District pylons near each building */}
-      <DistrictPylon position={[-13, 0, -8]} label="WORK\nDISTRICT" color="#60a5fa" />
-      <DistrictPylon position={[13, 0, -8]} label="MARKET\nDISTRICT" color="#fbbf24" />
-      <DistrictPylon position={[-13, 0, 8]} label="FINANCIAL\nDISTRICT" color="#a78bfa" />
-      <DistrictPylon position={[13, 0, 8]} label="GOV\nDISTRICT" color="#f87171" />
+      {/* District pylons near each building — matches the building's accent color */}
+      <DistrictPylon position={[-13, 0, -4]} label="WORK\nDISTRICT" color="#60a5fa" />
+      <DistrictPylon position={[13, 0, -4]} label="MARKET\nDISTRICT" color="#fbbf24" />
+      <DistrictPylon position={[-13, 0, 4]} label="FINANCIAL\nDISTRICT" color="#a78bfa" />
+      <DistrictPylon position={[13, 0, 4]} label="GOV\nDISTRICT" color="#f87171" />
 
-      {/* Welcome pylons at city entry points */}
-      <DistrictPylon position={[0, 0, -22]} label="WELCOME\nTO\nBOTCITY" color="#4ade80" />
-      <DistrictPylon position={[0, 0, 22]} label="POP. 9001\nBOTS" color="#86efac" rotation={Math.PI} />
+      {/* Welcome pylons at city entry points — off main avenue (x=0) */}
+      <DistrictPylon position={[-4, 0, -22]} label="WELCOME\nTO\nBOTCITY" color="#4ade80" rotation={Math.PI / 12} />
+      <DistrictPylon position={[ 4, 0,  22]} label="POP. 9001\nBOTS" color="#86efac" rotation={Math.PI + Math.PI / 12} />
 
-      {/* Hover platforms scattered */}
+      {/* Hover platforms scattered in block interiors */}
       <HoverPlatform position={[-6, 2.5, -6]} color="#22c55e" />
       <HoverPlatform position={[6, 2.5, -6]} color="#fbbf24" />
       <HoverPlatform position={[-6, 2.5, 6]} color="#4ade80" />
       <HoverPlatform position={[6, 2.5, 6]} color="#86efac" />
 
-      {/* Benches around plaza */}
-      <Bench position={[-5, 0, 0]} rotation={Math.PI / 2} />
-      <Bench position={[5, 0, 0]} rotation={-Math.PI / 2} />
-      <Bench position={[0, 0, -5]} />
-      <Bench position={[0, 0, 5]} rotation={Math.PI} />
+      {/* Benches in plaza corners (off the main avenues) */}
+      <Bench position={[-4, 0, -4]} rotation={Math.PI / 4} />
+      <Bench position={[ 4, 0, -4]} rotation={-Math.PI / 4} />
+      <Bench position={[-4, 0,  4]} rotation={(3 * Math.PI) / 4} />
+      <Bench position={[ 4, 0,  4]} rotation={-(3 * Math.PI) / 4} />
     </group>
   );
 }

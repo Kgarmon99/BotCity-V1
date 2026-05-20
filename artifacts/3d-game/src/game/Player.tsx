@@ -85,12 +85,45 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Always-visible yellow arrow above bot */}
-      <mesh position={[0, 2.6, 0]} rotation={[Math.PI, 0, 0]}>
-        <coneGeometry args={[0.18, 0.4, 4]} />
-        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1} toneMapped={false} />
-      </mesh>
+      <PlayerIndicator />
       <MoneyBot isMoving={isMoving} />
+    </group>
+  );
+}
+
+// Floating gold-and-green halo above the player so they can spot themselves at a glance.
+function PlayerIndicator() {
+  const ringRef = useRef<THREE.Mesh>(null!);
+  const orbRef = useRef<THREE.Mesh>(null!);
+  const glowRef = useRef<THREE.Mesh>(null!);
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    if (ringRef.current) ringRef.current.rotation.z = t * 0.8;
+    if (orbRef.current) {
+      orbRef.current.position.y = 2.7 + Math.sin(t * 2) * 0.08;
+      (orbRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity =
+        1.8 + Math.sin(t * 3) * 0.6;
+    }
+    if (glowRef.current) {
+      const s = 1 + Math.sin(t * 2) * 0.12;
+      glowRef.current.scale.set(s, s, s);
+      (glowRef.current.material as THREE.MeshBasicMaterial).opacity = 0.35 + Math.sin(t * 2) * 0.12;
+    }
+  });
+  return (
+    <group>
+      <mesh ref={glowRef} position={[0, 2.7, 0]}>
+        <sphereGeometry args={[0.3, 16, 16]} />
+        <meshBasicMaterial color="#22c55e" transparent opacity={0.35} depthWrite={false} />
+      </mesh>
+      <mesh ref={ringRef} position={[0, 2.7, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.22, 0.04, 8, 24]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={2} toneMapped={false} />
+      </mesh>
+      <mesh ref={orbRef} position={[0, 2.7, 0]}>
+        <sphereGeometry args={[0.1, 12, 12]} />
+        <meshStandardMaterial color="#86efac" emissive="#22c55e" emissiveIntensity={2} toneMapped={false} />
+      </mesh>
     </group>
   );
 }

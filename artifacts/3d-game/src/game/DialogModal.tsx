@@ -32,15 +32,21 @@ export default function DialogModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-gray-900 text-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-white/10">
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-3">{dialog.title}</h2>
-          <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed mb-4">{dialog.body}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-[fadeIn_0.15s_ease-out]">
+      <div className="bg-gradient-to-b from-slate-900 to-slate-950 text-white rounded-2xl shadow-2xl shadow-emerald-900/40 max-w-2xl w-full max-h-[85vh] overflow-hidden border border-emerald-500/20 flex flex-col">
+        {/* Header band */}
+        <div className="px-6 py-4 border-b border-emerald-500/15 bg-gradient-to-r from-emerald-900/30 via-slate-900 to-amber-900/20">
+          <h2 className="text-xl font-bold text-white tracking-tight">{dialog.title}</h2>
+        </div>
+
+        <div className="p-6 overflow-y-auto">
+          <p className="text-emerald-100/80 text-sm whitespace-pre-line leading-relaxed mb-4">
+            {dialog.body}
+          </p>
 
           {dialog.options && (
-            <div className="space-y-3 mb-4">
-              <div className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">
+            <div className="space-y-2.5 mb-4">
+              <div className="text-[11px] font-semibold text-amber-300/90 uppercase tracking-[0.18em]">
                 Available Items — Click to purchase & learn
               </div>
               {dialog.options.map((item) => {
@@ -50,31 +56,33 @@ export default function DialogModal() {
                     key={item.id}
                     onClick={() => handlePurchase(item)}
                     disabled={bought}
-                    className={`w-full text-left p-3 rounded-xl border transition-all ${
+                    className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                       bought
-                        ? "border-green-500/40 bg-green-900/20 opacity-60 cursor-not-allowed"
+                        ? "border-emerald-500/30 bg-emerald-900/15 opacity-60 cursor-not-allowed"
                         : item.deductible
-                        ? "border-blue-500/40 bg-blue-900/20 hover:bg-blue-900/40 cursor-pointer"
-                        : "border-red-500/40 bg-red-900/20 hover:bg-red-900/40 cursor-pointer"
+                        ? "border-emerald-500/30 bg-emerald-900/10 hover:bg-emerald-900/30 hover:border-emerald-400/50 hover:shadow-[0_0_20px_-8px_rgba(34,197,94,0.6)] cursor-pointer"
+                        : "border-rose-500/30 bg-rose-900/10 hover:bg-rose-900/25 hover:border-rose-400/50 cursor-pointer"
                     }`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="font-semibold text-sm">{item.name}</span>
-                        <div className="text-xs mt-0.5 text-gray-400">{item.reason}</div>
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="min-w-0">
+                        <div className="font-semibold text-sm text-white">{item.name}</div>
+                        <div className="text-xs mt-0.5 text-emerald-100/60 leading-relaxed">{item.reason}</div>
                       </div>
-                      <div className="text-right ml-3 shrink-0">
-                        <div className={`text-sm font-mono font-bold ${item.deductible ? "text-green-400" : "text-red-400"}`}>
-                          {item.deductible ? `Save: $${Math.round(item.deductibleAmount * 0.12)}` : "No tax benefit"}
+                      <div className="text-right shrink-0">
+                        <div className={`text-sm font-mono font-bold tabular-nums ${item.deductible ? "text-emerald-400" : "text-rose-400"}`}>
+                          {item.deductible ? `Save ~$${Math.round(item.deductibleAmount * 0.12)}` : "No benefit"}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-[11px] text-emerald-200/50 mt-0.5">
                           {item.deductible ? `Deductible: $${item.deductibleAmount}` : "Not deductible"}
                         </div>
-                        {bought && <div className="text-xs text-green-400 font-bold mt-0.5">✓ Purchased</div>}
+                        {bought && <div className="text-[11px] text-emerald-400 font-bold mt-0.5">✓ Purchased</div>}
                       </div>
                     </div>
-                    <div className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full ${
-                      item.deductible ? "bg-blue-800 text-blue-200" : "bg-gray-700 text-gray-300"
+                    <div className={`mt-2 inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                      item.deductible
+                        ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                        : "bg-slate-700/60 text-emerald-200/70 border border-emerald-500/10"
                     }`}>
                       {item.category}
                     </div>
@@ -83,36 +91,37 @@ export default function DialogModal() {
               })}
             </div>
           )}
+        </div>
 
-          <div className="flex gap-3 justify-end mt-4">
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-emerald-500/15 bg-slate-950/60 flex gap-3 justify-end">
+          <button
+            onClick={closeDialog}
+            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-emerald-500/10 text-sm font-semibold transition-colors"
+          >
+            Close
+          </button>
+          {dialog.action && (
             <button
-              onClick={closeDialog}
-              className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-semibold transition-colors"
-            >
-              Close
-            </button>
-            {dialog.action && (
-              <button
-                onClick={handleAction}
-                disabled={dialog.action === "earn" && income > 0}
-                className={`px-5 py-2 rounded-lg text-sm font-bold transition-colors ${
-                  dialog.action === "earn" && income > 0
-                    ? "bg-gray-600 cursor-not-allowed opacity-60"
-                    : dialog.action === "file"
-                    ? "bg-blue-600 hover:bg-blue-500"
-                    : "bg-green-600 hover:bg-green-500"
-                }`}
-              >
-                {dialog.action === "earn"
-                  ? income > 0
-                    ? "Already Collected"
-                    : "Collect $48,000 Paycheck"
+              onClick={handleAction}
+              disabled={dialog.action === "earn" && income > 0}
+              className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+                dialog.action === "earn" && income > 0
+                  ? "bg-slate-700 cursor-not-allowed opacity-60 text-emerald-200/60"
                   : dialog.action === "file"
-                  ? "File My Taxes!"
-                  : "Got it!"}
-              </button>
-            )}
-          </div>
+                  ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_0_20px_-4px_rgba(251,191,36,0.6)] hover:shadow-[0_0_28px_-4px_rgba(251,191,36,0.8)]"
+                  : "bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-[0_0_20px_-4px_rgba(34,197,94,0.6)] hover:shadow-[0_0_28px_-4px_rgba(34,197,94,0.8)]"
+              }`}
+            >
+              {dialog.action === "earn"
+                ? income > 0
+                  ? "Already Collected"
+                  : "Collect $48,000 Paycheck"
+                : dialog.action === "file"
+                ? "File My Taxes!"
+                : "Got it!"}
+            </button>
+          )}
         </div>
       </div>
     </div>
