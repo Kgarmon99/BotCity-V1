@@ -202,12 +202,12 @@ export default function TitleScreen() {
 
           {/* Eyebrow */}
           <div className="text-[11px] font-bold tracking-[0.3em] text-emerald-300/80 uppercase mb-2">
-            A Tax-Filing Adventure
+            A Financial Adventure
           </div>
 
           <p className="text-emerald-100/75 text-base mb-6 leading-relaxed max-w-md mx-auto">
-            Explore an emerald city of bots, earn income, find deductions, and
-            file your first tax return.
+            Explore an emerald city of bots, earn income, master credits and
+            deductions, invest, plan for retirement, and file your return.
           </p>
 
           {/* Feature row — 7 stops, 4-up grid wraps to 2 rows */}
