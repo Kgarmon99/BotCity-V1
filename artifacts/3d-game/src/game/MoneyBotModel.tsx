@@ -37,6 +37,16 @@ export function MoneyBotModel({ scale = 1.5, animation = "Idle", phase = 0, paus
   const cloned = useMemo(() => cloneSkeleton(scene), [scene]);
 
   useEffect(() => {
+    // Ground the model: shift the cloned root so the lowest mesh point
+    // sits at y=0 in local space. This way callers can drop the group at
+    // pedestal/floor level and the bot's feet land exactly there — no
+    // more half-buried statues.
+    cloned.position.set(0, 0, 0);
+    cloned.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(cloned);
+    if (Number.isFinite(box.min.y)) {
+      cloned.position.y = -box.min.y;
+    }
     cloned.traverse((obj) => {
       const m = obj as THREE.Mesh;
       if (m.isMesh) {
