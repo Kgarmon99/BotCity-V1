@@ -13,6 +13,7 @@ interface Keys {
   back: boolean;
   left: boolean;
   right: boolean;
+  jet: boolean;
 }
 
 interface PlayerProps {
@@ -23,13 +24,19 @@ interface PlayerProps {
 
 const WALK_SPEED = 7;
 const RIDE_SPEED = 17; // BotMobile boost (~2.4x walking)
+const JETPACK_THRUST = 28; // upward accel when Shift held (m/s²)
+const GRAVITY = 22; // downward accel (m/s²)
+const MAX_ALTITUDE = 55; // ceiling so we don't fly off the skybox
+const TERMINAL_FALL = -30; // clamp downward velocity
 
 export default function Player({ onPositionChange, onInteract, isMoving }: PlayerProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const velocity = useRef(new THREE.Vector3());
-  const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false });
+  const verticalVel = useRef(0);
+  const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false, jet: false });
   const ridingRef = useRef(false);
   const [riding, setRiding] = useState(false);
+  const [jetting, setJetting] = useState(false);
   const cameraMode = useGameStore((s) => s.cameraMode);
   // Track the last touch interact tick we've consumed so a single tap fires
   // onInteract exactly once.
@@ -57,6 +64,9 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") keys.current.back    = true;
       if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") keys.current.left    = true;
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.current.right   = true;
+      if (e.key === "Shift" || e.code === "ShiftLeft" || e.code === "ShiftRight") {
+        keys.current.jet = true;
+      }
       if (e.key === "e" || e.key === "E") {
         if (groupRef.current) onInteract(groupRef.current.position.clone());
       }
@@ -74,6 +84,9 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") keys.current.back    = false;
       if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") keys.current.left    = false;
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.current.right   = false;
+      if (e.key === "Shift" || e.code === "ShiftLeft" || e.code === "ShiftRight") {
+        keys.current.jet = false;
+      }
       if (e.code === "Space" || e.key === " ") {
         stopRiding();
       }
@@ -85,6 +98,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       keys.current.back = false;
       keys.current.left = false;
       keys.current.right = false;
+      keys.current.jet = false;
       stopRiding();
     };
 
@@ -158,6 +172,24 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       groupRef.current.position.x += velocity.current.x;
       groupRef.current.position.z += velocity.current.z;
 
+      // ── Jetpack: Shift adds upward thrust; gravity pulls back down. Disabled
+      // while riding the BotMobile (cars don't fly).
+      const jetActive = keys.current.jet && !ridingRef.current;
+      const accel = (jetActive ? JETPACK_THRUST : 0) - GRAVITY;
+      verticalVel.current = Math.max(TERMINAL_FALL, verticalVel.current + accel * delta);
+      groupRef.current.position.y += verticalVel.current * delta;
+      if (groupRef.current.position.y <= 0) {
+        groupRef.current.position.y = 0;
+        if (verticalVel.current < 0) verticalVel.current = 0;
+      }
+      if (groupRef.current.position.y >= MAX_ALTITUDE) {
+        groupRef.current.position.y = MAX_ALTITUDE;
+        if (verticalVel.current > 0) verticalVel.current = 0;
+      }
+      const isAirborne = groupRef.current.position.y > 0.01;
+      const showJet = jetActive || isAirborne;
+      if (showJet !== jetting) setJetting(showJet);
+
       const bound = 64;
       groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
@@ -186,6 +218,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
       <PlayerIndicator />
+      {jetting && !riding && <JetpackFlame thrusting={keys.current.jet} />}
       {riding ? (
         // BotMobile's headlights are along its local +X axis. Rotating by
         // -π/2 around Y maps local +X → local +Z, aligning the car's front
@@ -196,6 +229,48 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       ) : (
         <MoneyBot isMoving={isMoving} />
       )}
+    </group>
+  );
+}
+
+// Twin jetpack flames under the player. `thrusting` flickers the flame
+// brighter & longer while Shift is held; otherwise a small idle plume shows
+// during the fall back to ground.
+function JetpackFlame({ thrusting }: { thrusting: boolean }) {
+  const leftRef = useRef<THREE.Mesh>(null!);
+  const rightRef = useRef<THREE.Mesh>(null!);
+  const lightRef = useRef<THREE.PointLight>(null!);
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    const base = thrusting ? 1 : 0.35;
+    const flicker = base + Math.sin(t * 40) * 0.18 + Math.cos(t * 31) * 0.12;
+    const s = Math.max(0.15, flicker);
+    if (leftRef.current) leftRef.current.scale.set(0.7, s * 1.6, 0.7);
+    if (rightRef.current) rightRef.current.scale.set(0.7, s * 1.6, 0.7);
+    if (lightRef.current) lightRef.current.intensity = thrusting ? 4 + Math.sin(t * 30) * 1 : 1;
+  });
+  return (
+    <group position={[0, 0.15, 0]}>
+      {[-0.3, 0.3].map((xOff, i) => (
+        <mesh
+          key={`flame-${i}`}
+          ref={xOff < 0 ? leftRef : rightRef}
+          position={[xOff, -0.4, -0.2]}
+          rotation={[Math.PI, 0, 0]}
+        >
+          <coneGeometry args={[0.18, 1.1, 12, 1, true]} />
+          <meshStandardMaterial
+            color="#fde047"
+            emissive="#f97316"
+            emissiveIntensity={3.5}
+            transparent
+            opacity={0.9}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+      <pointLight ref={lightRef} position={[0, -0.2, 0]} color="#f97316" distance={6} intensity={1} />
     </group>
   );
 }
