@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Tax Quest 3D"
+title = "BotCity v1"
 version = "1.0.0"
 id = "artifacts/3d-game"
 router = "path"

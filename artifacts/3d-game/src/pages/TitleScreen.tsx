@@ -19,7 +19,7 @@ export default function TitleScreen() {
       <div className="relative text-center max-w-xl px-6 py-10">
         <div className="text-7xl mb-4 drop-shadow-[0_0_30px_rgba(34,197,94,0.5)]">💰</div>
         <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
-          Tax Quest <span className="text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">3D</span>
+          BotCity <span className="text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">v1</span>
         </h1>
         <p className="text-emerald-200/80 text-lg mb-8 leading-relaxed">
           Explore BotCity, earn income, discover deductions, and file your first tax return.
