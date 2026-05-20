@@ -244,6 +244,21 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "₿",
   },
   {
+    id: "moneybotgaming",
+    label: "MoneyBot Gaming Store",
+    // West middle ring, mirror of BotCrypto (at +27, -5). Offset north to
+    // clear the main E-W avenue at z=0. Footprint x[-29.5..-24.5] z[-7..-3].
+    // Neon purple with a cyan arcade-style roof — reads as "retail/games"
+    // from far away to balance the financial buildings on the east side.
+    position: [-27, 2.5, -5],
+    color: "#a855f7",
+    roofColor: "#22d3ee",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🎮",
+  },
+  {
     id: "botcharity",
     label: "BotCharity Center",
     // West middle ring. Offset south to clear the main avenue at z=0.

@@ -30,6 +30,7 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   botgigs: { id: "1099nec", code: "1099-NEC", label: "Self-employment income", icon: "🛵", line: "Sch C" },
   botcityhall: { id: "state-return", code: "State", label: "State & local return", icon: "🏛️", line: "Sch CR" },
   littlebots: { id: "2441", code: "2441", label: "Dependent care receipts", icon: "🧸", line: "Sch 3" },
+  moneybotgaming: { id: "streamer-1099", code: "1099-MISC", label: "Streaming & creator income", icon: "🎮", line: "Sch C" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -95,6 +96,7 @@ export default function DialogModal() {
     gigs: "botgigs",
     cityhall: "botcityhall",
     daycare: "littlebots",
+    gaming: "moneybotgaming",
   };
 
   const handleAction = () => {
@@ -260,6 +262,7 @@ const ACTION_LABELS: Record<string, string> = {
   gigs: "Quarterly Payment 🛵",
   cityhall: "File State Return 🏛️",
   daycare: "Drop Off the Kids 🧸",
+  gaming: "Cash Out Stream Earnings 🎮",
 };
 
 function actionButtonLabel(action: string, income: number): string {

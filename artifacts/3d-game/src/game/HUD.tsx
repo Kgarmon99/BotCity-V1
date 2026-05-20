@@ -37,6 +37,7 @@ const BUILDINGS = [
   { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
   { id: "botshops", emoji: "🏪", label: "BotShops" },
   { id: "botdealer", emoji: "🚗", label: "BotDealer" },
+  { id: "moneybotgaming", emoji: "🎮", label: "MoneyBot Gaming Store" },
 
   // 🎓  Education & transit
   { id: "university", emoji: "🎓", label: "MoneyBot U" },

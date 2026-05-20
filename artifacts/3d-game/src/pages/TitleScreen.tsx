@@ -115,6 +115,12 @@ const FEATURES = [
     desc: "EV credits & Section 179 at BotDealer",
     accent: "from-cyan-500/12 to-amber-500/5 border-cyan-400/30",
   },
+  {
+    emoji: "🎮",
+    title: "Creator",
+    desc: "Streamer & esports tax at MoneyBot Gaming",
+    accent: "from-fuchsia-500/15 to-cyan-500/10 border-fuchsia-400/30",
+  },
 
   // 🎓  Education & transit
   {
