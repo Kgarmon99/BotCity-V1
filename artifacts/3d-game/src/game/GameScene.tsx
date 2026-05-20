@@ -422,6 +422,69 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   // x=7.5 (3u gap) and the secondary street at x=18 (2.5u gap on west
   // sidewalk). A civic plaza decoration sits south of the building —
   // see CityHallPlaza.tsx.
+  // ─── Industry & specialty-tax districts ─────────────────────────────
+  // Four destination buildings spread around the outer envelope (player
+  // bound is ±64), each anchoring a tax topic that wasn't yet represented:
+  //   tariffs/customs, gambling W-2G, mining depletion, charitable trusts.
+  // Visual decorations (docks, neon signs, mineshafts, animal pens) are
+  // rendered in CityDistricts.tsx alongside the existing districts.
+  {
+    id: "botport",
+    label: "BotPort Harbor",
+    // Far SE coast. Footprint x[47..53] z[45.5..50.5]. Closest neighbor is
+    // BotBeach boardwalk at (44, 25) — 23u north. Player bound ±64 → east
+    // edge at 53 leaves 11u for the sea/docks rendered in CityDistricts.
+    position: [50, 2, 48],
+    color: "#0c4a6e",
+    roofColor: "#fbbf24",
+    width: 6,
+    depth: 5,
+    height: 4,
+    emoji: "⚓",
+  },
+  {
+    id: "botcasino",
+    label: "BotCasino",
+    // NE outer area, off the avenue grid. Footprint x[32.5..37.5] z[-42..-38].
+    // Closest neighbor BotRocket (50, -50) is 18u away — both spectacle
+    // landmarks but well separated. BotBroker (55, -6) is 39u south.
+    position: [35, 4, -40],
+    color: "#7c2d12",
+    roofColor: "#fde047",
+    width: 5,
+    depth: 4,
+    height: 7,
+    emoji: "🎰",
+  },
+  {
+    id: "botmine",
+    label: "Underground BotMine",
+    // Far W edge. Footprint x[-52.5..-47.5] z[-26.5..-23.5]. Player bound
+    // ±64 → west edge at -52.5 leaves 11.5u for the mineshaft entrance
+    // and ore piles. BotGigs at (-55, 6) is 31u south; nothing else
+    // within 60u.
+    position: [-50, 1.5, -25],
+    color: "#44403c",
+    roofColor: "#a16207",
+    width: 5,
+    depth: 3,
+    height: 3,
+    emoji: "⛏️",
+  },
+  {
+    id: "botzoo",
+    label: "BotZoo & Park",
+    // S edge near the BotKids family district. Footprint x[-18..-12] z[56..60].
+    // BotKids at (-6, 55) is 10u east — reads as an adjacent attraction.
+    // Player bound ±64 → south edge at 60 leaves 4u for the entrance arch.
+    position: [-15, 2.5, 58],
+    color: "#15803d",
+    roofColor: "#fde047",
+    width: 6,
+    depth: 4,
+    height: 5,
+    emoji: "🦒",
+  },
   {
     id: "botcityhall",
     label: "BotCityHall",

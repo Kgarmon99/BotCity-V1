@@ -42,7 +42,11 @@ export interface DialogContent {
     | "techmuseum"
     | "edumuseum"
     | "finmuseum"
-    | "launch";
+    | "launch"
+    | "port"
+    | "casino"
+    | "mine"
+    | "zoo";
   amount?: number;
 }
 

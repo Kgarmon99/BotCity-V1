@@ -105,6 +105,10 @@ export default function DialogModal() {
     edumuseum: "eduhistory",
     finmuseum: "finhistory",
     launch: "botrocket",
+    port: "botport",
+    casino: "botcasino",
+    mine: "botmine",
+    zoo: "botzoo",
   };
 
   const handleAction = () => {
@@ -275,6 +279,10 @@ const ACTION_LABELS: Record<string, string> = {
   edumuseum: "Tour Education History 📚",
   finmuseum: "Tour Finance History 💰",
   launch: "Watch the Launch 🚀",
+  port: "Clear Customs ⚓",
+  casino: "Cash Out 🎰",
+  mine: "Haul the Ore ⛏️",
+  zoo: "Visit the Animals 🦒",
 };
 
 function actionButtonLabel(action: string, income: number): string {
