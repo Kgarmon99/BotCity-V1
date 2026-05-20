@@ -97,18 +97,23 @@ function Statue({ position, rotation = 0, pose = "hero", plaque }: StatueProps) 
   );
 }
 
-// Statues placed at major intersections — facing the city center
+// Hall of Fame statues. Earlier versions placed these AT the secondary
+// intersections (±18, ±18) and at the outer-avenue ends (0, ±36) / (±36, 0)
+// — which put every pedestal directly in the middle of a road. They've
+// been moved to the diagonal outer corners of each secondary intersection
+// (±22, ±22), which sits on the empty block-corner sidewalk just past the
+// crossroads, facing back toward the city center. We also pruned from 8
+// statues down to 4 (one per quadrant) so the city reads less cluttered.
 const statues: StatueProps[] = [
-  // 4 corner intersections of inner blocks
-  { position: [-18, 0, -18], rotation:  Math.PI / 4,           pose: "hero",    plaque: "MOMOBOT\nThe Founder" },
-  { position: [ 18, 0, -18], rotation: -Math.PI / 4,           pose: "salute",  plaque: "GENERAL\nGEARWORTH" },
-  { position: [-18, 0,  18], rotation:  Math.PI * 3 / 4,       pose: "thinker", plaque: "PROF.\nLEDGERINGTON" },
-  { position: [ 18, 0,  18], rotation: -Math.PI * 3 / 4,       pose: "wave",    plaque: "MAYOR\nBYTECOIN" },
-  // 4 cardinal end-of-avenue statues, facing inward
-  { position: [  0, 0, -36], rotation: 0,                      pose: "point",   plaque: "THE\nFIRST BOT" },
-  { position: [  0, 0,  36], rotation: Math.PI,                pose: "salute",  plaque: "BOT OF\nLIBERTY" },
-  { position: [-36, 0,   0], rotation:  Math.PI / 2,           pose: "wave",    plaque: "AUDITOR\nPRIME" },
-  { position: [ 36, 0,   0], rotation: -Math.PI / 2,           pose: "thinker", plaque: "GOVERNOR\nSILICONIA" },
+  // NW quadrant — pedestal sits on the NW outer corner of the (-18, -18)
+  // intersection, looking SE toward downtown.
+  { position: [-22, 0, -22], rotation:  Math.PI / 4,     pose: "hero",    plaque: "MOMOBOT\nThe Founder" },
+  // NE quadrant — outer corner of the (18, -18) intersection.
+  { position: [ 22, 0, -22], rotation: -Math.PI / 4,     pose: "thinker", plaque: "PROF.\nLEDGERINGTON" },
+  // SW quadrant — outer corner of the (-18, 18) intersection.
+  { position: [-22, 0,  22], rotation:  Math.PI * 3 / 4, pose: "wave",    plaque: "MAYOR\nBYTECOIN" },
+  // SE quadrant — outer corner of the (18, 18) intersection.
+  { position: [ 22, 0,  22], rotation: -Math.PI * 3 / 4, pose: "salute",  plaque: "GOVERNOR\nSILICONIA" },
 ];
 
 export default function Statues() {
