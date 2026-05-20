@@ -18,6 +18,7 @@ import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
 import CityExpansion from "./CityExpansion";
 import CityDistricts from "./CityDistricts";
+import CityHallPlaza from "./CityHallPlaza";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
 import { useGameStore } from "./gameStore";
@@ -312,6 +313,26 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 6,
     emoji: "🛵",
   },
+  // ─── Civic centerpiece ─────────────────────────────────────────────────
+  // BotCityHall is the urban-design anchor for the city. White marble +
+  // gold dome, placed at the N middle ring east of the main avenue so it
+  // reads as a destination from the spawn camera (which looks +Z → north).
+  //
+  // Footprint x[10.5..15.5] z[-33..-27]. Clears bothospital east edge at
+  // x=7.5 (3u gap) and the secondary street at x=18 (2.5u gap on west
+  // sidewalk). A civic plaza decoration sits south of the building —
+  // see CityHallPlaza.tsx.
+  {
+    id: "botcityhall",
+    label: "BotCityHall",
+    position: [13, 5, -30],
+    color: "#f1f5f9",
+    roofColor: "#fbbf24",
+    width: 5,
+    depth: 6,
+    height: 8,
+    emoji: "🏛️",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;
@@ -464,6 +485,7 @@ export default function GameScene() {
           <CityBuildings />
           <CityExpansion />
           <CityDistricts />
+          <CityHallPlaza />
           <Blimp />
           <Statues />
           <Billboards />

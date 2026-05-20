@@ -6,28 +6,47 @@ import TouchControls from "./TouchControls";
 import MiniMap from "./MiniMap";
 
 const BUILDINGS = [
+  // Ordered by city district, not insertion order. Reading the checklist
+  // top-to-bottom now matches the conceptual zones of the city — civic
+  // core, then commerce wedges, then outer suburbs. The IDs themselves
+  // are unchanged so save state stays compatible.
+
+  // 🏛️  Civic core
+  { id: "botcityhall", emoji: "🏛️", label: "BotCityHall" },
+  { id: "irs", emoji: "📋", label: "IRS Office" },
+
+  // 💼  Work & entity
   { id: "workcorp", emoji: "💼", label: "WorkCorp" },
-  { id: "taxmart", emoji: "🛒", label: "TaxMart" },
+  { id: "moneybottowers", emoji: "🏢", label: "MoneyBot Towers" },
+  { id: "botgigs", emoji: "🛵", label: "BotGigs" },
+
+  // 💰  Financial district
   { id: "firstbank", emoji: "🏦", label: "First Bank" },
+  { id: "botbroker", emoji: "📈", label: "BotBroker" },
+  { id: "botcrypto", emoji: "₿", label: "BotCrypto" },
+
+  // 🏥  Life & family
+  { id: "bothospital", emoji: "🏥", label: "BotHospital" },
+  { id: "botkids", emoji: "🧒", label: "BotKids" },
+  { id: "botcharity", emoji: "❤️", label: "BotCharity" },
+  { id: "botretirement", emoji: "🏛️", label: "BotRetirement" },
+
+  // 🛒  Retail & services
+  { id: "taxmart", emoji: "🛒", label: "TaxMart" },
+  { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
+  { id: "botshops", emoji: "🏪", label: "BotShops" },
+  { id: "botdealer", emoji: "🚗", label: "BotDealer" },
+
+  // 🎓  Education & transit
   { id: "university", emoji: "🎓", label: "MoneyBot U" },
   { id: "bottrain", emoji: "🚆", label: "BotTrain" },
   { id: "botplane", emoji: "✈️", label: "BotPlane" },
-  { id: "botdealer", emoji: "🚗", label: "BotDealer" },
-  { id: "bothospital", emoji: "🏥", label: "BotHospital" },
-  { id: "botretirement", emoji: "🏛️", label: "BotRetirement" },
-  { id: "botcrypto", emoji: "₿", label: "BotCrypto" },
-  { id: "botcharity", emoji: "❤️", label: "BotCharity" },
+
+  // 🏠  Home & lifestyle
   { id: "bothaus", emoji: "🏠", label: "BotHaus" },
-  { id: "botbroker", emoji: "📈", label: "BotBroker" },
-  { id: "botkids", emoji: "🧒", label: "BotKids" },
-  { id: "botgigs", emoji: "🛵", label: "BotGigs" },
-  { id: "botstadium", emoji: "🏟️", label: "BotStadium" },
-  { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
   { id: "botbeach", emoji: "🏖️", label: "BotBeach" },
-  { id: "botshops", emoji: "🏪", label: "BotShops" },
+  { id: "botstadium", emoji: "🏟️", label: "BotStadium" },
   { id: "botfarm", emoji: "🚜", label: "BotFarm" },
-  { id: "moneybottowers", emoji: "🏢", label: "MoneyBot Towers" },
-  { id: "irs", emoji: "📋", label: "IRS Office" },
 ] as const;
 
 interface RowProps {

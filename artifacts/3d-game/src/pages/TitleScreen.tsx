@@ -1,6 +1,24 @@
 import { useGameStore } from "../game/gameStore";
 
+// Feature cards are grouped by city district so the title screen reads
+// like an actual urban plan rather than a flat list. Order: Civic → Work →
+// Finance → Life & Family → Retail → Education & Transit → Lifestyle.
 const FEATURES = [
+  // 🏛️  Civic core
+  {
+    emoji: "🏛️",
+    title: "Civic",
+    desc: "State & local taxes at BotCityHall",
+    accent: "from-amber-500/15 to-emerald-500/5 border-amber-400/35",
+  },
+  {
+    emoji: "📋",
+    title: "File",
+    desc: "Submit your return at the IRS",
+    accent: "from-rose-500/10 to-emerald-500/5 border-emerald-500/25",
+  },
+
+  // 💼  Work & entity
   {
     emoji: "💼",
     title: "Earn",
@@ -8,17 +26,91 @@ const FEATURES = [
     accent: "from-sky-500/10 to-emerald-500/5 border-emerald-500/25",
   },
   {
-    emoji: "🛒",
-    title: "Shop",
-    desc: "Find deductions at TaxMart",
-    accent: "from-amber-500/12 to-emerald-500/5 border-amber-400/30",
+    emoji: "🏢",
+    title: "Entity",
+    desc: "C-Corp vs S-Corp at MoneyBot Towers",
+    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
   },
+  {
+    emoji: "🛵",
+    title: "Gig Work",
+    desc: "1099 & SE tax at BotGigs",
+    accent: "from-purple-500/12 to-emerald-500/5 border-purple-400/30",
+  },
+
+  // 💰  Financial district
   {
     emoji: "🏦",
     title: "Brackets",
     desc: "Study brackets at First Bank",
     accent: "from-violet-500/10 to-emerald-500/5 border-emerald-500/25",
   },
+  {
+    emoji: "📈",
+    title: "Invest",
+    desc: "RSUs & dividends at BotBroker",
+    accent: "from-indigo-500/15 to-amber-500/10 border-indigo-400/30",
+  },
+  {
+    emoji: "₿",
+    title: "Crypto",
+    desc: "Cap gains & wash sales at BotCrypto",
+    accent: "from-amber-500/15 to-emerald-500/5 border-amber-400/30",
+  },
+
+  // 🏥  Life & family
+  {
+    emoji: "🏥",
+    title: "Health",
+    desc: "HSAs & medical at BotHospital",
+    accent: "from-rose-500/12 to-emerald-500/5 border-rose-400/30",
+  },
+  {
+    emoji: "🧒",
+    title: "Family",
+    desc: "CTC & 529 plans at BotKids",
+    accent: "from-orange-500/12 to-emerald-500/5 border-orange-400/30",
+  },
+  {
+    emoji: "❤️",
+    title: "Charity",
+    desc: "Donations & QCDs at BotCharity",
+    accent: "from-pink-500/12 to-emerald-500/5 border-pink-400/30",
+  },
+  {
+    emoji: "🏛️",
+    title: "Retire",
+    desc: "401(k), Roth & RMDs at BotRetirement",
+    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
+  },
+
+  // 🛒  Retail & services
+  {
+    emoji: "🛒",
+    title: "Shop",
+    desc: "Find deductions at TaxMart",
+    accent: "from-amber-500/12 to-emerald-500/5 border-amber-400/30",
+  },
+  {
+    emoji: "🛍️",
+    title: "SE Tax",
+    desc: "Self-employment at BotMarket",
+    accent: "from-amber-500/12 to-emerald-500/5 border-amber-400/30",
+  },
+  {
+    emoji: "🏪",
+    title: "Hobby?",
+    desc: "Hobby vs business at BotShops",
+    accent: "from-fuchsia-500/12 to-emerald-500/5 border-fuchsia-400/30",
+  },
+  {
+    emoji: "🚗",
+    title: "Buy a Car",
+    desc: "EV credits & Section 179 at BotDealer",
+    accent: "from-cyan-500/12 to-amber-500/5 border-cyan-400/30",
+  },
+
+  // 🎓  Education & transit
   {
     emoji: "🎓",
     title: "Loans",
@@ -37,47 +129,13 @@ const FEATURES = [
     desc: "Write off business trips at BotPlane",
     accent: "from-sky-500/12 to-emerald-500/5 border-sky-400/30",
   },
+
+  // 🏠  Home & lifestyle
   {
-    emoji: "🚗",
-    title: "Buy a Car",
-    desc: "EV credits & Section 179 at BotDealer",
-    accent: "from-cyan-500/12 to-amber-500/5 border-cyan-400/30",
-  },
-  {
-    emoji: "🏟️",
-    title: "Entertain",
-    desc: "TCJA & gambling at BotStadium",
-    accent: "from-red-500/12 to-amber-500/5 border-red-400/30",
-  },
-  {
-    emoji: "🏥",
-    title: "Health",
-    desc: "HSAs & medical at BotHospital",
-    accent: "from-rose-500/12 to-emerald-500/5 border-rose-400/30",
-  },
-  {
-    emoji: "❤️",
-    title: "Charity",
-    desc: "Donations & QCDs at BotCharity",
-    accent: "from-pink-500/12 to-emerald-500/5 border-pink-400/30",
-  },
-  {
-    emoji: "₿",
-    title: "Crypto",
-    desc: "Cap gains & wash sales at BotCrypto",
-    accent: "from-amber-500/15 to-emerald-500/5 border-amber-400/30",
-  },
-  {
-    emoji: "🏛️",
-    title: "Retire",
-    desc: "401(k), Roth & RMDs at BotRetirement",
-    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
-  },
-  {
-    emoji: "🛍️",
-    title: "SE Tax",
-    desc: "Self-employment at BotMarket",
-    accent: "from-amber-500/12 to-emerald-500/5 border-amber-400/30",
+    emoji: "🏠",
+    title: "Homeowner",
+    desc: "Mortgage & SALT at BotHaus",
+    accent: "from-sky-500/12 to-amber-500/5 border-sky-400/30",
   },
   {
     emoji: "🏖️",
@@ -86,52 +144,16 @@ const FEATURES = [
     accent: "from-cyan-500/12 to-emerald-500/5 border-cyan-400/30",
   },
   {
-    emoji: "🏪",
-    title: "Hobby?",
-    desc: "Hobby vs business at BotShops",
-    accent: "from-fuchsia-500/12 to-emerald-500/5 border-fuchsia-400/30",
+    emoji: "🏟️",
+    title: "Entertain",
+    desc: "TCJA & gambling at BotStadium",
+    accent: "from-red-500/12 to-amber-500/5 border-red-400/30",
   },
   {
     emoji: "🚜",
     title: "Farm",
     desc: "Schedule F & Section 179 at BotFarm",
     accent: "from-lime-500/12 to-amber-500/10 border-lime-400/30",
-  },
-  {
-    emoji: "🏠",
-    title: "Homeowner",
-    desc: "Mortgage & SALT at BotHaus",
-    accent: "from-sky-500/12 to-amber-500/5 border-sky-400/30",
-  },
-  {
-    emoji: "📈",
-    title: "Invest",
-    desc: "RSUs & dividends at BotBroker",
-    accent: "from-indigo-500/15 to-amber-500/10 border-indigo-400/30",
-  },
-  {
-    emoji: "🧒",
-    title: "Family",
-    desc: "CTC & 529 plans at BotKids",
-    accent: "from-orange-500/12 to-emerald-500/5 border-orange-400/30",
-  },
-  {
-    emoji: "🛵",
-    title: "Gig Work",
-    desc: "1099 & SE tax at BotGigs",
-    accent: "from-purple-500/12 to-emerald-500/5 border-purple-400/30",
-  },
-  {
-    emoji: "🏢",
-    title: "Entity",
-    desc: "C-Corp vs S-Corp at MoneyBot Towers",
-    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
-  },
-  {
-    emoji: "📋",
-    title: "File",
-    desc: "Submit your return at the IRS",
-    accent: "from-rose-500/10 to-emerald-500/5 border-emerald-500/25",
   },
 ];
 

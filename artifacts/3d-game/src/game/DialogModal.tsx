@@ -28,6 +28,7 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   botbroker: { id: "1099div", code: "1099-DIV/B", label: "Dividends & cap gains", icon: "📈", line: "Sch D" },
   botkids: { id: "ctc", code: "CTC", label: "Child Tax Credit worksheet", icon: "🧒", line: "19" },
   botgigs: { id: "1099nec", code: "1099-NEC", label: "Self-employment income", icon: "🛵", line: "Sch C" },
+  botcityhall: { id: "state-return", code: "State", label: "State & local return", icon: "🏛️", line: "Sch CR" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -91,6 +92,7 @@ export default function DialogModal() {
     broker: "botbroker",
     kids: "botkids",
     gigs: "botgigs",
+    cityhall: "botcityhall",
   };
 
   const handleAction = () => {
@@ -254,6 +256,7 @@ const ACTION_LABELS: Record<string, string> = {
   broker: "Bull Run 📈",
   kids: "Claim the Credit 🧒",
   gigs: "Quarterly Payment 🛵",
+  cityhall: "File State Return 🏛️",
 };
 
 function actionButtonLabel(action: string, income: number): string {
