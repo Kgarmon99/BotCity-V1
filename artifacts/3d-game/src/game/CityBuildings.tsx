@@ -155,9 +155,9 @@ const buildings: BuildingSpec[] = [
   // The (-9, -27) filler was removed to make room for BotDealer showroom + lot
   // (see CityDistricts.tsx and BUILDING_DEFS in GameScene.tsx).
   { pos: [  9, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 12, shape: "tower",   color: "#a78bfa", beaconColor: "#c4b5fd" },
-  // South row (z ≈ 27)
+  // South row (z ≈ 27). The (9, 27) filler was removed to clear the site
+  // for LittleBots DayCare (see BUILDING_DEFS in GameScene.tsx).
   { pos: [ -9, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 11, shape: "box",     color: "#f472b6", beaconColor: "#f9a8d4" },
-  { pos: [  9, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 9,  shape: "pyramid", color: "#fbbf24", beaconColor: "#fde047" },
 
   // OUTER RING — beyond ±36 streets — taller skyscrapers, facing inward
   // West outer (x ≈ -41)

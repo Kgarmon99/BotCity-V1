@@ -313,6 +313,22 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 6,
     emoji: "🛵",
   },
+  // ─── Family services (south middle ring) ─────────────────────────────
+  // Opposite BotRetirement (at x=-5, z=27) across the main N-S avenue,
+  // LittleBots DayCare occupies the empty east half of the south middle
+  // ring. Footprint x[9.5..14.5] z[25..29]. A short, cheerful one-story
+  // building keyed to the BotKids "Family" district.
+  {
+    id: "littlebots",
+    label: "LittleBots DayCare",
+    position: [12, 1.8, 27],
+    color: "#fb7185",
+    roofColor: "#fef3c7",
+    width: 5,
+    depth: 4,
+    height: 3,
+    emoji: "🧸",
+  },
   // ─── Civic centerpiece ─────────────────────────────────────────────────
   // BotCityHall is the urban-design anchor for the city. White marble +
   // gold dome, placed at the N middle ring east of the main avenue so it

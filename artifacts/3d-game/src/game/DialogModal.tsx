@@ -29,6 +29,7 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   botkids: { id: "ctc", code: "CTC", label: "Child Tax Credit worksheet", icon: "🧒", line: "19" },
   botgigs: { id: "1099nec", code: "1099-NEC", label: "Self-employment income", icon: "🛵", line: "Sch C" },
   botcityhall: { id: "state-return", code: "State", label: "State & local return", icon: "🏛️", line: "Sch CR" },
+  littlebots: { id: "2441", code: "2441", label: "Dependent care receipts", icon: "🧸", line: "Sch 3" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -93,6 +94,7 @@ export default function DialogModal() {
     kids: "botkids",
     gigs: "botgigs",
     cityhall: "botcityhall",
+    daycare: "littlebots",
   };
 
   const handleAction = () => {
@@ -257,6 +259,7 @@ const ACTION_LABELS: Record<string, string> = {
   kids: "Claim the Credit 🧒",
   gigs: "Quarterly Payment 🛵",
   cityhall: "File State Return 🏛️",
+  daycare: "Drop Off the Kids 🧸",
 };
 
 function actionButtonLabel(action: string, income: number): string {

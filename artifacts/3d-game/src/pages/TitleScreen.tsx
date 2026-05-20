@@ -72,6 +72,12 @@ const FEATURES = [
     accent: "from-orange-500/12 to-emerald-500/5 border-orange-400/30",
   },
   {
+    emoji: "🧸",
+    title: "DayCare",
+    desc: "Form 2441 & FSA at LittleBots",
+    accent: "from-rose-500/12 to-amber-500/10 border-rose-400/30",
+  },
+  {
     emoji: "❤️",
     title: "Charity",
     desc: "Donations & QCDs at BotCharity",

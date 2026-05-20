@@ -36,7 +36,8 @@ export interface DialogContent {
     | "broker"
     | "kids"
     | "gigs"
-    | "cityhall";
+    | "cityhall"
+    | "daycare";
   amount?: number;
 }
 

@@ -28,6 +28,7 @@ const BUILDINGS = [
   // 🏥  Life & family
   { id: "bothospital", emoji: "🏥", label: "BotHospital" },
   { id: "botkids", emoji: "🧒", label: "BotKids" },
+  { id: "littlebots", emoji: "🧸", label: "LittleBots DayCare" },
   { id: "botcharity", emoji: "❤️", label: "BotCharity" },
   { id: "botretirement", emoji: "🏛️", label: "BotRetirement" },
 
