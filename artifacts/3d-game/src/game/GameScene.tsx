@@ -17,6 +17,7 @@ import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
 import CityExpansion from "./CityExpansion";
 import CityDistricts from "./CityDistricts";
+import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
@@ -318,6 +319,7 @@ export default function GameScene() {
           <CityBuildings />
           <CityExpansion />
           <CityDistricts />
+          <Blimp />
           <Statues />
           <Billboards />
           <NPCBots />
