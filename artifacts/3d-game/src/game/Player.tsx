@@ -6,6 +6,7 @@ import { BotMobile } from "./CityDistricts";
 import { useGameStore } from "./gameStore";
 import { cameraInput } from "./cameraInput";
 import { touchInput } from "./touchInput";
+import { playerTracker } from "./playerTracker";
 
 interface Keys {
   forward: boolean;
@@ -171,6 +172,12 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
           0.2
         );
       }
+
+      // Mirror the position into the shared tracker so out-of-Canvas UI
+      // (MiniMap) can read it without subscribing to React state.
+      playerTracker.x = groupRef.current.position.x;
+      playerTracker.z = groupRef.current.position.z;
+      playerTracker.yaw = groupRef.current.rotation.y;
 
       onPositionChange(groupRef.current.position.clone());
     }

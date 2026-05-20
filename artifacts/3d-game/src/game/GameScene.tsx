@@ -23,7 +23,7 @@ import RoadGrid from "./RoadGrid";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
-const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
+export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "workcorp",
     label: "WorkCorp",

@@ -3,6 +3,7 @@ import { calculateTax } from "./types";
 import { sound } from "./sound";
 import { useEffect, useState } from "react";
 import TouchControls from "./TouchControls";
+import MiniMap from "./MiniMap";
 
 const BUILDINGS = [
   { id: "workcorp", emoji: "💼", label: "WorkCorp" },
@@ -180,6 +181,7 @@ export default function HUD() {
       </div>
 
       <SoundToggle />
+      <MiniMap />
       <TouchControls />
 
       {/* Controls */}
