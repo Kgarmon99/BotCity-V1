@@ -117,14 +117,14 @@ export default function GameScene() {
           camera={{ position: [0, 10, 14], fov: 55 }}
           gl={{ antialias: true }}
         >
-          <color attach="background" args={["#05050f"]} />
-          <fog attach="fog" args={["#0a0a25", 30, 75]} />
+          <color attach="background" args={["#021410"]} />
+          <fog attach="fog" args={["#052e16", 28, 70]} />
 
-          <ambientLight intensity={0.35} color="#4c1d95" />
+          <ambientLight intensity={0.45} color="#22c55e" />
           <directionalLight
             position={[15, 20, 10]}
-            intensity={0.6}
-            color="#a78bfa"
+            intensity={0.7}
+            color="#86efac"
             castShadow
             shadow-mapSize={[2048, 2048]}
             shadow-camera-far={80}
@@ -133,8 +133,8 @@ export default function GameScene() {
             shadow-camera-top={30}
             shadow-camera-bottom={-30}
           />
-          <hemisphereLight args={["#22d3ee", "#a855f7", 0.4]} />
-          <pointLight position={[0, 8, 0]} intensity={1.5} color="#fbbf24" distance={20} />
+          <hemisphereLight args={["#4ade80", "#16a34a", 0.6]} />
+          <pointLight position={[0, 8, 0]} intensity={2} color="#fbbf24" distance={20} />
 
           <FollowCamera target={playerPos} />
           <World />

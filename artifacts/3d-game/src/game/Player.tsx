@@ -1,9 +1,7 @@
-import { useRef, useEffect, Suspense, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
-
-useGLTF.preload("/SilverSkin.glb");
+import MoneyBot from "./MoneyBot";
 
 interface Keys {
   forward: boolean;
@@ -16,70 +14,6 @@ interface PlayerProps {
   onPositionChange: (pos: THREE.Vector3) => void;
   onInteract: (pos: THREE.Vector3) => void;
   isMoving: React.MutableRefObject<boolean>;
-}
-
-function SilverSkinModel({ isMoving }: { isMoving: React.MutableRefObject<boolean> }) {
-  const { scene, animations } = useGLTF("/SilverSkin.glb");
-  const group = useRef<THREE.Group>(null!);
-
-  const cloned = useMemo(() => {
-    const c = scene.clone(true);
-    c.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        (child as THREE.Mesh).castShadow = true;
-      }
-    });
-    return c;
-  }, [scene]);
-
-  const { actions, names } = useAnimations(animations, group);
-
-  const { scale, yOffset } = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(cloned);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const targetHeight = 1.8;
-    const s = targetHeight / (size.y || 1);
-    return { scale: s, yOffset: -(box.min.y * s) };
-  }, [cloned]);
-
-  // Play first available animation if any exist
-  useEffect(() => {
-    if (names.length > 0 && actions[names[0]]) {
-      actions[names[0]]!.reset().fadeIn(0.3).play();
-    }
-  }, [actions, names]);
-
-  // Walking bob effect
-  useFrame((state) => {
-    if (group.current) {
-      const moving = isMoving?.current ?? false;
-      const t = state.clock.elapsedTime;
-      group.current.position.y = moving ? Math.abs(Math.sin(t * 12)) * 0.08 : 0;
-      group.current.rotation.z = moving ? Math.sin(t * 12) * 0.04 : 0;
-    }
-  });
-
-  return (
-    <group ref={group}>
-      <primitive object={cloned} scale={[scale, scale, scale]} position={[0, yOffset, 0]} />
-    </group>
-  );
-}
-
-function FallbackCharacter() {
-  return (
-    <group>
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <boxGeometry args={[0.6, 1.4, 0.4]} />
-        <meshStandardMaterial color="#c0c0c0" metalness={0.9} roughness={0.15} emissive="#22d3ee" emissiveIntensity={0.2} />
-      </mesh>
-      <mesh position={[0, 1.65, 0]} castShadow>
-        <sphereGeometry args={[0.28, 16, 16]} />
-        <meshStandardMaterial color="#a0a0b0" metalness={0.95} roughness={0.05} emissive="#22d3ee" emissiveIntensity={0.3} />
-      </mesh>
-    </group>
-  );
 }
 
 export default function Player({ onPositionChange, onInteract, isMoving }: PlayerProps) {
@@ -151,19 +85,12 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Player ring indicator - always visible */}
-      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.7, 0.9, 32]} />
-        <meshBasicMaterial color="#22d3ee" transparent opacity={0.7} />
-      </mesh>
-      {/* Floating arrow above player */}
-      <mesh position={[0, 2.8, 0]} rotation={[Math.PI, 0, 0]}>
+      {/* Always-visible yellow arrow above bot */}
+      <mesh position={[0, 2.6, 0]} rotation={[Math.PI, 0, 0]}>
         <coneGeometry args={[0.18, 0.4, 4]} />
-        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1} toneMapped={false} />
       </mesh>
-      <Suspense fallback={<FallbackCharacter />}>
-        <SilverSkinModel isMoving={isMoving} />
-      </Suspense>
+      <MoneyBot isMoving={isMoving} />
     </group>
   );
 }
