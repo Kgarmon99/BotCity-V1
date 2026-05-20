@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import Player from "./Player";
 import Building, { BuildingData } from "./Building";
@@ -78,6 +79,69 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
 ];
 
 const INTERACT_RADIUS = 4.5;
+
+// Tall wayfinding beacon — sits on top of a building and pulses so the
+// player can spot the building from anywhere in the city.
+function WayfindingBeacon({
+  position,
+  label,
+  color,
+}: {
+  position: [number, number, number];
+  label: string;
+  color: string;
+}) {
+  const beamRef = useRef<THREE.Mesh>(null!);
+  const orbRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (beamRef.current) {
+      const mat = beamRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.35 + Math.sin(t * 2) * 0.15;
+    }
+    if (orbRef.current) {
+      orbRef.current.scale.setScalar(1 + Math.sin(t * 3) * 0.18);
+      const mat = orbRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 2.2 + Math.sin(t * 3) * 0.8;
+    }
+  });
+  const [x, baseY, z] = position;
+  const beamHeight = 22;
+  const beamCenterY = baseY + beamHeight / 2;
+  const orbY = baseY + beamHeight + 0.4;
+  return (
+    <group>
+      {/* Vertical light beam */}
+      <mesh ref={beamRef} position={[x, beamCenterY, z]}>
+        <cylinderGeometry args={[0.18, 0.45, beamHeight, 10, 1, true]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.4}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Pulsing orb at the top */}
+      <mesh ref={orbRef} position={[x, orbY, z]}>
+        <sphereGeometry args={[0.55, 16, 16]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.4} toneMapped={false} />
+      </mesh>
+      {/* Floating label high above */}
+      <Text
+        position={[x, orbY + 1.2, z]}
+        fontSize={0.9}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.08}
+        outlineColor={color}
+      >
+        🎓 {label}
+      </Text>
+    </group>
+  );
+}
 
 export default function GameScene() {
   const playerPos = useRef(new THREE.Vector3(0, 0, 0));
@@ -175,6 +239,14 @@ export default function GameScene() {
               isNear={nearBuilding === b.id}
             />
           ))}
+
+          {/* Wayfinding beacon for the tucked-away University building */}
+          <WayfindingBeacon
+            position={[-14, 8, -14]}
+            label="MoneyBot U"
+            color="#fbbf24"
+          />
+
 
           <Player onPositionChange={handlePositionChange} onInteract={handleInteract} isMoving={playerMoving} />
         </Canvas>
