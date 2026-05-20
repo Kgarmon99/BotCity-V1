@@ -6,6 +6,8 @@ const BUILDINGS = [
   { id: "taxmart", emoji: "🛒", label: "TaxMart" },
   { id: "firstbank", emoji: "🏦", label: "First Bank" },
   { id: "university", emoji: "🎓", label: "MoneyBot U" },
+  { id: "bottrain", emoji: "🚆", label: "BotTrain" },
+  { id: "botplane", emoji: "✈️", label: "BotPlane" },
   { id: "irs", emoji: "📋", label: "IRS Office" },
 ] as const;
 

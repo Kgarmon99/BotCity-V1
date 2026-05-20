@@ -132,13 +132,13 @@ const buildings: BuildingSpec[] = [
   { pos: [14, 0, -5],   rotY: -Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "dome",      color: "#fbbf24", beaconColor: "#fde047" },
   { pos: [5,  0, -14],  rotY: 0,            w: 3, d: 2.6, h: 7, shape: "tower",    color: "#22c55e", beaconColor: "#4ade80" },
 
-  // SW inner block (x<0, z>0): irs at (-9,9)
+  // SW inner block (x<0, z>0): irs at (-9,9); BotPlane terminal + runway occupy the
+  // z=10..16 strip so the inner filler at (-5, 14) was removed.
   { pos: [-14, 0, 5],   rotY:  Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "cylinder", color: "#f472b6", beaconColor: "#f9a8d4" },
-  { pos: [-5,  0, 14],  rotY: Math.PI,      w: 3, d: 2.6, h: 7, shape: "box",      color: "#34d399", beaconColor: "#6ee7b7" },
 
-  // SE inner block (x>0, z>0): firstbank at (9,9)
+  // SE inner block (x>0, z>0): firstbank at (9,9); BotTrain station + tracks occupy
+  // the z=10..16 strip so the inner filler at (5, 14) was removed.
   { pos: [14, 0, 5],    rotY: -Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "tower",    color: "#22d3ee", beaconColor: "#67e8f9" },
-  { pos: [5,  0, 14],   rotY: Math.PI,      w: 3, d: 2.6, h: 7, shape: "dome",     color: "#fbbf24", beaconColor: "#fde047" },
 
   // MIDDLE RING — between secondary streets (±18) and outer ring (±36)
   // All offsets avoid main avenues (x=0, z=0) and secondary streets (x=±18, z=±18)

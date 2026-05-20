@@ -78,6 +78,20 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "study",
   }),
 
+  bottrain: () => ({
+    buildingId: "bottrain",
+    title: "🚆 BotTrain Station — Commute vs Business Travel",
+    body: `All aboard! Today's lesson: not all train rides are tax-equal.\n\n📖 YOUR DAILY COMMUTE — NOT DEDUCTIBLE:\nThe ride between home and your regular workplace is "commuting" — even if it's expensive, even if it's far. The IRS considers it a personal expense.\n\n📖 BUSINESS TRAVEL — DEDUCTIBLE:\nTraveling to a client site, a conference, or a temporary work location (away from your tax home) IS deductible. Train tickets, taxis, mileage — keep the receipts.\n\n📖 PRE-TAX COMMUTER BENEFITS:\nMany employers offer a commuter benefits plan: you can use pre-tax dollars (up to $315/month in 2024) for transit passes and parking. It's not a deduction — it just lowers your taxable wages before they even hit your paycheck.\n\n💡 Lesson: Keep a log of business trips. Save the receipts. Your daily commute doesn't count — but that conference trip definitely does.`,
+    action: "train",
+  }),
+
+  botplane: () => ({
+    buildingId: "botplane",
+    title: "✈️ BotPlane Airport — Business Travel Deductions",
+    body: `Welcome to BotPlane International! Time to learn what you can write off when you fly.\n\n📖 DEDUCTIBLE BUSINESS TRAVEL:\nFlights, hotels, baggage fees, rental cars, and ground transport for work trips are deductible (for self-employed and certain business travelers). The trip must have a clear business purpose and be "away from your tax home."\n\n📖 MEALS — THE 50% RULE:\nMeals while traveling for business are only 50% deductible. So a $40 dinner on a work trip → $20 write-off.\n\n📖 PER DIEM:\nInstead of tracking every receipt, the IRS publishes daily allowance rates by city. If your employer reimburses at or below per diem, the reimbursement is tax-free to you.\n\n📖 MIXING BUSINESS + PLEASURE:\nTacked a vacation onto a work trip? Only the business portion is deductible. You can't write off the extra days you spent at the beach.\n\n💡 Lesson: A business trip is a tax-deductible expense. A vacation is not. The IRS cares about the primary PURPOSE of the trip.`,
+    action: "plane",
+  }),
+
   irs: ({ income, withheld, visitedBuildings }) => ({
     buildingId: "irs",
     title: "📋 IRS Tax Office — File Your Return",

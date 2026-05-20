@@ -15,6 +15,7 @@ import MoneyRain from "./MoneyRain";
 import CityDetails from "./CityDetails";
 import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
+import CityExpansion from "./CityExpansion";
 import RoadGrid from "./RoadGrid";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
@@ -75,6 +76,32 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     depth: 5,
     height: 8,
     emoji: "🎓",
+  },
+  {
+    id: "bottrain",
+    label: "BotTrain Station",
+    // SE inner block. Building footprint x=12..16, z=10..14. Tracks run east-west
+    // at z=15.5 (north of station; clear of secondary street at z=18 / 16.9..19.1).
+    position: [14, 2.5, 12],
+    color: "#fb923c",
+    roofColor: "#7c2d12",
+    width: 4,
+    depth: 4,
+    height: 5,
+    emoji: "🚆",
+  },
+  {
+    id: "botplane",
+    label: "BotPlane Airport",
+    // SW inner block. Building footprint x=-16..-12, z=10..14. Runway runs east-west
+    // at z=15.5 alongside the terminal (clear of streets at x=-18 and z=18).
+    position: [-14, 2.5, 12],
+    color: "#38bdf8",
+    roofColor: "#0c4a6e",
+    width: 4,
+    depth: 4,
+    height: 5,
+    emoji: "✈️",
   },
 ];
 
@@ -226,6 +253,7 @@ export default function GameScene() {
           <RoadGrid />
           <CityDetails />
           <CityBuildings />
+          <CityExpansion />
           <Statues />
           <Billboards />
           <NPCBots />

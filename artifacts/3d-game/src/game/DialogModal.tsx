@@ -21,6 +21,12 @@ export default function DialogModal() {
     } else if (dialog.action === "study") {
       visitBuilding("university");
       closeDialog();
+    } else if (dialog.action === "train") {
+      visitBuilding("bottrain");
+      closeDialog();
+    } else if (dialog.action === "plane") {
+      visitBuilding("botplane");
+      closeDialog();
     } else {
       closeDialog();
     }
@@ -124,6 +130,10 @@ export default function DialogModal() {
                 ? "File My Taxes!"
                 : dialog.action === "study"
                 ? "Lesson Complete 🎓"
+                : dialog.action === "train"
+                ? "All Aboard 🚆"
+                : dialog.action === "plane"
+                ? "Cleared for Takeoff ✈️"
                 : "Got it!"}
             </button>
           )}

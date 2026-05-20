@@ -26,6 +26,18 @@ const FEATURES = [
     accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
   },
   {
+    emoji: "🚆",
+    title: "Commute",
+    desc: "Commute vs travel at BotTrain",
+    accent: "from-orange-500/12 to-emerald-500/5 border-orange-400/30",
+  },
+  {
+    emoji: "✈️",
+    title: "Travel",
+    desc: "Write off business trips at BotPlane",
+    accent: "from-sky-500/12 to-emerald-500/5 border-sky-400/30",
+  },
+  {
     emoji: "📋",
     title: "File",
     desc: "Submit your return at the IRS",
@@ -74,8 +86,8 @@ export default function TitleScreen() {
             file your first tax return.
           </p>
 
-          {/* Feature row — compact 5-up */}
-          <div className="grid grid-cols-5 gap-2 mb-5 text-left">
+          {/* Feature row — 7 stops, 4-up grid wraps to 2 rows */}
+          <div className="grid grid-cols-4 gap-2 mb-5 text-left">
             {FEATURES.map(({ emoji, title, desc, accent }, i) => (
               <div
                 key={title}
