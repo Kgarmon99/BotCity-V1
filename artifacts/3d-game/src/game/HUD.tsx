@@ -66,9 +66,48 @@ export default function HUD() {
   const completed = BUILDINGS.filter((b) => visitedBuildings.includes(b.id)).length;
   const progressPct = (completed / BUILDINGS.length) * 100;
 
+  // Lets the player hide all three top panels (Tax Summary, Objectives,
+  // Form 1040) to reclaim the screen. Persisted across reloads so the
+  // preference sticks. `H` toggles too.
+  const [panelsHidden, setPanelsHidden] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("botcity:panelsHidden") === "1";
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("botcity:panelsHidden", panelsHidden ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [panelsHidden]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.key === "h" || e.key === "H") setPanelsHidden((v) => !v);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <div className="fixed top-0 left-0 right-0 pointer-events-none z-10 p-4">
-      <div className="flex gap-3 flex-wrap">
+      {/* Hide/Show panels toggle — always visible so the player can bring
+          the HUD back. Sits top-left so it's adjacent to where the panels
+          appear (and pairs with the SoundToggle on top-right). */}
+      <button
+        type="button"
+        onClick={() => setPanelsHidden((v) => !v)}
+        className="pointer-events-auto mb-3 bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)] hover:bg-slate-900/90 transition-colors"
+        title={panelsHidden ? "Show HUD panels (H)" : "Hide HUD panels (H)"}
+      >
+        {panelsHidden ? "👁️ Show HUD" : "🙈 Hide HUD"}
+      </button>
+      <div className={`flex gap-3 flex-wrap transition-opacity ${panelsHidden ? "hidden" : ""}`}>
         {/* Finance Panel */}
         <div className="bg-slate-950/85 text-white rounded-2xl p-4 min-w-[230px] border border-emerald-500/20 backdrop-blur-md shadow-[0_0_30px_-10px_rgba(34,197,94,0.4)]">
           <PanelHeader>Tax Return Summary</PanelHeader>
