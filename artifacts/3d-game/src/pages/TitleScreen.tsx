@@ -142,6 +142,14 @@ const FEATURES = [
     accent: "from-amber-500/15 to-emerald-500/10 border-amber-400/35",
   },
 
+  // 🚀  Edge attractions
+  {
+    emoji: "🚀",
+    title: "Rocket Launch",
+    desc: "Watch periodic lift-offs at BotRocket Station",
+    accent: "from-red-500/15 to-orange-500/10 border-orange-400/35",
+  },
+
   // 🎓  Education & transit
   {
     emoji: "🎓",

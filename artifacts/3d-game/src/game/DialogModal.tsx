@@ -34,6 +34,7 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   bothistory: { id: "tech-pass", code: "TECH", label: "Bot History Museum pass", icon: "🤖", line: "—" },
   eduhistory: { id: "edu-pass", code: "EDU", label: "Education History Museum pass", icon: "📚", line: "—" },
   finhistory: { id: "fin-pass", code: "FIN", label: "Finance History Museum pass", icon: "💰", line: "—" },
+  botrocket: { id: "launch-pass", code: "🚀", label: "BotRocket launch ticket", icon: "🚀", line: "—" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -103,6 +104,7 @@ export default function DialogModal() {
     techmuseum: "bothistory",
     edumuseum: "eduhistory",
     finmuseum: "finhistory",
+    launch: "botrocket",
   };
 
   const handleAction = () => {
@@ -272,6 +274,7 @@ const ACTION_LABELS: Record<string, string> = {
   techmuseum: "Tour Bot History 🤖",
   edumuseum: "Tour Education History 📚",
   finmuseum: "Tour Finance History 💰",
+  launch: "Watch the Launch 🚀",
 };
 
 function actionButtonLabel(action: string, income: number): string {

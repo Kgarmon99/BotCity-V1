@@ -41,7 +41,8 @@ export interface DialogContent {
     | "gaming"
     | "techmuseum"
     | "edumuseum"
-    | "finmuseum";
+    | "finmuseum"
+    | "launch";
   amount?: number;
 }
 

@@ -47,7 +47,8 @@ const BUILDINGS = [
   // 🎓  Education & transit
   { id: "university", emoji: "🎓", label: "MoneyBot U" },
   { id: "bottrain", emoji: "🚆", label: "BotTrain" },
-  { id: "botplane", emoji: "✈️", label: "BotPlane" },
+  { id: "botplane", emoji: "✈️", label: "BotPlane International" },
+  { id: "botrocket", emoji: "🚀", label: "BotRocket Station" },
 
   // 🏠  Home & lifestyle
   { id: "bothaus", emoji: "🏠", label: "BotHaus" },

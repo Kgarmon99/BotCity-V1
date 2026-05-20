@@ -96,15 +96,19 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   },
   {
     id: "botplane",
-    label: "BotPlane Airport",
-    // SW inner block. Building footprint x=-16..-12, z=10..14. Runway runs east-west
-    // at z=15.5 alongside the terminal (clear of streets at x=-18 and z=18).
-    position: [-14, 2.5, 12],
+    label: "BotPlane International",
+    // Real airports take a lot of land, so BotPlane has been moved out of the
+    // inner-block grid and given an entire corner of the map. Terminal sits on
+    // the far SW edge at (-50, *, 45); a 35-unit runway runs E-W behind it at
+    // z=55, with apron + hangars rendered in CityExpansion. Empty corner —
+    // nearest neighbors are botfarm at (-40, -41) (86u north) and botgigs at
+    // (-55, 6) (39u north).
+    position: [-50, 3, 45],
     color: "#38bdf8",
     roofColor: "#0c4a6e",
-    width: 4,
-    depth: 4,
-    height: 5,
+    width: 10,
+    depth: 6,
+    height: 4,
     emoji: "✈️",
   },
   // ─── Middle-ring district kiosks (entry markers for the 4 new districts) ───
@@ -135,13 +139,17 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   },
   {
     id: "botbeach",
-    label: "BotBeach",
-    position: [27, 1.5, 20.5],
+    label: "BotBeach Boardwalk",
+    // Moved out of the inner-middle-ring kiosk position (27, 20.5) — beaches
+    // belong on the edge of the world, not in the middle of the city. The
+    // boardwalk pavilion now sits ON the giant east-edge beach at (44, *, 25),
+    // with the sand strip and ocean rendered in CityDistricts.Beach().
+    position: [44, 1.5, 25],
     color: "#22d3ee",
     roofColor: "#fcd34d",
-    width: 1.8,
-    depth: 1.8,
-    height: 3,
+    width: 3,
+    depth: 3,
+    height: 2.5,
     emoji: "🏖️",
   },
   {
@@ -343,6 +351,22 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     depth: 4,
     height: 3,
     emoji: "🧸",
+  },
+  // ─── Edge attractions ──────────────────────────────────────────────────
+  // Far NE corner — a rocket launch pad with periodic lift-offs animated
+  // in CityDistricts.RocketStation(). Way out past all the suburbs so the
+  // smoke/fire/exhaust doesn't visually crowd downtown. Nearest neighbor
+  // is botbroker at (55, -6), 44u south.
+  {
+    id: "botrocket",
+    label: "BotRocket Station",
+    position: [50, 3, -50],
+    color: "#cbd5e1",
+    roofColor: "#ef4444",
+    width: 4,
+    depth: 4,
+    height: 5,
+    emoji: "🚀",
   },
   // ─── Culture & history district (corner museums) ──────────────────────
   // Three museums sit at the outer corners of the inner-block intersections

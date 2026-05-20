@@ -202,7 +202,12 @@ function Market() {
   );
 }
 
-// ===== Beach @ (27, 0, 27) ===========================================
+// ===== Beach — east edge of the world ================================
+// A real beach with a vast ocean. Sand strip runs along the east edge of
+// the inhabited area (x ∈ [37..52]) from z = 5 down to z = 65, and the
+// ocean extends beyond it from x ≈ 53 out to x ≈ 72 (the playable ground
+// ends at ±75). Stays clear of botbroker at (55, -6) by ~11u north.
+// ===================================================================
 function PalmTree({ x, z, scale = 1 }: { x: number; z: number; scale?: number }) {
   return (
     <group position={[x, 0, z]} scale={scale}>
@@ -254,55 +259,360 @@ function BeachUmbrella({ x, z, color }: { x: number; z: number; color: string })
   );
 }
 
-function Beach() {
+function OceanWaves() {
+  // Subtle shimmer on the giant water plane — modulates emissive intensity
+  // so the ocean reads as "alive" without paying the cost of a real shader.
+  const ref = useRef<THREE.MeshStandardMaterial>(null!);
+  useFrame((state) => {
+    if (ref.current) {
+      ref.current.emissiveIntensity = 0.55 + Math.sin(state.clock.elapsedTime * 0.7) * 0.2;
+    }
+  });
   return (
-    <group position={[27, 0, 27]}>
-      {/* Sand patch */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
-        <planeGeometry args={[11, 11]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[62.5, 0.05, 25]}>
+      <planeGeometry args={[20, 130, 1, 1]} />
+      <meshStandardMaterial
+        ref={ref}
+        color="#0e7490"
+        emissive="#22d3ee"
+        emissiveIntensity={0.6}
+        transparent
+        opacity={0.9}
+        roughness={0.25}
+        metalness={0.4}
+      />
+    </mesh>
+  );
+}
+
+function BeachChair({ x, z, rot = 0 }: { x: number; z: number; rot?: number }) {
+  return (
+    <group position={[x, 0, z]} rotation={[0, rot, 0]}>
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <boxGeometry args={[0.55, 0.08, 1.2]} />
+        <meshStandardMaterial color="#1e3a8a" emissive="#3b82f6" emissiveIntensity={0.25} />
+      </mesh>
+      <mesh position={[0, 0.7, -0.4]} rotation={[Math.PI / 4, 0, 0]} castShadow>
+        <boxGeometry args={[0.55, 0.08, 0.6]} />
+        <meshStandardMaterial color="#1e3a8a" emissive="#3b82f6" emissiveIntensity={0.25} />
+      </mesh>
+    </group>
+  );
+}
+
+function Surfboard({ x, z, color, rot = 0 }: { x: number; z: number; color: string; rot?: number }) {
+  return (
+    <group position={[x, 0, z]} rotation={[0, rot, 0]}>
+      <mesh position={[0, 0.7, 0]} rotation={[0, 0, -Math.PI / 2.3]} castShadow>
+        <capsuleGeometry args={[0.18, 1.6, 6, 12]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} roughness={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+function Beach() {
+  // Sand strip footprint: x[37..52], z[5..65]. Pavilion (botbeach kiosk)
+  // sits inside this at (44, 25).
+  return (
+    <group>
+      {/* Giant sand strip along the east edge */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[44.5, 0.03, 35]}>
+        <planeGeometry args={[15, 60]} />
         <meshStandardMaterial
           color="#fef3c7"
           emissive="#fcd34d"
-          emissiveIntensity={0.22}
+          emissiveIntensity={0.18}
           roughness={0.95}
         />
       </mesh>
-      {/* Water strip along east side (toward outer street) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[4.8, 0.05, 0]}>
-        <planeGeometry args={[2.5, 11]} />
+      {/* Wet-sand band where the surf laps the shore */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[51.5, 0.04, 30]}>
+        <planeGeometry args={[2, 70]} />
         <meshStandardMaterial
-          color="#0e7490"
-          emissive="#22d3ee"
-          emissiveIntensity={0.7}
-          transparent
-          opacity={0.85}
+          color="#d4a574"
+          emissive="#fbbf24"
+          emissiveIntensity={0.3}
+          roughness={0.85}
         />
       </mesh>
-      {/* Palms */}
-      <PalmTree x={-3.5} z={-3.5} />
-      <PalmTree x={3.2} z={-3.5} scale={1.1} />
-      <PalmTree x={-3.5} z={3.5} scale={0.9} />
-      <PalmTree x={-4.2} z={0} />
-      {/* Umbrellas */}
-      <BeachUmbrella x={1.5} z={-1.5} color="#ef4444" />
-      <BeachUmbrella x={-1} z={2} color="#f97316" />
-      <BeachUmbrella x={2.5} z={2.5} color="#facc15" />
-      {/* Beach ball */}
-      <mesh position={[0.8, 0.42, -3]} castShadow>
+      {/* The ocean — huge animated water plane reaching the world edge */}
+      <OceanWaves />
+      {/* Distant waves / breakers — a couple of darker emissive strips */}
+      {[58, 65, 70].map((wx) => (
+        <mesh
+          key={`wave-${wx}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[wx, 0.07, 25]}
+        >
+          <planeGeometry args={[0.4, 110]} />
+          <meshStandardMaterial
+            color="#67e8f9"
+            emissive="#a5f3fc"
+            emissiveIntensity={0.9}
+            transparent
+            opacity={0.6}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+      {/* Palms scattered along the back of the beach */}
+      <PalmTree x={39} z={10} scale={1.1} />
+      <PalmTree x={38} z={20} />
+      <PalmTree x={39} z={30} scale={1.15} />
+      <PalmTree x={38} z={40} scale={0.95} />
+      <PalmTree x={39} z={50} scale={1.05} />
+      <PalmTree x={38} z={60} />
+      <PalmTree x={42} z={5} scale={0.9} />
+      <PalmTree x={43} z={64} scale={1.1} />
+      {/* Umbrellas spread across the sand */}
+      <BeachUmbrella x={45} z={15} color="#ef4444" />
+      <BeachUmbrella x={47} z={22} color="#f97316" />
+      <BeachUmbrella x={46} z={32} color="#facc15" />
+      <BeachUmbrella x={48} z={42} color="#ec4899" />
+      <BeachUmbrella x={45} z={55} color="#22c55e" />
+      <BeachUmbrella x={47} z={60} color="#a855f7" />
+      {/* Beach chairs facing the ocean */}
+      <BeachChair x={49} z={18} rot={-Math.PI / 2} />
+      <BeachChair x={49} z={28} rot={-Math.PI / 2} />
+      <BeachChair x={49} z={38} rot={-Math.PI / 2} />
+      <BeachChair x={49} z={48} rot={-Math.PI / 2} />
+      <BeachChair x={49} z={58} rot={-Math.PI / 2} />
+      {/* Surfboards staked into the sand */}
+      <Surfboard x={41} z={15} color="#22d3ee" rot={0.3} />
+      <Surfboard x={42} z={45} color="#f97316" rot={-0.2} />
+      <Surfboard x={41} z={58} color="#ec4899" rot={0.4} />
+      {/* Beach balls */}
+      <mesh position={[46, 0.42, 50]} castShadow>
         <sphereGeometry args={[0.4, 16, 16]} />
         <meshStandardMaterial color="#dc2626" emissive="#fde047" emissiveIntensity={0.5} />
       </mesh>
-      {/* Beach sign */}
+      <mesh position={[44, 0.35, 35]} castShadow>
+        <sphereGeometry args={[0.33, 16, 16]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#a855f7" emissiveIntensity={0.5} />
+      </mesh>
+      {/* Big oceanfront sign */}
       <Text
-        position={[0, 3.2, 5.4]}
-        fontSize={0.5}
+        position={[40, 4.5, 35]}
+        rotation={[0, Math.PI / 2, 0]}
+        fontSize={1.1}
         color="#0c4a6e"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.04}
+        outlineWidth={0.08}
         outlineColor="#fde68a"
       >
         🏖️ BOTBEACH
+      </Text>
+    </group>
+  );
+}
+
+// ===== Rocket Station — far NE edge (50, 0, -50) =====================
+// A periodic-launch pad way out in the empty NE corner. The rocket loops
+// through idle → ignition → ascent → reset on a ~28-second cycle.
+function RocketStation() {
+  const rocketRef = useRef<THREE.Group>(null!);
+  const flameRef = useRef<THREE.Mesh>(null!);
+  const smokeRef = useRef<THREE.Mesh>(null!);
+  const lightRef = useRef<THREE.PointLight>(null!);
+
+  const CYCLE = 28; // seconds — full loop
+  const IGNITE_AT = 18;
+  const LIFTOFF_AT = 20;
+  const APOGEE_AT = 28;
+  const MAX_ALT = 80;
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime % CYCLE;
+    let y = 0;
+    let flameScale = 0;
+    let smokeScale = 0;
+    let lightIntensity = 0;
+    if (t < IGNITE_AT) {
+      // Idle
+      y = 0;
+      flameScale = 0;
+      smokeScale = 0;
+    } else if (t < LIFTOFF_AT) {
+      // Ignition — flames build, smoke billows, rocket still on pad
+      const k = (t - IGNITE_AT) / (LIFTOFF_AT - IGNITE_AT); // 0..1
+      flameScale = k * 1.2;
+      smokeScale = k * 2.5;
+      lightIntensity = k * 8;
+      y = Math.sin(state.clock.elapsedTime * 30) * 0.02 * k; // rumble
+    } else if (t < APOGEE_AT) {
+      // Ascent — quadratic so it accelerates upward
+      const k = (t - LIFTOFF_AT) / (APOGEE_AT - LIFTOFF_AT); // 0..1
+      y = k * k * MAX_ALT;
+      flameScale = 1.3 + Math.sin(state.clock.elapsedTime * 25) * 0.2;
+      smokeScale = 2.8;
+      lightIntensity = 10;
+    }
+    if (rocketRef.current) rocketRef.current.position.y = y;
+    if (flameRef.current) {
+      flameRef.current.scale.set(flameScale, flameScale * 2, flameScale);
+      flameRef.current.visible = flameScale > 0.05;
+    }
+    if (smokeRef.current) {
+      smokeRef.current.scale.setScalar(Math.max(smokeScale, 0.001));
+      smokeRef.current.visible = smokeScale > 0.05;
+      const mat = smokeRef.current.material as THREE.MeshStandardMaterial;
+      mat.opacity = Math.min(0.7, smokeScale * 0.3);
+    }
+    if (lightRef.current) lightRef.current.intensity = lightIntensity;
+  });
+
+  return (
+    <group position={[50, 0, -50]}>
+      {/* Concrete launch pad */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
+        <planeGeometry args={[12, 12]} />
+        <meshStandardMaterial color="#3f3f46" roughness={0.9} />
+      </mesh>
+      {/* Pad ring (scorch ring around the launch point) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+        <ringGeometry args={[1.8, 3.2, 32]} />
+        <meshStandardMaterial color="#18181b" emissive="#f97316" emissiveIntensity={0.3} />
+      </mesh>
+      {/* Flame trench (cross-shaped) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+        <planeGeometry args={[0.6, 6]} />
+        <meshStandardMaterial color="#0b1220" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, Math.PI / 2]} position={[0, 0.06, 0]}>
+        <planeGeometry args={[0.6, 6]} />
+        <meshStandardMaterial color="#0b1220" />
+      </mesh>
+      {/* Gantry / launch tower — 4 leg trusses */}
+      {[
+        [1.4, 1.4],
+        [-1.4, 1.4],
+        [1.4, -1.4],
+        [-1.4, -1.4],
+      ].map(([gx, gz], i) => (
+        <mesh key={`leg-${i}`} position={[gx, 6, gz]} castShadow>
+          <boxGeometry args={[0.15, 12, 0.15]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} metalness={0.7} />
+        </mesh>
+      ))}
+      {/* Cross bracing rings */}
+      {[2, 5, 8, 11].map((cy) => (
+        <group key={`brace-${cy}`} position={[0, cy, 0]}>
+          <mesh position={[0, 0, 1.4]}>
+            <boxGeometry args={[2.8, 0.1, 0.1]} />
+            <meshStandardMaterial color="#92400e" emissive="#fbbf24" emissiveIntensity={0.4} />
+          </mesh>
+          <mesh position={[0, 0, -1.4]}>
+            <boxGeometry args={[2.8, 0.1, 0.1]} />
+            <meshStandardMaterial color="#92400e" emissive="#fbbf24" emissiveIntensity={0.4} />
+          </mesh>
+          <mesh position={[1.4, 0, 0]}>
+            <boxGeometry args={[0.1, 0.1, 2.8]} />
+            <meshStandardMaterial color="#92400e" emissive="#fbbf24" emissiveIntensity={0.4} />
+          </mesh>
+          <mesh position={[-1.4, 0, 0]}>
+            <boxGeometry args={[0.1, 0.1, 2.8]} />
+            <meshStandardMaterial color="#92400e" emissive="#fbbf24" emissiveIntensity={0.4} />
+          </mesh>
+        </group>
+      ))}
+      {/* Service walkway to rocket */}
+      <mesh position={[0.75, 6, 0]}>
+        <boxGeometry args={[1.5, 0.1, 0.4]} />
+        <meshStandardMaterial color="#a16207" emissive="#fbbf24" emissiveIntensity={0.3} />
+      </mesh>
+      {/* THE ROCKET — animated via rocketRef.position.y */}
+      <group ref={rocketRef} position={[0, 0, 0]}>
+        {/* Main stage */}
+        <mesh position={[0, 5, 0]} castShadow>
+          <cylinderGeometry args={[0.75, 0.85, 10, 24]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#e2e8f0" emissiveIntensity={0.2} metalness={0.4} roughness={0.4} />
+        </mesh>
+        {/* Black stripes (orbital insignia band) */}
+        <mesh position={[0, 7.5, 0]}>
+          <cylinderGeometry args={[0.78, 0.78, 0.4, 24]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        {/* Red BotCity flag stripe */}
+        <mesh position={[0, 3, 0]}>
+          <cylinderGeometry args={[0.82, 0.86, 0.6, 24]} />
+          <meshStandardMaterial color="#dc2626" emissive="#ef4444" emissiveIntensity={0.6} />
+        </mesh>
+        {/* Nose cone */}
+        <mesh position={[0, 11, 0]} castShadow>
+          <coneGeometry args={[0.75, 2.4, 24]} />
+          <meshStandardMaterial color="#dc2626" emissive="#ef4444" emissiveIntensity={0.6} metalness={0.5} />
+        </mesh>
+        {/* Fins (4) */}
+        {[0, 1, 2, 3].map((i) => (
+          <mesh
+            key={`fin-${i}`}
+            position={[
+              Math.cos((i * Math.PI) / 2) * 1,
+              0.6,
+              Math.sin((i * Math.PI) / 2) * 1,
+            ]}
+            rotation={[0, (i * Math.PI) / 2, 0]}
+            castShadow
+          >
+            <boxGeometry args={[0.08, 1.2, 1]} />
+            <meshStandardMaterial color="#475569" emissive="#1e293b" emissiveIntensity={0.4} />
+          </mesh>
+        ))}
+        {/* Engine bell */}
+        <mesh position={[0, -0.35, 0]} castShadow>
+          <cylinderGeometry args={[0.55, 0.85, 0.7, 24]} />
+          <meshStandardMaterial color="#27272a" metalness={0.85} roughness={0.3} />
+        </mesh>
+        {/* Flame — invisible by default, scaled up during ignition+ascent */}
+        <mesh ref={flameRef} position={[0, -1.6, 0]} visible={false}>
+          <coneGeometry args={[0.65, 2.2, 16, 1, true]} />
+          <meshStandardMaterial
+            color="#fde047"
+            emissive="#f97316"
+            emissiveIntensity={4}
+            transparent
+            opacity={0.85}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
+        </mesh>
+      </group>
+      {/* Ground-level smoke billow during ignition (stays on the pad) */}
+      <mesh ref={smokeRef} position={[0, 0.6, 0]} visible={false}>
+        <sphereGeometry args={[1.3, 16, 12]} />
+        <meshStandardMaterial
+          color="#e5e7eb"
+          emissive="#f3f4f6"
+          emissiveIntensity={0.3}
+          transparent
+          opacity={0.4}
+          roughness={1}
+        />
+      </mesh>
+      {/* Ignition firelight (off when idle) */}
+      <pointLight ref={lightRef} position={[0, 1, 0]} color="#f97316" distance={20} intensity={0} />
+      {/* Big station sign */}
+      <Text
+        position={[0, 1.4, -5.5]}
+        fontSize={0.9}
+        color="#f97316"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.07}
+        outlineColor="#0b1220"
+      >
+        🚀 BOTROCKET STATION
+      </Text>
+      <Text
+        position={[0, 0.7, -5.5]}
+        fontSize={0.32}
+        color="#fbbf24"
+        anchorX="center"
+        anchorY="middle"
+      >
+        — Launches every 28 seconds —
       </Text>
     </group>
   );
@@ -966,6 +1276,7 @@ export default function CityDistricts() {
       <Stadium />
       <Market />
       <Beach />
+      <RocketStation />
       <ShopsCluster />
       <Dealer />
       <Farm />

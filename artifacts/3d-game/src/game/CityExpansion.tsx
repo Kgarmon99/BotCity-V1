@@ -148,22 +148,20 @@ function TrainStationSign() {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Airport addons: BotPlane terminal at (-14, *, 12); footprint x=-16..-12,
-// z=10..14. Runway runs east-west at z=15.5, width 1.8 (z=14.6..16.4),
-// x = -16..-3 (length 13). Stays clear of:
-//   - x=-18 street (-19.1..-16.9) — runway starts at -16
-//   - x=0 main avenue (-1.5..1.5)  — runway ends at -3
-//   - z=18 street (16.9..19.1)      — runway max z = 16.4
-//   - Terminal footprint z=10..14   — runway min z = 14.6
-//   - IRS at (-9, 9) z=7..11        — runway z=14.6+ is clear
+// Airport addons: BotPlane International — relocated from the inner block
+// out to the far SW edge of the world. Terminal sits at (-50, *, 45),
+// footprint x=-55..-45, z=42..48. A 35u-long runway runs E-W at z=55,
+// width 5 (z=52.5..57.5), x = -65..-30. Empty corner — closest neighbors
+// are botfarm at (-40, -41) (86u north) and botgigs at (-55, 6) (39u N).
+// All runway/apron/hangar geometry stays well within the 150x150 ground.
 // ─────────────────────────────────────────────────────────────────────
 
-const RUNWAY_Z = 15.5;
-const RUNWAY_WIDTH = 1.8;
-const RUNWAY_X_MIN = -16;
-const RUNWAY_X_MAX = -3;
-const RUNWAY_LENGTH = RUNWAY_X_MAX - RUNWAY_X_MIN; // 13
-const RUNWAY_CENTER_X = (RUNWAY_X_MIN + RUNWAY_X_MAX) / 2; // -9.5
+const RUNWAY_Z = 55;
+const RUNWAY_WIDTH = 5;
+const RUNWAY_X_MIN = -65;
+const RUNWAY_X_MAX = -30;
+const RUNWAY_LENGTH = RUNWAY_X_MAX - RUNWAY_X_MIN; // 35
+const RUNWAY_CENTER_X = (RUNWAY_X_MIN + RUNWAY_X_MAX) / 2; // -47.5
 
 function Runway() {
   return (
@@ -182,8 +180,8 @@ function Runway() {
         />
       </mesh>
       {/* Center dashed line — dashes along x-axis */}
-      {Array.from({ length: 9 }).map((_, i) => {
-        const t = (i + 0.5) / 9;
+      {Array.from({ length: 18 }).map((_, i) => {
+        const t = (i + 0.5) / 18;
         const x = RUNWAY_X_MIN + t * RUNWAY_LENGTH;
         return (
           <mesh
@@ -191,7 +189,7 @@ function Runway() {
             rotation={[-Math.PI / 2, 0, Math.PI / 2]}
             position={[x, 0.05, RUNWAY_Z]}
           >
-            <planeGeometry args={[0.15, 1.1]} />
+            <planeGeometry args={[0.3, 1.4]} />
             <meshStandardMaterial
               color="#fde047"
               emissive="#fde047"
@@ -201,17 +199,64 @@ function Runway() {
           </mesh>
         );
       })}
-      {/* Threshold markers at east end of runway (away from terminal) */}
-      {[-0.5, 0.5].map((zOff) => (
-        <mesh
-          key={`th-${zOff}`}
-          rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-          position={[RUNWAY_X_MAX - 0.6, 0.05, RUNWAY_Z + zOff]}
-        >
-          <planeGeometry args={[0.3, 0.8]} />
-          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
-        </mesh>
+      {/* Threshold markers at both ends */}
+      {[-1.6, -0.8, 0.8, 1.6].flatMap((zOff) =>
+        [RUNWAY_X_MIN + 1.2, RUNWAY_X_MAX - 1.2].map((x) => (
+          <mesh
+            key={`th-${zOff}-${x}`}
+            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+            position={[x, 0.05, RUNWAY_Z + zOff]}
+          >
+            <planeGeometry args={[0.5, 1.2]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+          </mesh>
+        ))
+      )}
+      {/* Apron / tarmac in front of terminal */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[-47, 0.02, 50]}
+        receiveShadow
+      >
+        <planeGeometry args={[24, 8]} />
+        <meshStandardMaterial color="#27272a" roughness={0.85} />
+      </mesh>
+      {/* Hangars — two big arched hangars flanking the terminal */}
+      {[-60, -38].map((hx) => (
+        <group key={`hangar-${hx}`} position={[hx, 0, 50]}>
+          <mesh position={[0, 1.6, 0]} castShadow receiveShadow>
+            <boxGeometry args={[5, 3.2, 4]} />
+            <meshStandardMaterial color="#475569" metalness={0.5} roughness={0.55} />
+          </mesh>
+          <mesh position={[0, 3.4, 0]} rotation={[0, 0, 0]} castShadow>
+            <cylinderGeometry args={[2.5, 2.5, 4, 16, 1, false, 0, Math.PI]} />
+            <meshStandardMaterial color="#64748b" metalness={0.6} roughness={0.45} />
+          </mesh>
+          {/* Hangar door (slatted look) */}
+          <mesh position={[0, 1.5, 2.01]}>
+            <planeGeometry args={[4.4, 2.8]} />
+            <meshStandardMaterial
+              color="#1e293b"
+              emissive="#38bdf8"
+              emissiveIntensity={0.25}
+              metalness={0.7}
+              roughness={0.35}
+            />
+          </mesh>
+        </group>
       ))}
+      {/* Big airport sign */}
+      <Text
+        position={[-47, 5.5, 41.5]}
+        fontSize={0.7}
+        color="#38bdf8"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.05}
+        outlineColor="#0b1220"
+      >
+        ✈ BOTPLANE INTERNATIONAL
+      </Text>
     </group>
   );
 }
@@ -249,10 +294,10 @@ function Airplane({ position }: { position: [number, number, number] }) {
           roughness={0.2}
         />
       </mesh>
-      {/* Wings (perpendicular to fuselage) — wingspan 2.4 keeps max world z ≤ 16.7,
-          clear of z=18 secondary street band (16.9..19.1). */}
+      {/* Wings — wingspan 4.4 (we're out at the airport corner now, no
+          street clearance constraint). */}
       <mesh position={[0, 0, 0]} castShadow>
-        <boxGeometry args={[0.95, 0.12, 2.4]} />
+        <boxGeometry args={[1.1, 0.14, 4.4]} />
         <meshStandardMaterial color="#cbd5e1" metalness={0.55} roughness={0.4} />
       </mesh>
       {/* Tail vertical fin */}
@@ -265,8 +310,8 @@ function Airplane({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[0.08, 0.5, 1.4]} />
         <meshStandardMaterial color="#cbd5e1" metalness={0.55} roughness={0.4} />
       </mesh>
-      {/* Engines under wings (kept inside shrunk wingspan) */}
-      {[-0.85, 0.85].map((zOff) => (
+      {/* Engines under wings */}
+      {[-1.6, 1.6].map((zOff) => (
         <mesh
           key={`eng-${zOff}`}
           position={[0, 0.1, zOff]}
@@ -291,9 +336,9 @@ function Airplane({ position }: { position: [number, number, number] }) {
 }
 
 function ControlTower() {
-  // Sits in front of the airport terminal (south face) — between terminal and plaza.
+  // Sits on the airport apron between terminal and runway.
   return (
-    <group position={[-14, 0, 9]}>
+    <group position={[-42, 0, 50]}>
       <mesh position={[0, 3, 0]} castShadow>
         <cylinderGeometry args={[0.3, 0.35, 6, 12]} />
         <meshStandardMaterial color="#1f2937" metalness={0.7} roughness={0.4} />
@@ -326,9 +371,10 @@ export default function CityExpansion() {
       <TrainCar x={13} z={TRACK_Z} color="#fb923c" accent="#fde68a" />
       <TrainStationSign />
 
-      {/* ─── Airport district (SW inner block) ─── */}
+      {/* ─── Airport district (far SW edge) ─── */}
       <Runway />
-      <Airplane position={[-10, 0.55, RUNWAY_Z]} />
+      <Airplane position={[-55, 0.75, RUNWAY_Z]} />
+      <Airplane position={[-40, 0.75, RUNWAY_Z]} />
       <ControlTower />
     </group>
   );
