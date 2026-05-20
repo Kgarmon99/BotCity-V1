@@ -81,11 +81,155 @@ const billboards: BillboardProps[] = [
   { position: [0, 3, 20], rotation: [0, Math.PI, 0], color: "#fbbf24", msgIndex: 5 },
 ];
 
+// ─── GetMoneyBot.com brand billboards ────────────────────────────────
+// Larger purple/cyan-glow billboards at the 4 cardinal edges, in the
+// 7.9-unit gap between the outer ring street (±36) and the world bound
+// (±45). They face inward toward the city center so they're visible from
+// the main avenues. Taglines cycle through GMB brand copy.
+
+const GMB_TAGLINES = [
+  "TAX HACKS\n  DAILY",
+  "FREE FILING\n  TOOLS",
+  "JOIN 1M+ BOTS\n  ALREADY",
+  "MAX YOUR\n  REFUND",
+  "DEDUCTION\nFINDER AI",
+];
+
+interface GmbBillboardProps {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  seed: number;
+}
+
+function GmbBillboard({ position, rotation, seed }: GmbBillboardProps) {
+  const [tagIdx, setTagIdx] = useState(seed % GMB_TAGLINES.length);
+  const frameRef = useRef<THREE.Mesh>(null!);
+  const scanRef = useRef<THREE.Mesh>(null!);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTagIdx((c) => (c + 1) % GMB_TAGLINES.length);
+    }, 4200 + (seed % 4) * 500);
+    return () => clearInterval(id);
+  }, [seed]);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (frameRef.current) {
+      const mat = frameRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(t * 2.5 + seed) * 0.6;
+    }
+    // Scanline drifts vertically across the panel
+    if (scanRef.current) {
+      const y = ((t * 0.8 + seed * 0.3) % 2.6) - 1.3;
+      scanRef.current.position.y = y;
+    }
+  });
+
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Twin posts for the wide billboard */}
+      <mesh position={[-1.8, -3, 0]} castShadow>
+        <cylinderGeometry args={[0.14, 0.14, 6, 8]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.85} />
+      </mesh>
+      <mesh position={[1.8, -3, 0]} castShadow>
+        <cylinderGeometry args={[0.14, 0.14, 6, 8]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.85} />
+      </mesh>
+      {/* Outer glowing frame (cyan) */}
+      <mesh ref={frameRef} position={[0, 0, 0]}>
+        <boxGeometry args={[5.4, 3.2, 0.2]} />
+        <meshStandardMaterial
+          color="#1e1b4b"
+          emissive="#22d3ee"
+          emissiveIntensity={1.5}
+          metalness={0.55}
+        />
+      </mesh>
+      {/* Inner panel (deep purple) */}
+      <mesh position={[0, 0, 0.11]}>
+        <boxGeometry args={[5.05, 2.85, 0.02]} />
+        <meshStandardMaterial color="#0b0823" emissive="#7c3aed" emissiveIntensity={0.5} />
+      </mesh>
+      {/* Drifting scanline */}
+      <mesh ref={scanRef} position={[0, 0, 0.13]}>
+        <planeGeometry args={[5.0, 0.12]} />
+        <meshStandardMaterial
+          color="#22d3ee"
+          emissive="#22d3ee"
+          emissiveIntensity={1.4}
+          transparent
+          opacity={0.35}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Brand mark (top) */}
+      <Text
+        position={[0, 1.0, 0.16]}
+        fontSize={0.42}
+        color="#22d3ee"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.035}
+        outlineColor="#0b0823"
+        maxWidth={5}
+        textAlign="center"
+      >
+        💰 GETMONEYBOT
+      </Text>
+      {/* URL (small, under brand) */}
+      <Text
+        position={[0, 0.55, 0.16]}
+        fontSize={0.2}
+        color="#f9a8d4"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.018}
+        outlineColor="#0b0823"
+      >
+        .COM
+      </Text>
+      {/* Rotating tagline (center/bottom) */}
+      <Text
+        position={[0, -0.4, 0.16]}
+        fontSize={0.34}
+        color="#fde047"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.03}
+        outlineColor="#7c3aed"
+        maxWidth={4.8}
+        textAlign="center"
+      >
+        {GMB_TAGLINES[tagIdx]}
+      </Text>
+    </group>
+  );
+}
+
+// 4 cardinal billboards in the 7.9-unit outer ring → world edge gap.
+// Each post bases sit at y=-3 below billboard center y=5, so post bottoms
+// touch ground (y=0..6 vertical span). All clear of road bands.
+const gmbBillboards: GmbBillboardProps[] = [
+  // North edge — facing south (toward city center)
+  { position: [0, 5, -40], rotation: [0, 0, 0], seed: 0 },
+  // South edge — facing north
+  { position: [0, 5, 40], rotation: [0, Math.PI, 0], seed: 1 },
+  // West edge — facing east
+  { position: [-40, 5, 0], rotation: [0, Math.PI / 2, 0], seed: 2 },
+  // East edge — facing west
+  { position: [40, 5, 0], rotation: [0, -Math.PI / 2, 0], seed: 3 },
+];
+
 export default function Billboards() {
   return (
     <group>
       {billboards.map((b, i) => (
         <Billboard key={`bb-${i}`} {...b} />
+      ))}
+      {gmbBillboards.map((b, i) => (
+        <GmbBillboard key={`gmb-${i}`} {...b} />
       ))}
     </group>
   );
