@@ -172,9 +172,9 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       groupRef.current.position.x += velocity.current.x;
       groupRef.current.position.z += velocity.current.z;
 
-      // ── Jetpack: Shift adds upward thrust; gravity pulls back down. Disabled
-      // while riding the BotMobile (cars don't fly).
-      const jetActive = keys.current.jet && !ridingRef.current;
+      // ── Jetpack: Shift (or on-screen button) adds upward thrust; gravity
+      // pulls back down. Disabled while riding the BotMobile (cars don't fly).
+      const jetActive = (keys.current.jet || touchInput.jetHeld) && !ridingRef.current;
       const accel = (jetActive ? JETPACK_THRUST : 0) - GRAVITY;
       verticalVel.current = Math.max(TERMINAL_FALL, verticalVel.current + accel * delta);
       groupRef.current.position.y += verticalVel.current * delta;
@@ -218,7 +218,9 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
       <PlayerIndicator />
-      {jetting && !riding && <JetpackFlame thrusting={keys.current.jet} />}
+      {jetting && !riding && (
+        <JetpackFlame thrusting={keys.current.jet || touchInput.jetHeld} />
+      )}
       {riding ? (
         // BotMobile's headlights are along its local +X axis. Rotating by
         // -π/2 around Y maps local +X → local +Z, aligning the car's front

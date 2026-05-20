@@ -178,32 +178,47 @@ function ActionButtons() {
 
   // Use pointer events so the ride button feels like Space being held down.
   const rideRef = useRef<HTMLButtonElement>(null);
+  const jetRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    const el = rideRef.current;
-    if (!el) return;
-    const down = (e: PointerEvent) => {
-      touchInput.rideHeld = true;
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
+    const wireHoldButton = (
+      el: HTMLButtonElement | null,
+      onChange: (held: boolean) => void
+    ) => {
+      if (!el) return () => {};
+      const down = (e: PointerEvent) => {
+        onChange(true);
+        el.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      };
+      const up = (e: PointerEvent) => {
+        onChange(false);
+        try {
+          el.releasePointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      };
+      el.addEventListener("pointerdown", down);
+      el.addEventListener("pointerup", up);
+      el.addEventListener("pointercancel", up);
+      el.addEventListener("lostpointercapture", up);
+      return () => {
+        el.removeEventListener("pointerdown", down);
+        el.removeEventListener("pointerup", up);
+        el.removeEventListener("pointercancel", up);
+        el.removeEventListener("lostpointercapture", up);
+        onChange(false);
+      };
     };
-    const up = (e: PointerEvent) => {
-      touchInput.rideHeld = false;
-      try {
-        el.releasePointerCapture(e.pointerId);
-      } catch {
-        /* ignore */
-      }
-    };
-    el.addEventListener("pointerdown", down);
-    el.addEventListener("pointerup", up);
-    el.addEventListener("pointercancel", up);
-    el.addEventListener("lostpointercapture", up);
+    const cleanupRide = wireHoldButton(rideRef.current, (h) => {
+      touchInput.rideHeld = h;
+    });
+    const cleanupJet = wireHoldButton(jetRef.current, (h) => {
+      touchInput.jetHeld = h;
+    });
     return () => {
-      el.removeEventListener("pointerdown", down);
-      el.removeEventListener("pointerup", up);
-      el.removeEventListener("pointercancel", up);
-      el.removeEventListener("lostpointercapture", up);
-      touchInput.rideHeld = false;
+      cleanupRide();
+      cleanupJet();
     };
   }, []);
 
@@ -219,6 +234,15 @@ function ActionButtons() {
         aria-label="Enter building"
       >
         E
+      </button>
+      <button
+        ref={jetRef}
+        type="button"
+        className="w-16 h-16 rounded-full bg-gradient-to-b from-orange-300 to-orange-600 text-white text-2xl shadow-[0_0_22px_-4px_rgba(249,115,22,0.85)] border-2 border-orange-200 active:scale-95 transition-transform select-none"
+        aria-label="Jetpack (hold to fly)"
+        title="Jetpack — hold to fly"
+      >
+        🚀
       </button>
       <button
         ref={rideRef}

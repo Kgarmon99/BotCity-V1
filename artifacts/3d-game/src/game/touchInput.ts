@@ -17,4 +17,6 @@ export const touchInput = {
   interactTick: 0,
   /** True while the on-screen ride button is held. Equivalent to Space. */
   rideHeld: false,
+  /** True while the on-screen jetpack button is held. Equivalent to Shift. */
+  jetHeld: false,
 };
