@@ -7,6 +7,11 @@ import World from "./World";
 import FollowCamera from "./FollowCamera";
 import HUD from "./HUD";
 import DialogModal from "./DialogModal";
+import Skybox from "./Skybox";
+import NPCBots from "./NPCBots";
+import Billboards from "./Billboards";
+import MoneyRain from "./MoneyRain";
+import CityDetails from "./CityDetails";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -15,8 +20,8 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "workcorp",
     label: "WorkCorp",
     position: [8, 3, -10],
-    color: "#2563eb",
-    roofColor: "#1e40af",
+    color: "#60a5fa",
+    roofColor: "#3b82f6",
     width: 5,
     depth: 4,
     height: 6,
@@ -26,8 +31,8 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "taxmart",
     label: "TaxMart",
     position: [-9, 2, -8],
-    color: "#dc2626",
-    roofColor: "#991b1b",
+    color: "#fbbf24",
+    roofColor: "#f59e0b",
     width: 6,
     depth: 5,
     height: 4,
@@ -37,8 +42,8 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "firstbank",
     label: "First Bank",
     position: [9, 2.5, 9],
-    color: "#d97706",
-    roofColor: "#92400e",
+    color: "#a78bfa",
+    roofColor: "#8b5cf6",
     width: 5,
     depth: 4,
     height: 5,
@@ -48,8 +53,8 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "irs",
     label: "IRS Office",
     position: [-9, 3, 9],
-    color: "#7c3aed",
-    roofColor: "#4c1d95",
+    color: "#f87171",
+    roofColor: "#ef4444",
     width: 5,
     depth: 4,
     height: 6,
@@ -137,7 +142,12 @@ export default function GameScene() {
           <pointLight position={[0, 8, 0]} intensity={2} color="#fbbf24" distance={20} />
 
           <FollowCamera target={playerPos} />
+          <Skybox />
           <World />
+          <CityDetails />
+          <Billboards />
+          <NPCBots />
+          <MoneyRain />
 
           {buildings.map((b) => (
             <Building
