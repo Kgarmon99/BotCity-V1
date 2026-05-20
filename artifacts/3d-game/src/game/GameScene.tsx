@@ -12,6 +12,8 @@ import NPCBots from "./NPCBots";
 import Billboards from "./Billboards";
 import MoneyRain from "./MoneyRain";
 import CityDetails from "./CityDetails";
+import Statues from "./Statues";
+import CityBuildings from "./CityBuildings";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -123,7 +125,7 @@ export default function GameScene() {
           gl={{ antialias: true }}
         >
           <color attach="background" args={["#021410"]} />
-          <fog attach="fog" args={["#052e16", 28, 70]} />
+          <fog attach="fog" args={["#052e16", 40, 110]} />
 
           <ambientLight intensity={0.45} color="#22c55e" />
           <directionalLight
@@ -145,6 +147,8 @@ export default function GameScene() {
           <Skybox />
           <World />
           <CityDetails />
+          <CityBuildings />
+          <Statues />
           <Billboards />
           <NPCBots />
           <MoneyRain />

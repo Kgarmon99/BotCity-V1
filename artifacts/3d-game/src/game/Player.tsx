@@ -64,7 +64,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       groupRef.current.position.x += velocity.current.x;
       groupRef.current.position.z += velocity.current.z;
 
-      const bound = 22;
+      const bound = 44;
       groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
 

@@ -118,10 +118,10 @@ export default function CityDetails() {
   return (
     <group>
       {/* Sidewalks flanking the roads */}
-      <Sidewalk position={[2.5, 0.02, 0]} size={[1.5, 50]} />
-      <Sidewalk position={[-2.5, 0.02, 0]} size={[1.5, 50]} />
-      <Sidewalk position={[0, 0.02, 2.5]} size={[50, 1.5]} />
-      <Sidewalk position={[0, 0.02, -2.5]} size={[50, 1.5]} />
+      <Sidewalk position={[2.5, 0.02, 0]} size={[1.5, 90]} />
+      <Sidewalk position={[-2.5, 0.02, 0]} size={[1.5, 90]} />
+      <Sidewalk position={[0, 0.02, 2.5]} size={[90, 1.5]} />
+      <Sidewalk position={[0, 0.02, -2.5]} size={[90, 1.5]} />
 
       {/* District pylons near each building */}
       <DistrictPylon position={[-13, 0, -8]} label="WORK\nDISTRICT" color="#60a5fa" />

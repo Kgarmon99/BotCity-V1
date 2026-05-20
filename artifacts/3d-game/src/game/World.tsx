@@ -189,7 +189,7 @@ function GridFloor() {
   return (
     <gridHelper
       ref={gridRef}
-      args={[60, 60, "#4ade80", "#16a34a"]}
+      args={[110, 110, "#4ade80", "#16a34a"]}
       position={[0, 0.01, 0]}
     />
   );
@@ -287,7 +287,7 @@ export default function World() {
     <group>
       {/* Dark emerald ground */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[60, 60]} />
+        <planeGeometry args={[110, 110]} />
         <meshStandardMaterial color="#042f1f" roughness={0.4} metalness={0.5} />
       </mesh>
 
@@ -296,7 +296,7 @@ export default function World() {
 
       {/* Neon green roads */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
-        <planeGeometry args={[3, 50]} />
+        <planeGeometry args={[3, 90]} />
         <meshStandardMaterial
           color="#052e16"
           emissive="#22c55e"
@@ -306,7 +306,7 @@ export default function World() {
         />
       </mesh>
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
-        <planeGeometry args={[50, 3]} />
+        <planeGeometry args={[90, 3]} />
         <meshStandardMaterial
           color="#052e16"
           emissive="#4ade80"
@@ -384,15 +384,15 @@ export default function World() {
       ))}
 
       {/* Boundary glowing rails */}
-      {[-23, 23].map((x) => (
+      {[-45, 45].map((x) => (
         <mesh key={`fx${x}`} position={[x, 0.5, 0]} castShadow>
-          <boxGeometry args={[0.15, 1, 46]} />
+          <boxGeometry args={[0.15, 1, 90]} />
           <meshStandardMaterial color="#052e16" emissive="#22c55e" emissiveIntensity={1.2} toneMapped={false} />
         </mesh>
       ))}
-      {[-23, 23].map((z) => (
+      {[-45, 45].map((z) => (
         <mesh key={`fz${z}`} position={[0, 0.5, z]} castShadow>
-          <boxGeometry args={[46, 1, 0.15]} />
+          <boxGeometry args={[90, 1, 0.15]} />
           <meshStandardMaterial color="#052e16" emissive="#4ade80" emissiveIntensity={1.2} toneMapped={false} />
         </mesh>
       ))}
