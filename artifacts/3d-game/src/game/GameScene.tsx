@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
-import { KeyboardControls, Sky, Stars } from "@react-three/drei";
+import { Sky } from "@react-three/drei";
 import * as THREE from "three";
 import Player from "./Player";
 import Building, { BuildingData } from "./Building";
@@ -10,20 +10,6 @@ import HUD from "./HUD";
 import DialogModal from "./DialogModal";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
-
-enum Controls {
-  forward = "forward",
-  back = "back",
-  left = "left",
-  right = "right",
-}
-
-const KEY_MAP = [
-  { name: Controls.forward, keys: ["ArrowUp", "KeyW"] },
-  { name: Controls.back, keys: ["ArrowDown", "KeyS"] },
-  { name: Controls.left, keys: ["ArrowLeft", "KeyA"] },
-  { name: Controls.right, keys: ["ArrowRight", "KeyD"] },
-];
 
 const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
@@ -75,7 +61,7 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
 const INTERACT_RADIUS = 4.5;
 
 export default function GameScene() {
-  const playerPos = useRef(new THREE.Vector3(0, 0.75, 0));
+  const playerPos = useRef(new THREE.Vector3(0, 0, 0));
   const [nearBuilding, setNearBuilding] = useState<string | null>(null);
   const { visitedBuildings, openDialog, income, deductions, withheld, dialog } = useGameStore();
 
@@ -126,47 +112,44 @@ export default function GameScene() {
       <HUD />
       <DialogModal />
       <div className="w-full h-screen">
-        <KeyboardControls map={KEY_MAP}>
-          <Canvas
-            shadows
-            camera={{ position: [0, 10, 14], fov: 55 }}
-            gl={{ antialias: true }}
-            style={{ background: "#0f172a" }}
-          >
-            <color attach="background" args={["#87ceeb"]} />
-            <fog attach="fog" args={["#c7e9f9", 40, 80]} />
+        <Canvas
+          shadows
+          camera={{ position: [0, 10, 14], fov: 55 }}
+          gl={{ antialias: true }}
+        >
+          <color attach="background" args={["#87ceeb"]} />
+          <fog attach="fog" args={["#c7e9f9", 40, 80]} />
 
-            <Sky sunPosition={[100, 30, 100]} turbidity={0.3} rayleigh={0.5} />
+          <Sky sunPosition={[100, 30, 100]} turbidity={0.3} rayleigh={0.5} />
 
-            <ambientLight intensity={0.7} />
-            <directionalLight
-              position={[15, 20, 10]}
-              intensity={1.5}
-              castShadow
-              shadow-mapSize={[2048, 2048]}
-              shadow-camera-far={80}
-              shadow-camera-left={-30}
-              shadow-camera-right={30}
-              shadow-camera-top={30}
-              shadow-camera-bottom={-30}
+          <ambientLight intensity={0.7} />
+          <directionalLight
+            position={[15, 20, 10]}
+            intensity={1.5}
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-far={80}
+            shadow-camera-left={-30}
+            shadow-camera-right={30}
+            shadow-camera-top={30}
+            shadow-camera-bottom={-30}
+          />
+          <hemisphereLight args={["#87ceeb", "#4ade80", 0.4]} />
+
+          <FollowCamera target={playerPos} />
+          <World />
+
+          {buildings.map((b) => (
+            <Building
+              key={b.id}
+              data={b}
+              playerPos={playerPos.current}
+              isNear={nearBuilding === b.id}
             />
-            <hemisphereLight args={["#87ceeb", "#4ade80", 0.4]} />
+          ))}
 
-            <FollowCamera target={playerPos} />
-            <World />
-
-            {buildings.map((b) => (
-              <Building
-                key={b.id}
-                data={b}
-                playerPos={playerPos.current}
-                isNear={nearBuilding === b.id}
-              />
-            ))}
-
-            <Player onPositionChange={handlePositionChange} onInteract={handleInteract} />
-          </Canvas>
-        </KeyboardControls>
+          <Player onPositionChange={handlePositionChange} onInteract={handleInteract} />
+        </Canvas>
       </div>
     </>
   );

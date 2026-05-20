@@ -1,15 +1,15 @@
 import { useRef, useEffect, Suspense } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useKeyboardControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 useGLTF.preload("/SilverSkin.glb");
 
-enum Controls {
-  forward = "forward",
-  back = "back",
-  left = "left",
-  right = "right",
+interface Keys {
+  forward: boolean;
+  back: boolean;
+  left: boolean;
+  right: boolean;
 }
 
 interface PlayerProps {
@@ -21,18 +21,12 @@ function SilverSkinModel() {
   const { scene } = useGLTF("/SilverSkin.glb");
   const cloned = scene.clone(true);
 
-  // Measure the model's natural bounding box so we can auto-scale it
   const box = new THREE.Box3().setFromObject(cloned);
   const size = new THREE.Vector3();
   box.getSize(size);
 
-  // Target height: ~1.6 units (about 1.6m for a character)
   const targetHeight = 1.6;
   const scale = targetHeight / (size.y || 1);
-
-  // Shift the model so its feet sit at y=0
-  const center = new THREE.Vector3();
-  box.getCenter(center);
   const yOffset = -(box.min.y * scale);
 
   cloned.traverse((child) => {
@@ -68,23 +62,36 @@ function FallbackCharacter() {
 export default function Player({ onPositionChange, onInteract }: PlayerProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const velocity = useRef(new THREE.Vector3());
-  const [, getKeys] = useKeyboardControls<Controls>();
+  const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false });
   const speed = 6;
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "ArrowUp"    || e.key === "w" || e.key === "W") keys.current.forward = true;
+      if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") keys.current.back    = true;
+      if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") keys.current.left    = true;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.current.right   = true;
       if (e.key === "e" || e.key === "E") {
-        if (groupRef.current) {
-          onInteract(groupRef.current.position.clone());
-        }
+        if (groupRef.current) onInteract(groupRef.current.position.clone());
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    const up = (e: KeyboardEvent) => {
+      if (e.key === "ArrowUp"    || e.key === "w" || e.key === "W") keys.current.forward = false;
+      if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") keys.current.back    = false;
+      if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") keys.current.left    = false;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.current.right   = false;
+    };
+
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
   }, [onInteract]);
 
   useFrame((_state, delta) => {
-    const { forward, back, left, right } = getKeys();
+    const { forward, back, left, right } = keys.current;
     const dir = new THREE.Vector3();
 
     if (forward) dir.z -= 1;
@@ -92,23 +99,21 @@ export default function Player({ onPositionChange, onInteract }: PlayerProps) {
     if (left)    dir.x -= 1;
     if (right)   dir.x += 1;
 
-    dir.normalize().multiplyScalar(speed * delta);
+    if (dir.length() > 0) dir.normalize();
+    dir.multiplyScalar(speed * delta);
     velocity.current.lerp(dir, 0.25);
 
     if (groupRef.current) {
       groupRef.current.position.x += velocity.current.x;
       groupRef.current.position.z += velocity.current.z;
-      // Keep player on ground
       groupRef.current.position.y = 0;
 
-      // Clamp to world bounds
       const bound = 22;
       groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
 
-      // Face movement direction
-      if (dir.length() > 0.001) {
-        const angle = Math.atan2(dir.x, dir.z);
+      if (velocity.current.length() > 0.01) {
+        const angle = Math.atan2(velocity.current.x, velocity.current.z);
         groupRef.current.rotation.y = THREE.MathUtils.lerp(
           groupRef.current.rotation.y,
           angle,
