@@ -7,6 +7,7 @@ import { useGameStore } from "./gameStore";
 import { cameraInput } from "./cameraInput";
 import { touchInput } from "./touchInput";
 import { playerTracker } from "./playerTracker";
+import { sound } from "./sound";
 
 interface Keys {
   forward: boolean;
@@ -175,6 +176,9 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       // ── Jetpack: Shift (or on-screen button) adds upward thrust; gravity
       // pulls back down. Disabled while riding the BotMobile (cars don't fly).
       const jetActive = (keys.current.jet || touchInput.jetHeld) && !ridingRef.current;
+      // Drive the jetpack whoosh sound on/off as the player toggles thrust.
+      // setJetpack is idempotent so calling it every frame is fine.
+      sound.setJetpack(jetActive);
       const accel = (jetActive ? JETPACK_THRUST : 0) - GRAVITY;
       verticalVel.current = Math.max(TERMINAL_FALL, verticalVel.current + accel * delta);
       groupRef.current.position.y += verticalVel.current * delta;

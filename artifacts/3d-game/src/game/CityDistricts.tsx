@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { MoneyBotModel } from "./MoneyBotModel";
+import { sound } from "./sound";
 
 // ─────────────────────────────────────────────────────────────────────
 // 4 new districts at the middle-ring corners (±27, ±27).
@@ -450,6 +451,9 @@ function RocketStation() {
       lightIntensity = 10;
     }
     if (rocketRef.current) rocketRef.current.position.y = y;
+    // Rocket roar tracks flame intensity — silent on idle, ramps with
+    // ignition, full roar during ascent, then fades on reset.
+    sound.setRocket(Math.min(1, flameScale));
     if (flameRef.current) {
       flameRef.current.scale.set(flameScale, flameScale * 2, flameScale);
       flameRef.current.visible = flameScale > 0.05;

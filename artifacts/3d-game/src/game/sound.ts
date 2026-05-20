@@ -9,6 +9,13 @@ class SoundManager {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private muted = false;
+  // Pre-generated white-noise buffer shared by all noise-based effects so we
+  // don't allocate a new buffer per jetpack press / rocket launch.
+  private noiseBuffer: AudioBuffer | null = null;
+  // Sustained sound handles — kept around so we can fade/stop them later.
+  private ambientNodes: { osc: OscillatorNode[]; gain: GainNode } | null = null;
+  private jetpackNodes: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private rocketNodes: { src: AudioBufferSourceNode; osc: OscillatorNode; gain: GainNode } | null = null;
 
   private ensure(): AudioContext | null {
     if (this.muted) return null;
@@ -61,16 +68,160 @@ class SoundManager {
       this.master.gain.value = 0;
     } else if (this.master) {
       this.master.gain.value = 0.5;
+      // Restart ambient on unmute in case it was skipped while muted.
+      this.startAmbient();
+    } else if (!m) {
+      // No context yet — try to bring up ambient (and the context) now.
+      this.startAmbient();
     }
   }
   isMuted() {
     return this.muted;
   }
 
-  /** Dialog open — friendly two-note rising chirp. */
+  // ── Sustained ambient/effect sounds ────────────────────────────────
+  private getNoise(ctx: AudioContext): AudioBuffer {
+    if (!this.noiseBuffer) {
+      const len = ctx.sampleRate * 2;
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      this.noiseBuffer = buf;
+    }
+    return this.noiseBuffer;
+  }
+
+  /**
+   * Start the ambient city hum — three low detuned oscillators forming a
+   * faint perpetual drone. Idempotent: subsequent calls no-op while the
+   * ambient bed is already running.
+   */
+  startAmbient() {
+    const ctx = this.ensure();
+    if (!ctx || !this.master || this.ambientNodes) return;
+    const g = ctx.createGain();
+    // Short fade-in so the drone doesn't pop on first start.
+    const now = ctx.currentTime;
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(0.022, now + 0.08);
+    g.connect(this.master);
+    const oscs: OscillatorNode[] = [];
+    // Low-frequency triad: fundamental + perfect fifth + octave, mildly
+    // detuned so the beat between them keeps the drone alive.
+    const layers: Array<[number, OscillatorType, number]> = [
+      [55, "sine", 0],
+      [82.5, "sine", 6],
+      [110, "triangle", -8],
+    ];
+    for (const [freq, type, detune] of layers) {
+      const o = ctx.createOscillator();
+      o.type = type;
+      o.frequency.value = freq;
+      o.detune.value = detune;
+      o.connect(g);
+      o.start();
+      oscs.push(o);
+    }
+    this.ambientNodes = { osc: oscs, gain: g };
+  }
+
+  /**
+   * Toggle the jetpack whoosh — bandpass-filtered white noise that fades
+   * in/out instead of cutting hard so quick taps don't click. Calling
+   * with the same value back-to-back is a no-op.
+   */
+  setJetpack(active: boolean) {
+    const ctx = this.ensure();
+    if (!ctx || !this.master) {
+      // Audio is unavailable (e.g. muted). If a previous activation left a
+      // live source running, tear it down BEFORE dropping the handle so the
+      // node doesn't keep running forever and we can't allocate a duplicate
+      // on the next activation. We can still reach the source via the saved
+      // refs even when ensure() refuses to vend a context.
+      if (this.jetpackNodes) {
+        try { this.jetpackNodes.src.stop(); } catch { /* already stopped */ }
+        this.jetpackNodes = null;
+      }
+      return;
+    }
+    if (active && !this.jetpackNodes) {
+      const src = ctx.createBufferSource();
+      src.buffer = this.getNoise(ctx);
+      src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 900;
+      filter.Q.value = 0.6;
+      const g = ctx.createGain();
+      const now = ctx.currentTime;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.07, now + 0.08);
+      src.connect(filter).connect(g).connect(this.master);
+      src.start();
+      this.jetpackNodes = { src, gain: g };
+    } else if (!active && this.jetpackNodes) {
+      const { src, gain } = this.jetpackNodes;
+      const now = ctx.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.14);
+      setTimeout(() => {
+        try { src.stop(); } catch { /* already stopped */ }
+      }, 200);
+      this.jetpackNodes = null;
+    }
+  }
+
+  /**
+   * Set rocket roar intensity (0..1). Lazily creates a low-pass filtered
+   * noise bed + sub-bass sawtooth on first call; subsequent calls just
+   * ramp the gain. Passing 0 fades out and tears down the nodes.
+   */
+  setRocket(intensity: number) {
+    const t = Math.max(0, Math.min(1, intensity));
+    const ctx = this.ensure();
+    if (!ctx || !this.master) return;
+    if (t > 0.001 && !this.rocketNodes) {
+      const src = ctx.createBufferSource();
+      src.buffer = this.getNoise(ctx);
+      src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 420;
+      filter.Q.value = 0.5;
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.value = 48;
+      const g = ctx.createGain();
+      g.gain.value = 0;
+      src.connect(filter).connect(g);
+      osc.connect(g);
+      g.connect(this.master);
+      src.start();
+      osc.start();
+      this.rocketNodes = { src, osc, gain: g };
+    }
+    if (this.rocketNodes) {
+      const now = ctx.currentTime;
+      const target = t * 0.14;
+      this.rocketNodes.gain.gain.cancelScheduledValues(now);
+      this.rocketNodes.gain.gain.linearRampToValueAtTime(target, now + 0.12);
+      if (t <= 0.001) {
+        const { src, osc } = this.rocketNodes;
+        this.rocketNodes = null;
+        setTimeout(() => {
+          try { src.stop(); } catch { /* already stopped */ }
+          try { osc.stop(); } catch { /* already stopped */ }
+        }, 250);
+      }
+    }
+  }
+
+  /** Dialog open — three-note rising chime (C5-E5-G5 triad). */
   open() {
-    this.blip(660, 0.12, "triangle", 0.05);
-    setTimeout(() => this.blip(880, 0.11, "triangle", 0.05), 70);
+    this.blip(523, 0.16, "triangle", 0.05);
+    setTimeout(() => this.blip(659, 0.16, "triangle", 0.05), 60);
+    setTimeout(() => this.blip(784, 0.18, "sine", 0.06), 120);
   }
   /** Dialog close — single descending blip. */
   close() {
