@@ -139,7 +139,51 @@ export default function HUD() {
           <kbd className="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 font-mono text-[10px] text-amber-300">E</kbd>
           <span className="text-emerald-200/60">Enter building</span>
         </div>
+        <div className="flex items-center gap-2 text-emerald-100 mt-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/40 font-mono text-[10px] text-cyan-300">C</kbd>
+          <span className="text-emerald-200/60">Camera view</span>
+        </div>
       </div>
+      <CameraModeIndicator />
+    </div>
+  );
+}
+
+const CAMERA_MODES = [
+  { label: "Chase",     icon: "🎯" },
+  { label: "Cinematic", icon: "🎬" },
+  { label: "Top-Down",  icon: "🛰️" },
+  { label: "Side-Iso",  icon: "📐" },
+] as const;
+
+function CameraModeIndicator() {
+  const cameraMode = useGameStore((s) => s.cameraMode);
+  const setCameraMode = useGameStore((s) => s.setCameraMode);
+  return (
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-cyan-500/25 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,211,238,0.5)] flex items-center gap-2">
+      <span className="font-bold text-cyan-300/90 uppercase tracking-[0.18em] text-[10px] mr-1">View</span>
+      {CAMERA_MODES.map((m, i) => {
+        const active = cameraMode === i;
+        return (
+          <button
+            key={m.label}
+            type="button"
+            onClick={() => setCameraMode(i as 0 | 1 | 2 | 3)}
+            className={
+              "px-2 py-1 rounded font-mono text-[10px] border transition-colors " +
+              (active
+                ? "bg-cyan-500/30 border-cyan-400/60 text-cyan-100 shadow-[0_0_12px_-2px_rgba(34,211,238,0.7)]"
+                : "bg-slate-900/60 border-slate-700/60 text-emerald-200/70 hover:bg-slate-800/80 hover:text-cyan-200")
+            }
+          >
+            <span className="mr-1">{m.icon}</span>
+            {m.label}
+            <span className={"ml-1.5 opacity-60 " + (active ? "text-cyan-200" : "")}>
+              {i + 1}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

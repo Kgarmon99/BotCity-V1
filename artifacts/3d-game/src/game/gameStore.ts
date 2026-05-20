@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { GameState, DialogContent, PurchaseOption, calculateTax } from "./types";
 
+export type CameraMode = 0 | 1 | 2 | 3;
+
 interface GameStore extends GameState {
+  cameraMode: CameraMode;
+  setCameraMode: (m: CameraMode) => void;
+  cycleCamera: () => void;
   startGame: () => void;
   openDialog: (dialog: DialogContent) => void;
   closeDialog: () => void;
@@ -29,6 +34,11 @@ const initialState: GameState = {
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
+  cameraMode: 0,
+
+  setCameraMode: (cameraMode) => set({ cameraMode }),
+  cycleCamera: () =>
+    set((s) => ({ cameraMode: (((s.cameraMode + 1) % 4) as CameraMode) })),
 
   startGame: () => set({ ...initialState, screen: "game" }),
 
