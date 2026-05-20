@@ -3,10 +3,16 @@ import { GameState, DialogContent, PurchaseOption, TaxDocument, calculateTax } f
 
 export type CameraMode = 0 | 1 | 2 | 3 | 4;
 
+export type WeatherMode = "clear" | "rain" | "snow" | "fog";
+const WEATHER_CYCLE: WeatherMode[] = ["clear", "rain", "snow", "fog"];
+
 interface GameStore extends GameState {
   cameraMode: CameraMode;
   setCameraMode: (m: CameraMode) => void;
   cycleCamera: () => void;
+  weather: WeatherMode;
+  setWeather: (w: WeatherMode) => void;
+  cycleWeather: () => void;
   startGame: () => void;
   openDialog: (dialog: DialogContent) => void;
   closeDialog: () => void;
@@ -42,6 +48,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setCameraMode: (cameraMode) => set({ cameraMode }),
   cycleCamera: () =>
     set((s) => ({ cameraMode: (((s.cameraMode + 1) % 5) as CameraMode) })),
+
+  weather: "clear",
+  setWeather: (weather) => set({ weather }),
+  cycleWeather: () =>
+    set((s) => ({
+      weather:
+        WEATHER_CYCLE[(WEATHER_CYCLE.indexOf(s.weather) + 1) % WEATHER_CYCLE.length],
+    })),
 
   startGame: () => set({ ...initialState, screen: "game" }),
 

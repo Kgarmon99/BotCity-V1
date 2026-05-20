@@ -13,6 +13,7 @@ import NPCBots from "./NPCBots";
 import CitizenBots from "./CitizenBots";
 import Billboards from "./Billboards";
 import MoneyRain from "./MoneyRain";
+import Weather, { fogForWeather } from "./Weather";
 import CityDetails from "./CityDetails";
 import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
@@ -502,7 +503,8 @@ export default function GameScene() {
   const playerPos = useRef(new THREE.Vector3(0, 0, 0));
   const playerMoving = useRef(false);
   const [nearBuilding, setNearBuilding] = useState<string | null>(null);
-  const { visitedBuildings, openDialog, income, deductions, withheld, dialog } = useGameStore();
+  const { visitedBuildings, openDialog, income, deductions, withheld, dialog, weather } = useGameStore();
+  const fogParams = fogForWeather(weather);
 
   const handlePositionChange = useCallback(
     (pos: THREE.Vector3) => {
@@ -556,8 +558,8 @@ export default function GameScene() {
           camera={{ position: [0, 10, 14], fov: 55 }}
           gl={{ antialias: true }}
         >
-          <color attach="background" args={["#021410"]} />
-          <fog attach="fog" args={["#052e16", 55, 160]} />
+          <color attach="background" args={[fogParams.background]} />
+          <fog attach="fog" args={[fogParams.color, fogParams.near, fogParams.far]} />
 
           <ambientLight intensity={0.45} color="#22c55e" />
           <directionalLight
@@ -590,6 +592,7 @@ export default function GameScene() {
           <NPCBots />
           <CitizenBots />
           <MoneyRain />
+          <Weather mode={weather} />
 
           {buildings.map((b) => (
             <Building

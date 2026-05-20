@@ -212,6 +212,7 @@ export default function HUD() {
       </div>
 
       <SoundToggle />
+      <WeatherToggle />
       <MiniMap />
       <TouchControls />
 
@@ -341,6 +342,33 @@ function FormLine({
         {sign}${Math.abs(value).toLocaleString()}
       </span>
     </div>
+  );
+}
+
+// Cycles the city weather: clear ☀️ → rain 🌧 → snow ❄️ → fog 🌫
+function WeatherToggle() {
+  const weather = useGameStore((s) => s.weather);
+  const cycleWeather = useGameStore((s) => s.cycleWeather);
+  const icon =
+    weather === "rain" ? "🌧️" : weather === "snow" ? "❄️" : weather === "fog" ? "🌫️" : "☀️";
+  const label =
+    weather === "rain"
+      ? "Rain"
+      : weather === "snow"
+      ? "Snow"
+      : weather === "fog"
+      ? "Fog"
+      : "Clear";
+  return (
+    <button
+      type="button"
+      onClick={cycleWeather}
+      className="fixed top-16 right-4 z-20 pointer-events-auto bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)] hover:bg-slate-900/90 transition-colors flex items-center gap-1.5"
+      title={`Weather: ${label} — click to cycle`}
+    >
+      <span>{icon}</span>
+      <span className="text-emerald-200/70 hidden sm:inline">{label}</span>
+    </button>
   );
 }
 
