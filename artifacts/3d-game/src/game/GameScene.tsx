@@ -14,6 +14,7 @@ import MoneyRain from "./MoneyRain";
 import CityDetails from "./CityDetails";
 import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
+import RoadGrid from "./RoadGrid";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -146,6 +147,7 @@ export default function GameScene() {
           <FollowCamera target={playerPos} />
           <Skybox />
           <World />
+          <RoadGrid />
           <CityDetails />
           <CityBuildings />
           <Statues />

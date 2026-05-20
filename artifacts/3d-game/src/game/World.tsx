@@ -294,28 +294,6 @@ export default function World() {
       {/* Glowing green grid overlay */}
       <GridFloor />
 
-      {/* Neon green roads */}
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
-        <planeGeometry args={[3, 90]} />
-        <meshStandardMaterial
-          color="#052e16"
-          emissive="#22c55e"
-          emissiveIntensity={0.6}
-          metalness={0.5}
-          roughness={0.3}
-        />
-      </mesh>
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
-        <planeGeometry args={[90, 3]} />
-        <meshStandardMaterial
-          color="#052e16"
-          emissive="#4ade80"
-          emissiveIntensity={0.6}
-          metalness={0.5}
-          roughness={0.3}
-        />
-      </mesh>
-
       {/* Central plaza with aura */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
         <ringGeometry args={[2.5, 4, 32]} />
