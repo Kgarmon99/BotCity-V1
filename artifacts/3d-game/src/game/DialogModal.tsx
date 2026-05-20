@@ -47,8 +47,11 @@ export default function DialogModal() {
   const handlePurchase = (item: PurchaseOption) => {
     if (alreadyBought(item.id)) return;
     makePurchase(item);
-    if (!useGameStore.getState().visitedBuildings.includes("taxmart")) {
-      visitBuilding("taxmart");
+    // Mark the active building visited on first purchase (works for TaxMart,
+    // BotDealer, and any future option-based dialog).
+    const bid = dialog.buildingId;
+    if (bid && !useGameStore.getState().visitedBuildings.includes(bid)) {
+      visitBuilding(bid);
     }
   };
 

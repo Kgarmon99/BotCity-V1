@@ -8,6 +8,7 @@ const BUILDINGS = [
   { id: "university", emoji: "🎓", label: "MoneyBot U" },
   { id: "bottrain", emoji: "🚆", label: "BotTrain" },
   { id: "botplane", emoji: "✈️", label: "BotPlane" },
+  { id: "botdealer", emoji: "🚗", label: "BotDealer" },
   { id: "botstadium", emoji: "🏟️", label: "BotStadium" },
   { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
   { id: "botbeach", emoji: "🏖️", label: "BotBeach" },

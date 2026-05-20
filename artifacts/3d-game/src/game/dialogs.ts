@@ -113,6 +113,44 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "shops",
   }),
 
+  botdealer: () => ({
+    buildingId: "botdealer",
+    title: "🚗 BotDealer — Buy a BotMobile",
+    body: `Welcome to BotDealer! Buying a vehicle is a tax-loaded decision. Each BotMobile below carries different tax consequences. Read carefully before you pick one off the lot.\n\n📖 PERSONAL USE:\nA daily driver is a personal expense. You pay sales tax at purchase, but the car itself is NOT deductible. Commuting between home and your regular workplace is also NEVER deductible — no matter how fancy the car.\n\n📖 BUSINESS USE:\nIf the vehicle is used for business (NOT commuting), you have two options:\n• Standard mileage rate: 67¢/mile in 2024\n• Actual expenses: gas, insurance, maintenance, depreciation, Section 179\nSection 179 lets you deduct a large chunk of the cost in year one — for heavier vehicles (>6,000 lbs GVWR) the limit is more generous.\n\n📖 EV TAX CREDIT (the big one):\nQualified new clean vehicles can earn a federal credit up to $7,500. Credits beat deductions: a $7,500 credit reduces your TAX by $7,500. A $7,500 deduction at the 12% bracket only saves you $900. Big difference. Income limits and battery sourcing rules apply.`,
+    options: [
+      {
+        id: "botmobile_commuter",
+        name: "BotMobile Commuter — Daily Driver ($25,000)",
+        cost: 25000,
+        deductible: false,
+        deductibleAmount: 0,
+        reason:
+          "Personal vehicle for commuting. NOT deductible — commuting is always a personal expense. (You still pay sales tax.)",
+        category: "Personal",
+      },
+      {
+        id: "botmobile_pro",
+        name: "BotMobile Pro — 100% Business Use ($35,000)",
+        cost: 35000,
+        deductible: true,
+        deductibleAmount: 12000,
+        reason:
+          "Used exclusively for business. Eligible for Section 179 — deducting ~$12,000 in year one (depreciation continues in later years).",
+        category: "Business",
+      },
+      {
+        id: "botmobile_ev",
+        name: "BotMobile EV — Qualified Clean Vehicle ($40,000)",
+        cost: 40000,
+        deductible: true,
+        deductibleAmount: 7500,
+        reason:
+          "Qualifies for the federal Clean Vehicle Credit up to $7,500. Note: a real CREDIT reduces tax dollar-for-dollar — way more powerful than the deduction this game models.",
+        category: "EV Credit",
+      },
+    ],
+  }),
+
   botplane: () => ({
     buildingId: "botplane",
     title: "✈️ BotPlane Airport — Business Travel Deductions",

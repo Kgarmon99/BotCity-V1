@@ -151,8 +151,9 @@ const buildings: BuildingSpec[] = [
   // East column (x ≈ 27)
   { pos: [ 27, 0,  -9], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 9,  shape: "pyramid", color: "#22d3ee", beaconColor: "#67e8f9" },
   { pos: [ 27, 0,   9], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
-  // North row (z ≈ -27): face south (rotY = 0)
-  { pos: [ -9, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 9,  shape: "dome",    color: "#fbbf24", beaconColor: "#fde047" },
+  // North row (z ≈ -27): face south (rotY = 0).
+  // The (-9, -27) filler was removed to make room for BotDealer showroom + lot
+  // (see CityDistricts.tsx and BUILDING_DEFS in GameScene.tsx).
   { pos: [  9, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 12, shape: "tower",   color: "#a78bfa", beaconColor: "#c4b5fd" },
   // South row (z ≈ 27)
   { pos: [ -9, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 11, shape: "box",     color: "#f472b6", beaconColor: "#f9a8d4" },

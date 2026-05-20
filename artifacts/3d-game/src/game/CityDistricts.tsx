@@ -412,6 +412,165 @@ function ShopsCluster() {
   );
 }
 
+// ===== BotDealer @ (-9, 0, -27) ======================================
+// Showroom is rendered by Building.tsx via BUILDING_DEFS; this component
+// adds the parking lot, cars, flagpole, and signage around it. Cars sit
+// south of the showroom in a parking lot from z=-26..-22.
+function BotMobile({
+  pos,
+  color,
+  accent,
+  taillight = "#ef4444",
+}: {
+  pos: [number, number, number];
+  color: string;
+  accent: string;
+  taillight?: string;
+}) {
+  return (
+    <group position={pos}>
+      {/* Lower body */}
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <boxGeometry args={[2, 0.55, 1.05]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={accent}
+          emissiveIntensity={0.35}
+          metalness={0.75}
+          roughness={0.3}
+        />
+      </mesh>
+      {/* Cabin / canopy */}
+      <mesh position={[-0.1, 0.95, 0]} castShadow>
+        <boxGeometry args={[1.2, 0.5, 0.92]} />
+        <meshStandardMaterial
+          color="#0b1220"
+          emissive={accent}
+          emissiveIntensity={0.55}
+          metalness={0.5}
+          roughness={0.35}
+        />
+      </mesh>
+      {/* Front headlight bar */}
+      <mesh position={[1.01, 0.45, 0]}>
+        <boxGeometry args={[0.04, 0.12, 0.75]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={2.2}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Rear taillight bar */}
+      <mesh position={[-1.01, 0.45, 0]}>
+        <boxGeometry args={[0.04, 0.12, 0.75]} />
+        <meshStandardMaterial
+          color={taillight}
+          emissive={taillight}
+          emissiveIntensity={1.8}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Wheels */}
+      {[
+        [-0.7, -0.55],
+        [0.7, -0.55],
+        [-0.7, 0.55],
+        [0.7, 0.55],
+      ].map(([wx, wz], i) => (
+        <mesh
+          key={`wheel-${i}`}
+          position={[wx, 0.22, wz]}
+          rotation={[Math.PI / 2, 0, 0]}
+          castShadow
+        >
+          <cylinderGeometry args={[0.22, 0.22, 0.18, 12]} />
+          <meshStandardMaterial color="#0a0a0a" roughness={0.7} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Dealer() {
+  const flagRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    if (flagRef.current) {
+      flagRef.current.rotation.y = Math.sin(s.clock.elapsedTime * 1.6) * 0.25;
+    }
+  });
+  return (
+    <group position={[-9, 0, -27]}>
+      {/* Parking lot tarmac — south of the showroom */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 3]}>
+        <planeGeometry args={[7.5, 4]} />
+        <meshStandardMaterial color="#1f2937" emissive="#4ade80" emissiveIntensity={0.12} />
+      </mesh>
+      {/* Parking line stripes (3 bays for 3 cars) */}
+      {[-2.4, -0.8, 0.8, 2.4].map((x, i) => (
+        <mesh
+          key={`line-${i}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[x, 0.05, 3]}
+        >
+          <planeGeometry args={[0.08, 3.6]} />
+          <meshStandardMaterial
+            color="#fde047"
+            emissive="#fde047"
+            emissiveIntensity={1.5}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+      {/* 3 BotMobiles on display */}
+      <BotMobile pos={[-1.6, 0, 3.5]} color="#22d3ee" accent="#67e8f9" />
+      <BotMobile pos={[0, 0, 3.5]} color="#dc2626" accent="#fde047" />
+      <BotMobile pos={[1.6, 0, 3.5]} color="#a78bfa" accent="#22c55e" />
+      {/* Flagpole + waving flag */}
+      <mesh position={[3.6, 4, 0]}>
+        <cylinderGeometry args={[0.07, 0.07, 8, 6]} />
+        <meshStandardMaterial color="#0b1220" metalness={0.85} />
+      </mesh>
+      <mesh ref={flagRef} position={[3.6, 7.4, 0]}>
+        <group position={[0.5, 0, 0]}>
+          <mesh>
+            <boxGeometry args={[1, 0.7, 0.04]} />
+            <meshStandardMaterial
+              color="#fbbf24"
+              emissive="#fbbf24"
+              emissiveIntensity={1.2}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </group>
+      </mesh>
+      {/* Big neon dealer sign above the lot */}
+      <Text
+        position={[0, 5.8, 2.6]}
+        fontSize={0.45}
+        color="#fde047"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#dc2626"
+      >
+        🚗 BOTDEALER 🚗
+      </Text>
+      <Text
+        position={[0, 5.3, 2.6]}
+        fontSize={0.22}
+        color="#22d3ee"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#0b1220"
+      >
+        BotMobiles · 0% APR · No Money Down
+      </Text>
+    </group>
+  );
+}
+
 export default function CityDistricts() {
   return (
     <group>
@@ -419,6 +578,7 @@ export default function CityDistricts() {
       <Market />
       <Beach />
       <ShopsCluster />
+      <Dealer />
     </group>
   );
 }

@@ -152,6 +152,20 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 3,
     emoji: "🏪",
   },
+  {
+    id: "botdealer",
+    label: "BotDealer",
+    // North middle-ring, replaces the removed filler at (-9, -27). Showroom
+    // footprint x=-11.5..-6.5, z=-29..-25. Parking lot + cars rendered south
+    // of the building in CityDistricts.tsx (z = -26..-22).
+    position: [-9, 2.5, -27],
+    color: "#22d3ee",
+    roofColor: "#fde047",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🚗",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;

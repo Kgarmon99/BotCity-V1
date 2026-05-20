@@ -38,6 +38,12 @@ const FEATURES = [
     accent: "from-sky-500/12 to-emerald-500/5 border-sky-400/30",
   },
   {
+    emoji: "🚗",
+    title: "Buy a Car",
+    desc: "EV credits & Section 179 at BotDealer",
+    accent: "from-cyan-500/12 to-amber-500/5 border-cyan-400/30",
+  },
+  {
     emoji: "🏟️",
     title: "Entertain",
     desc: "TCJA & gambling at BotStadium",
