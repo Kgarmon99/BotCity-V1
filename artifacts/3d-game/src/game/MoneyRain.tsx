@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 const COUNT = 200;
-const AREA = 50;
+const AREA = 70;
 const HEIGHT = 25;
 
 export default function MoneyRain() {

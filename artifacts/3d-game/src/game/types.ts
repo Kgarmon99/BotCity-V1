@@ -31,7 +31,11 @@ export interface DialogContent {
     | "hospital"
     | "charity"
     | "crypto"
-    | "retirement";
+    | "retirement"
+    | "haus"
+    | "broker"
+    | "kids"
+    | "gigs";
   amount?: number;
 }
 

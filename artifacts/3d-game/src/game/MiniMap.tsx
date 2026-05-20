@@ -9,7 +9,7 @@ import { playerTracker } from "./playerTracker";
 // outermost buildings (botfarm) sit at ±41. We map this ±48 box to a square
 // SVG so blips always fit comfortably inside the radar even at the edge.
 
-const WORLD_EXTENT = 48;
+const WORLD_EXTENT = 68;
 const RADAR_SIZE = 168; // px
 
 function worldToRadar(wx: number, wz: number) {

@@ -24,6 +24,10 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   botretirement: { id: "5498", code: "5498", label: "IRA contributions", icon: "🏛️", line: "20" },
   botcrypto: { id: "1099b", code: "1099-B", label: "Crypto cap gains", icon: "₿", line: "Sch D" },
   botcharity: { id: "donation", code: "Donation", label: "Charity receipts", icon: "❤️", line: "11" },
+  bothaus: { id: "1098", code: "1098", label: "Mortgage interest statement", icon: "🏠", line: "Sch A" },
+  botbroker: { id: "1099div", code: "1099-DIV/B", label: "Dividends & cap gains", icon: "📈", line: "Sch D" },
+  botkids: { id: "ctc", code: "CTC", label: "Child Tax Credit worksheet", icon: "🧒", line: "19" },
+  botgigs: { id: "1099nec", code: "1099-NEC", label: "Self-employment income", icon: "🛵", line: "Sch C" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -83,6 +87,10 @@ export default function DialogModal() {
     charity: "botcharity",
     crypto: "botcrypto",
     retirement: "botretirement",
+    haus: "bothaus",
+    broker: "botbroker",
+    kids: "botkids",
+    gigs: "botgigs",
   };
 
   const handleAction = () => {
@@ -242,6 +250,10 @@ const ACTION_LABELS: Record<string, string> = {
   charity: "Thank You ❤️",
   crypto: "HODL ₿",
   retirement: "Save & Grow 🏛️",
+  haus: "Home Sweet Home 🏠",
+  broker: "Bull Run 📈",
+  kids: "Claim the Credit 🧒",
+  gigs: "Quarterly Payment 🛵",
 };
 
 function actionButtonLabel(action: string, income: number): string {

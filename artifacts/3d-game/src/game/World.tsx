@@ -189,7 +189,7 @@ function GridFloor() {
   return (
     <gridHelper
       ref={gridRef}
-      args={[110, 110, "#4ade80", "#16a34a"]}
+      args={[150, 150, "#4ade80", "#16a34a"]}
       position={[0, 0.01, 0]}
     />
   );
@@ -302,7 +302,7 @@ export default function World() {
     <group>
       {/* Dark emerald ground */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[110, 110]} />
+        <planeGeometry args={[150, 150]} />
         <meshStandardMaterial color="#042f1f" roughness={0.4} metalness={0.5} />
       </mesh>
 
@@ -376,16 +376,17 @@ export default function World() {
         <DistantTower key={`tower-${i}`} pos={t.pos} height={t.height} color={t.color} />
       ))}
 
-      {/* Boundary glowing rails */}
-      {[-45, 45].map((x) => (
+      {/* Boundary glowing rails — extended to ±65 to wrap the expanded
+          suburbs ring (BotHaus / BotBroker / BotKids / BotGigs). */}
+      {[-65, 65].map((x) => (
         <mesh key={`fx${x}`} position={[x, 0.5, 0]} castShadow>
-          <boxGeometry args={[0.15, 1, 90]} />
+          <boxGeometry args={[0.15, 1, 130]} />
           <meshStandardMaterial color="#052e16" emissive="#22c55e" emissiveIntensity={1.2} toneMapped={false} />
         </mesh>
       ))}
-      {[-45, 45].map((z) => (
+      {[-65, 65].map((z) => (
         <mesh key={`fz${z}`} position={[0, 0.5, z]} castShadow>
-          <boxGeometry args={[90, 1, 0.15]} />
+          <boxGeometry args={[130, 1, 0.15]} />
           <meshStandardMaterial color="#052e16" emissive="#4ade80" emissiveIntensity={1.2} toneMapped={false} />
         </mesh>
       ))}

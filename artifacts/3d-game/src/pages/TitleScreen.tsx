@@ -50,6 +50,30 @@ const FEATURES = [
     accent: "from-red-500/12 to-amber-500/5 border-red-400/30",
   },
   {
+    emoji: "🏥",
+    title: "Health",
+    desc: "HSAs & medical at BotHospital",
+    accent: "from-rose-500/12 to-emerald-500/5 border-rose-400/30",
+  },
+  {
+    emoji: "❤️",
+    title: "Charity",
+    desc: "Donations & QCDs at BotCharity",
+    accent: "from-pink-500/12 to-emerald-500/5 border-pink-400/30",
+  },
+  {
+    emoji: "₿",
+    title: "Crypto",
+    desc: "Cap gains & wash sales at BotCrypto",
+    accent: "from-amber-500/15 to-emerald-500/5 border-amber-400/30",
+  },
+  {
+    emoji: "🏛️",
+    title: "Retire",
+    desc: "401(k), Roth & RMDs at BotRetirement",
+    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
+  },
+  {
     emoji: "🛍️",
     title: "SE Tax",
     desc: "Self-employment at BotMarket",
@@ -72,6 +96,30 @@ const FEATURES = [
     title: "Farm",
     desc: "Schedule F & Section 179 at BotFarm",
     accent: "from-lime-500/12 to-amber-500/10 border-lime-400/30",
+  },
+  {
+    emoji: "🏠",
+    title: "Homeowner",
+    desc: "Mortgage & SALT at BotHaus",
+    accent: "from-sky-500/12 to-amber-500/5 border-sky-400/30",
+  },
+  {
+    emoji: "📈",
+    title: "Invest",
+    desc: "RSUs & dividends at BotBroker",
+    accent: "from-indigo-500/15 to-amber-500/10 border-indigo-400/30",
+  },
+  {
+    emoji: "🧒",
+    title: "Family",
+    desc: "CTC & 529 plans at BotKids",
+    accent: "from-orange-500/12 to-emerald-500/5 border-orange-400/30",
+  },
+  {
+    emoji: "🛵",
+    title: "Gig Work",
+    desc: "1099 & SE tax at BotGigs",
+    accent: "from-purple-500/12 to-emerald-500/5 border-purple-400/30",
   },
   {
     emoji: "🏢",
@@ -165,7 +213,7 @@ export default function TitleScreen() {
             <span className="text-emerald-500/30">•</span>
             <div className="flex items-center gap-2 text-emerald-100/80">
               <span className="text-amber-300 text-sm">🎯</span>
-              <span className="text-xs">Visit all 4 to win</span>
+              <span className="text-xs">Visit every building to win</span>
             </div>
           </div>
 

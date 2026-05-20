@@ -255,6 +255,63 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 5,
     emoji: "❤️",
   },
+  // ─── Outer suburbs ring (±55, offset 6u from main avenues) ─────────────
+  // Beyond the middle ring sits the expanded "suburbs" — four landmarks
+  // covering tax topics that weren't yet represented (home ownership,
+  // brokerage, dependents/CTC, and 1099 gig work). Each is bigger than
+  // the kiosks to read as a "destination" from far away.
+  {
+    id: "bothaus",
+    label: "BotHaus",
+    // North suburbs. Offset +6 in x to clear the N-S avenue at x=0.
+    // Footprint x[3..9] z[-58..-52].
+    position: [6, 3, -55],
+    color: "#0ea5e9",
+    roofColor: "#fde047",
+    width: 6,
+    depth: 6,
+    height: 6,
+    emoji: "🏠",
+  },
+  {
+    id: "botbroker",
+    label: "BotBroker",
+    // East suburbs (financial district). Offset -6 in z to clear the E-W
+    // avenue at z=0. Footprint x[52..58] z[-9..-3].
+    position: [55, 3, -6],
+    color: "#1e3a8a",
+    roofColor: "#fbbf24",
+    width: 6,
+    depth: 6,
+    height: 8,
+    emoji: "📈",
+  },
+  {
+    id: "botkids",
+    label: "BotKids",
+    // South suburbs (family district). Offset -6 in x to clear x=0.
+    // Footprint x[-9..-3] z[52..58].
+    position: [-6, 3, 55],
+    color: "#f97316",
+    roofColor: "#86efac",
+    width: 6,
+    depth: 6,
+    height: 5,
+    emoji: "🧒",
+  },
+  {
+    id: "botgigs",
+    label: "BotGigs",
+    // West suburbs (gig economy hub). Offset +6 in z to clear z=0.
+    // Footprint x[-58..-52] z[3..9].
+    position: [-55, 3, 6],
+    color: "#a855f7",
+    roofColor: "#fde047",
+    width: 6,
+    depth: 6,
+    height: 6,
+    emoji: "🛵",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;
@@ -381,7 +438,7 @@ export default function GameScene() {
           gl={{ antialias: true }}
         >
           <color attach="background" args={["#021410"]} />
-          <fog attach="fog" args={["#052e16", 40, 110]} />
+          <fog attach="fog" args={["#052e16", 55, 160]} />
 
           <ambientLight intensity={0.45} color="#22c55e" />
           <directionalLight
@@ -390,7 +447,7 @@ export default function GameScene() {
             color="#86efac"
             castShadow
             shadow-mapSize={[2048, 2048]}
-            shadow-camera-far={80}
+            shadow-camera-far={120}
             shadow-camera-left={-30}
             shadow-camera-right={30}
             shadow-camera-top={30}

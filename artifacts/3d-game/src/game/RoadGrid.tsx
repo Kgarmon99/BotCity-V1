@@ -74,7 +74,7 @@ function Streetlight({ position }: { position: [number, number, number] }) {
   );
 }
 
-const HALF = 45;       // city half-extent
+const HALF = 65;       // city half-extent (extended for suburbs ring)
 const MAIN_W = 3;      // main avenue width
 const SEC_W = 2.2;     // secondary street width
 
