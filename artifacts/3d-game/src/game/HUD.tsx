@@ -147,6 +147,7 @@ export default function HUD() {
           <kbd className="px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-400/40 font-mono text-[10px] text-rose-300">SPACE</kbd>
           <span className="text-emerald-200/60">Ride BotMobile 🚗</span>
         </div>
+        <OrbitHint />
       </div>
       <CameraModeIndicator />
     </div>
@@ -158,7 +159,26 @@ const CAMERA_MODES = [
   { label: "Cinematic", icon: "🎬" },
   { label: "Aerial",    icon: "🛰️" },
   { label: "Side-Iso",  icon: "📐" },
+  { label: "Orbit",     icon: "🔄" },
 ] as const;
+
+// Only shown while Orbit camera mode is active.
+function OrbitHint() {
+  const cameraMode = useGameStore((s) => s.cameraMode);
+  if (cameraMode !== 4) return null;
+  return (
+    <>
+      <div className="flex items-center gap-2 text-emerald-100 mt-1">
+        <kbd className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 font-mono text-[10px] text-purple-200">DRAG</kbd>
+        <span className="text-emerald-200/60">Look around 360°</span>
+      </div>
+      <div className="flex items-center gap-2 text-emerald-100 mt-1">
+        <kbd className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 font-mono text-[10px] text-purple-200">SCROLL</kbd>
+        <span className="text-emerald-200/60">Zoom in / out</span>
+      </div>
+    </>
+  );
+}
 
 function CameraModeIndicator() {
   const cameraMode = useGameStore((s) => s.cameraMode);
@@ -172,7 +192,7 @@ function CameraModeIndicator() {
           <button
             key={m.label}
             type="button"
-            onClick={() => setCameraMode(i as 0 | 1 | 2 | 3)}
+            onClick={() => setCameraMode(i as 0 | 1 | 2 | 3 | 4)}
             className={
               "px-2 py-1 rounded font-mono text-[10px] border transition-colors " +
               (active

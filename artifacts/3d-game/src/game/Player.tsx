@@ -3,6 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import MoneyBot from "./MoneyBot";
 import { BotMobile } from "./CityDistricts";
+import { useGameStore } from "./gameStore";
+import { cameraInput } from "./cameraInput";
 
 interface Keys {
   forward: boolean;
@@ -26,6 +28,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false });
   const ridingRef = useRef(false);
   const [riding, setRiding] = useState(false);
+  const cameraMode = useGameStore((s) => s.cameraMode);
 
   useEffect(() => {
     // Ignore game keys while the user is typing in a form input.
@@ -91,10 +94,27 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
     const { forward, back, left, right } = keys.current;
     const dir = new THREE.Vector3();
 
-    if (forward) dir.z -= 1;
-    if (back)    dir.z += 1;
-    if (left)    dir.x -= 1;
-    if (right)   dir.x += 1;
+    if (cameraMode === 4) {
+      // Orbit mode: WASD is camera-relative — pressing W moves the player
+      // "into the screen" regardless of which way the camera is yawed.
+      // Camera sits at offset (sin(yaw), *, cos(yaw)) from player, so the
+      // "away from camera" direction is -(sin(yaw), cos(yaw)).
+      const yaw = cameraInput.yaw;
+      const fx = -Math.sin(yaw);
+      const fz = -Math.cos(yaw);
+      // Right vector = forward rotated 90° clockwise (viewed from above)
+      const rx = -fz;
+      const rz = fx;
+      if (forward) { dir.x += fx; dir.z += fz; }
+      if (back)    { dir.x -= fx; dir.z -= fz; }
+      if (right)   { dir.x += rx; dir.z += rz; }
+      if (left)    { dir.x -= rx; dir.z -= rz; }
+    } else {
+      if (forward) dir.z -= 1;
+      if (back)    dir.z += 1;
+      if (left)    dir.x -= 1;
+      if (right)   dir.x += 1;
+    }
 
     if (dir.length() > 0) dir.normalize();
     const speed = ridingRef.current ? RIDE_SPEED : WALK_SPEED;

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { GameState, DialogContent, PurchaseOption, calculateTax } from "./types";
 
-export type CameraMode = 0 | 1 | 2 | 3;
+export type CameraMode = 0 | 1 | 2 | 3 | 4;
 
 interface GameStore extends GameState {
   cameraMode: CameraMode;
@@ -38,7 +38,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setCameraMode: (cameraMode) => set({ cameraMode }),
   cycleCamera: () =>
-    set((s) => ({ cameraMode: (((s.cameraMode + 1) % 4) as CameraMode) })),
+    set((s) => ({ cameraMode: (((s.cameraMode + 1) % 5) as CameraMode) })),
 
   startGame: () => set({ ...initialState, screen: "game" }),
 
