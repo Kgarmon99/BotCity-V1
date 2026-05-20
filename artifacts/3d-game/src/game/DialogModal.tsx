@@ -27,6 +27,18 @@ export default function DialogModal() {
     } else if (dialog.action === "plane") {
       visitBuilding("botplane");
       closeDialog();
+    } else if (dialog.action === "stadium") {
+      visitBuilding("botstadium");
+      closeDialog();
+    } else if (dialog.action === "market") {
+      visitBuilding("botmarket");
+      closeDialog();
+    } else if (dialog.action === "beach") {
+      visitBuilding("botbeach");
+      closeDialog();
+    } else if (dialog.action === "shops") {
+      visitBuilding("botshops");
+      closeDialog();
     } else {
       closeDialog();
     }
@@ -134,6 +146,14 @@ export default function DialogModal() {
                 ? "All Aboard 🚆"
                 : dialog.action === "plane"
                 ? "Cleared for Takeoff ✈️"
+                : dialog.action === "stadium"
+                ? "Game Over 🏟️"
+                : dialog.action === "market"
+                ? "Cha-ching 🛍️"
+                : dialog.action === "beach"
+                ? "Back to Work 🏖️"
+                : dialog.action === "shops"
+                ? "Open for Business 🏪"
                 : "Got it!"}
             </button>
           )}

@@ -16,6 +16,7 @@ import CityDetails from "./CityDetails";
 import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
 import CityExpansion from "./CityExpansion";
+import CityDistricts from "./CityDistricts";
 import RoadGrid from "./RoadGrid";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
@@ -102,6 +103,54 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     depth: 4,
     height: 5,
     emoji: "✈️",
+  },
+  // ─── Middle-ring district kiosks (entry markers for the 4 new districts) ───
+  // Each kiosk sits at the south edge of its district at z = ∓20.5, in the
+  // 2-unit gap between the secondary street z=±18 band (16.9..19.1 / -19.1..-16.9)
+  // and the district structure starting at z = ∓21.5.
+  {
+    id: "botstadium",
+    label: "BotStadium",
+    position: [-27, 1.5, -20.5],
+    color: "#dc2626",
+    roofColor: "#fde047",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🏟️",
+  },
+  {
+    id: "botmarket",
+    label: "BotMarket",
+    position: [27, 1.5, -20.5],
+    color: "#f97316",
+    roofColor: "#fde68a",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🛍️",
+  },
+  {
+    id: "botbeach",
+    label: "BotBeach",
+    position: [27, 1.5, 20.5],
+    color: "#22d3ee",
+    roofColor: "#fcd34d",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🏖️",
+  },
+  {
+    id: "botshops",
+    label: "BotShops",
+    position: [-27, 1.5, 20.5],
+    color: "#a855f7",
+    roofColor: "#f9a8d4",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🏪",
   },
 ];
 
@@ -254,6 +303,7 @@ export default function GameScene() {
           <CityDetails />
           <CityBuildings />
           <CityExpansion />
+          <CityDistricts />
           <Statues />
           <Billboards />
           <NPCBots />

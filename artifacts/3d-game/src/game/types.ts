@@ -15,7 +15,17 @@ export interface DialogContent {
   title: string;
   body: string;
   options?: PurchaseOption[];
-  action?: "earn" | "file" | "bank" | "study" | "train" | "plane";
+  action?:
+    | "earn"
+    | "file"
+    | "bank"
+    | "study"
+    | "train"
+    | "plane"
+    | "stadium"
+    | "market"
+    | "beach"
+    | "shops";
   amount?: number;
 }
 

@@ -142,26 +142,21 @@ const buildings: BuildingSpec[] = [
 
   // MIDDLE RING — between secondary streets (±18) and outer ring (±36)
   // All offsets avoid main avenues (x=0, z=0) and secondary streets (x=±18, z=±18)
+  // The four corners (±27, ±27) host the new districts (Stadium / Market / Beach /
+  // Shops), so the adjacent fillers at (±27, ∓23) and (±23, ∓27) were removed
+  // to clear room for them. See CityDistricts.tsx.
   // West column (x ≈ -27): face east (rotY = π/2) toward x=-18 street
-  { pos: [-27, 0, -23], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 10, shape: "tower",   color: "#a78bfa", beaconColor: "#c4b5fd" },
   { pos: [-27, 0,  -9], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#22c55e", beaconColor: "#4ade80" },
   { pos: [-27, 0,   9], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 8,  shape: "dome",    color: "#f472b6", beaconColor: "#f9a8d4" },
-  { pos: [-27, 0,  23], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 11, shape: "tower",   color: "#22d3ee", beaconColor: "#67e8f9" },
   // East column (x ≈ 27)
-  { pos: [ 27, 0, -23], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 11, shape: "tower",   color: "#fbbf24", beaconColor: "#fde047" },
   { pos: [ 27, 0,  -9], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 9,  shape: "pyramid", color: "#22d3ee", beaconColor: "#67e8f9" },
   { pos: [ 27, 0,   9], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
-  { pos: [ 27, 0,  23], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 10, shape: "cylinder",color: "#a78bfa", beaconColor: "#c4b5fd" },
   // North row (z ≈ -27): face south (rotY = 0)
-  { pos: [-23, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 10, shape: "tower",   color: "#22d3ee", beaconColor: "#67e8f9" },
   { pos: [ -9, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 9,  shape: "dome",    color: "#fbbf24", beaconColor: "#fde047" },
   { pos: [  9, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 12, shape: "tower",   color: "#a78bfa", beaconColor: "#c4b5fd" },
-  { pos: [ 23, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 11, shape: "box",     color: "#22c55e", beaconColor: "#4ade80" },
   // South row (z ≈ 27)
-  { pos: [-23, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 10, shape: "cylinder",color: "#22c55e", beaconColor: "#4ade80" },
   { pos: [ -9, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 11, shape: "box",     color: "#f472b6", beaconColor: "#f9a8d4" },
   { pos: [  9, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 9,  shape: "pyramid", color: "#fbbf24", beaconColor: "#fde047" },
-  { pos: [ 23, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 12, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
 
   // OUTER RING — beyond ±36 streets — taller skyscrapers, facing inward
   // West outer (x ≈ -41)

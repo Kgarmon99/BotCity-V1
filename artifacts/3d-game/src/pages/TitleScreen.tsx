@@ -38,6 +38,30 @@ const FEATURES = [
     accent: "from-sky-500/12 to-emerald-500/5 border-sky-400/30",
   },
   {
+    emoji: "🏟️",
+    title: "Entertain",
+    desc: "TCJA & gambling at BotStadium",
+    accent: "from-red-500/12 to-amber-500/5 border-red-400/30",
+  },
+  {
+    emoji: "🛍️",
+    title: "SE Tax",
+    desc: "Self-employment at BotMarket",
+    accent: "from-amber-500/12 to-emerald-500/5 border-amber-400/30",
+  },
+  {
+    emoji: "🏖️",
+    title: "Vacation",
+    desc: "Personal vs business at BotBeach",
+    accent: "from-cyan-500/12 to-emerald-500/5 border-cyan-400/30",
+  },
+  {
+    emoji: "🏪",
+    title: "Hobby?",
+    desc: "Hobby vs business at BotShops",
+    accent: "from-fuchsia-500/12 to-emerald-500/5 border-fuchsia-400/30",
+  },
+  {
     emoji: "📋",
     title: "File",
     desc: "Submit your return at the IRS",

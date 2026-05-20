@@ -85,6 +85,34 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "train",
   }),
 
+  botstadium: () => ({
+    buildingId: "botstadium",
+    title: "🏟️ BotStadium — Entertainment & Gambling Taxes",
+    body: `Welcome to BotStadium — home of the BotCity Robots! Today's lesson covers two stadium-flavored tax topics.\n\n📖 ENTERTAINMENT EXPENSES (the big TCJA change):\nBefore 2018, businesses could deduct 50% of entertainment costs — concert tickets, sports box seats, golf outings with clients. The Tax Cuts and Jobs Act killed that. Today, client entertainment is generally NOT deductible at all. Meals are still 50% deductible if there's a clear business purpose.\n\n📖 GAMBLING WINNINGS — TAXABLE INCOME:\nThat lucky parlay you hit? It's taxable. Casinos and sportsbooks issue Form W-2G when you win $600+ (and the threshold varies by game). You report ALL winnings, even small ones — not just the W-2G amount.\n\n📖 GAMBLING LOSSES — LIMITED DEDUCTION:\nYou can deduct losses ONLY if you itemize, and only up to the amount of your winnings for the year. So if you won $1,000 and lost $1,500, you can only deduct $1,000. The other $500 is gone.\n\n💡 Lesson: Sports tickets aren't deductible. Gambling winnings are taxable. Keep a log if you gamble seriously.`,
+    action: "stadium",
+  }),
+
+  botmarket: () => ({
+    buildingId: "botmarket",
+    title: "🛍️ BotMarket — Self-Employment & Sales Tax",
+    body: `Welcome to BotMarket! Selling stuff sounds simple — until tax season. Here's what every market vendor needs to know.\n\n📖 SELF-EMPLOYMENT TAX:\nIf you sell goods or services for profit, you owe SELF-EMPLOYMENT tax — 15.3% on net earnings (12.4% Social Security + 2.9% Medicare). That's ON TOP of regular income tax. Why? Because there's no employer to split FICA with you; you cover both halves.\n\n📖 SALES TAX vs INCOME TAX:\nSales tax is collected FROM your customers and remitted to your state — it's never your money. Income tax is on YOUR net profit (revenue minus expenses).\n\n📖 1099-K REPORTING:\nIf you sell through a payment processor (Square, PayPal, Etsy, etc.), they'll issue a 1099-K when your sales cross the federal threshold. As of recent rules, that threshold has been dropping — assume you'll get one if you process more than a few thousand dollars.\n\n📖 BUSINESS EXPENSES:\nInventory, booth fees, mileage to the market, packaging, supplies — all deductible on Schedule C, reducing your taxable profit.\n\n💡 Lesson: Selling for profit means SE tax + income tax. Track expenses religiously — they shrink your tax bill.`,
+    action: "market",
+  }),
+
+  botbeach: () => ({
+    buildingId: "botbeach",
+    title: "🏖️ BotBeach — Vacation vs Business Travel",
+    body: `Welcome to BotBeach! Sand, sun, and... tax rules. Here's how the IRS treats your getaway.\n\n📖 VACATIONS ARE NOT DEDUCTIBLE:\nA pure pleasure trip — even if you brought your laptop and answered a few emails — is a PERSONAL expense. Flights, hotels, meals, all of it: not deductible.\n\n📖 "WORKATION" / MIXED TRIPS:\nMixed business + leisure trips are deductible ONLY for the business portion. If you spent 4 days at a conference and 3 days lounging, you deduct flights only if business days >50%, and lodging/meals only for business days.\n\n📖 REMOTE WORK FROM THE BEACH:\nWorking remotely from a vacation rental doesn't turn it into a business trip. Your "tax home" is where you regularly work. A change of scenery is personal preference, not a business need.\n\n📖 HOME OFFICE RULES (the real deduction):\nIf you're self-employed and have a SPECIFIC space used REGULARLY and EXCLUSIVELY for business, you can deduct a portion of rent, utilities, and internet. The space at your beach Airbnb doesn't qualify.\n\n💡 Lesson: Vacations are personal. Real business travel needs a real business purpose. Sand is wonderful, but it isn't a deduction.`,
+    action: "beach",
+  }),
+
+  botshops: () => ({
+    buildingId: "botshops",
+    title: "🏪 BotShops Plaza — Hobby vs Business",
+    body: `Welcome to BotShops Plaza! Whether you sell coffee, books, games, or pastries, the same question matters: hobby or business?\n\n📖 THE HOBBY vs BUSINESS TEST:\nThe IRS looks at PROFIT MOTIVE. Rule of thumb: if you've earned a profit in 3 of the last 5 years, you're presumed to be a business. Other factors: do you keep books, market actively, have a separate bank account, and depend on the income?\n\n📖 WHY IT MATTERS:\n• BUSINESS: Report on Schedule C. Deduct all ordinary & necessary expenses. Losses can offset other income.\n• HOBBY: Report income as "other income" (no Schedule C). After 2017, hobby expenses are NOT deductible at all.\n\nThat asymmetry is brutal: a hobby pays full tax on revenue but can't subtract costs.\n\n📖 ORDINARY & NECESSARY EXPENSES:\nFor a business, you can deduct what's "ordinary" (common in your trade) and "necessary" (helpful for the business). Espresso beans for a coffee shop? Yes. A jet ski "for client meetings"? Probably not.\n\n📖 QUARTERLY ESTIMATED TAXES:\nIf you expect to owe $1,000+ at year end (federal), you should pay quarterly estimates (April, June, Sept, Jan). Otherwise: underpayment penalties.\n\n💡 Lesson: Treat your side gig like a business — books, separate account, profit motive — or accept the hobby tax hit.`,
+    action: "shops",
+  }),
+
   botplane: () => ({
     buildingId: "botplane",
     title: "✈️ BotPlane Airport — Business Travel Deductions",
