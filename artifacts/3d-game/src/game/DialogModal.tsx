@@ -42,6 +42,9 @@ export default function DialogModal() {
     } else if (dialog.action === "farm") {
       visitBuilding("botfarm");
       closeDialog();
+    } else if (dialog.action === "tower") {
+      visitBuilding("moneybottowers");
+      closeDialog();
     } else {
       closeDialog();
     }
@@ -162,6 +165,8 @@ export default function DialogModal() {
                 ? "Open for Business 🏪"
                 : dialog.action === "farm"
                 ? "Yeehaw 🚜"
+                : dialog.action === "tower"
+                ? "Back to HQ 🏢"
                 : "Got it!"}
             </button>
           )}

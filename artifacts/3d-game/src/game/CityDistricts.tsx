@@ -761,6 +761,222 @@ function Farm() {
   );
 }
 
+// ===== MoneyBot Towers @ (13, 0, -13) ================================
+// Futuristic HQ for MoneyBot Inc., occupying the NE inner block. Main
+// interactive tower comes from BUILDING_DEFS (slate body, gold roof, h=12,
+// footprint world x[11..15], z[-15..-11]). This component adds the second
+// tower, sky bridge, rotating ring, holographic $ logo, plaza, and
+// glowing facade chevrons. Decoration envelope:
+//   world x ∈ [9.5, 16.5]  (clears workcorp east edge at 10.5; stays
+//   world z ∈ [-16.5, -9.5] inside secondary streets at ±18 / ±16.9)
+// → local x ∈ [-3.5, +3.5], local z ∈ [-3.5, +3.5]
+function MoneyBotTowers() {
+  const ringRef = useRef<THREE.Group>(null!);
+  const logoRef = useRef<THREE.Group>(null!);
+  const bridgeRef = useRef<THREE.Mesh>(null!);
+
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    // Slow horizontal ring spin around tower crown
+    if (ringRef.current) ringRef.current.rotation.y = t * 0.4;
+    // Holo logo bobs gently and spins to stay legible from every side
+    if (logoRef.current) {
+      logoRef.current.position.y = 16 + Math.sin(t * 1.2) * 0.3;
+      logoRef.current.rotation.y = t * 0.7;
+    }
+    // Bridge underside pulses like a data stream
+    if (bridgeRef.current) {
+      const mat = bridgeRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(t * 3) * 0.8;
+    }
+  });
+
+  return (
+    <group position={[13, 0, -13]}>
+      {/* ── Plaza tiles around the towers (6×7 dark glass) ─────────── */}
+      {/* Center local (+0.7, 0, -0.2), size 6×7 → world x[10.7,16.7] ✓
+          (clears workcorp east edge at 10.5 by 0.2u), z[-16.7,-9.7] ✓
+          (≥0.2u margin from secondary street at z=-16.9). */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.7, 0.02, -0.2]}>
+        <planeGeometry args={[6, 7]} />
+        <meshStandardMaterial
+          color="#0f172a"
+          emissive="#22c55e"
+          emissiveIntensity={0.1}
+          metalness={0.65}
+          roughness={0.35}
+        />
+      </mesh>
+      {/* Glowing grid lines on the plaza */}
+      {[-2, 0.7, 3.4].map((u, i) => (
+        <mesh key={`grid-x-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[u, 0.04, -0.2]}>
+          <planeGeometry args={[0.05, 7]} />
+          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1.2} toneMapped={false} />
+        </mesh>
+      ))}
+      {[-2.7, -0.2, 2.3].map((v, i) => (
+        <mesh key={`grid-z-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0.7, 0.04, v]}>
+          <planeGeometry args={[6, 0.05]} />
+          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1.2} toneMapped={false} />
+        </mesh>
+      ))}
+
+      {/* ── Vertical glow chevrons on main tower's south face ──────── */}
+      {/* Main tower has depth=4 → front face at local z=+2. Chevrons sit
+          0.05u proud to avoid z-fighting with the building skin. */}
+      {[1, 3, 5, 7, 9, 11].map((y, i) => (
+        <mesh key={`chev-${i}`} position={[0, y, 2.05]}>
+          <boxGeometry args={[2.6, 0.18, 0.05]} />
+          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1.3} toneMapped={false} />
+        </mesh>
+      ))}
+
+      {/* ── Secondary tower — smaller, NE of main ──────────────────── */}
+      {/* local (2.5, 0, -2.5) center, w=2, d=2 → footprint local
+          x[1.5,3.5], z[-3.5,-1.5] → world x[14.5,16.5] ✓, z[-16.5,-14.5] ✓ */}
+      <group position={[2.5, 0, -2.5]}>
+        {/* Glass body */}
+        <mesh position={[0, 4, 0]} castShadow>
+          <boxGeometry args={[2, 8, 2]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.75} roughness={0.2} />
+        </mesh>
+        {/* Reflective window strip wraps the tower */}
+        {[1, 3, 5, 7].map((y, i) => (
+          <mesh key={`s-win-${i}`} position={[0, y, 1.01]}>
+            <boxGeometry args={[1.8, 0.6, 0.04]} />
+            <meshStandardMaterial color="#0ea5e9" emissive="#22d3ee" emissiveIntensity={0.7} metalness={0.8} roughness={0.15} />
+          </mesh>
+        ))}
+        {/* Gold crown cap */}
+        <mesh position={[0, 8.25, 0]}>
+          <boxGeometry args={[2.3, 0.4, 2.3]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.7} metalness={0.6} roughness={0.3} />
+        </mesh>
+        {/* Cyan spire */}
+        <mesh position={[0, 9.5, 0]}>
+          <coneGeometry args={[0.3, 2, 6]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.6} toneMapped={false} />
+        </mesh>
+        {/* Spire beacon */}
+        <mesh position={[0, 10.6, 0]}>
+          <sphereGeometry args={[0.12, 10, 10]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={2.4} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ── Sky bridge between the two towers ──────────────────────── */}
+      {/* Diagonal between (0,0,0) and (2.5,0,-2.5). Midpoint (1.25,7.5,
+          -1.25), rotated -π/4 around y so the box length aligns with the
+          diagonal. Length 3.5 reaches into both tower bodies, hiding the
+          end caps for a clean docked look. */}
+      <group position={[1.25, 7.5, -1.25]} rotation={[0, -Math.PI / 4, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[3.5, 0.6, 0.8]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.7} roughness={0.25} />
+        </mesh>
+        {/* Glowing underbelly — pulses like data flowing across */}
+        <mesh ref={bridgeRef} position={[0, -0.32, 0]}>
+          <boxGeometry args={[3.3, 0.05, 0.55]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+        {/* Side window strip */}
+        <mesh position={[0, 0.05, 0.42]}>
+          <boxGeometry args={[3.2, 0.25, 0.04]} />
+          <meshStandardMaterial color="#0ea5e9" emissive="#22d3ee" emissiveIntensity={0.6} />
+        </mesh>
+      </group>
+
+      {/* ── Rotating gold halo around main tower crown ─────────────── */}
+      {/* Group y=13.2 sits 1.2u above tower roof (y=12). Torus radius
+          2.8 → world x ∈ [10.2, 15.8] at y=13.2. Workcorp top is y=6,
+          so no collision in 3D even though x=10.2 < workcorp east 10.5 */}
+      <group ref={ringRef} position={[0, 13.2, 0]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[2.8, 0.12, 10, 48]} />
+          <meshStandardMaterial
+            color="#fbbf24"
+            emissive="#fbbf24"
+            emissiveIntensity={1.6}
+            metalness={0.75}
+            roughness={0.2}
+            toneMapped={false}
+          />
+        </mesh>
+        {/* Two satellite nodes ride the ring for a stronger motion cue */}
+        {[0, Math.PI].map((a, i) => (
+          <mesh key={`sat-${i}`} position={[Math.cos(a) * 2.8, 0, Math.sin(a) * 2.8]}>
+            <sphereGeometry args={[0.2, 12, 12]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={2} toneMapped={false} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ── Floating holographic MoneyBot logo above the tower ─────── */}
+      <group ref={logoRef} position={[0, 16, 0]}>
+        {/* Holo disk backdrop — flat ring lying horizontally */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.3, 1.55, 36]} />
+          <meshStandardMaterial
+            color="#22c55e"
+            emissive="#22c55e"
+            emissiveIntensity={2.2}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
+        </mesh>
+        {/* MoneyBot $ emblem (faces +z by default; rotates with logoRef) */}
+        <Text
+          fontSize={1.4}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.06}
+          outlineColor="#15803d"
+        >
+          $
+        </Text>
+        {/* Mirror $ on the opposite face so it's legible from behind too */}
+        <Text
+          position={[0, 0, -0.01]}
+          rotation={[0, Math.PI, 0]}
+          fontSize={1.4}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.06}
+          outlineColor="#15803d"
+        >
+          $
+        </Text>
+      </group>
+
+      {/* ── MONEYBOT TOWERS sign band above the main entrance ──────── */}
+      <Text
+        position={[0, 13.7, 2.1]}
+        fontSize={0.5}
+        color="#22c55e"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#0b1220"
+      >
+        🏢 MONEYBOT TOWERS
+      </Text>
+      <Text
+        position={[0, 13.1, 2.1]}
+        fontSize={0.22}
+        color="#fde047"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#0b1220"
+      >
+        Global HQ · Where the Money Lives
+      </Text>
+    </group>
+  );
+}
+
 export default function CityDistricts() {
   return (
     <group>
@@ -770,6 +986,7 @@ export default function CityDistricts() {
       <ShopsCluster />
       <Dealer />
       <Farm />
+      <MoneyBotTowers />
     </group>
   );
 }

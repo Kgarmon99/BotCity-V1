@@ -74,6 +74,12 @@ const FEATURES = [
     accent: "from-lime-500/12 to-amber-500/10 border-lime-400/30",
   },
   {
+    emoji: "🏢",
+    title: "Entity",
+    desc: "C-Corp vs S-Corp at MoneyBot Towers",
+    accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
+  },
+  {
     emoji: "📋",
     title: "File",
     desc: "Submit your return at the IRS",

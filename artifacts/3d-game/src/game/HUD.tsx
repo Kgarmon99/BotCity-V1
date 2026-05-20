@@ -14,6 +14,7 @@ const BUILDINGS = [
   { id: "botbeach", emoji: "🏖️", label: "BotBeach" },
   { id: "botshops", emoji: "🏪", label: "BotShops" },
   { id: "botfarm", emoji: "🚜", label: "BotFarm" },
+  { id: "moneybottowers", emoji: "🏢", label: "MoneyBot Towers" },
   { id: "irs", emoji: "📋", label: "IRS Office" },
 ] as const;
 

@@ -154,6 +154,23 @@ const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "🏪",
   },
   {
+    id: "moneybottowers",
+    label: "MoneyBot Towers",
+    // NE inner block corner — the only inner quadrant still empty.
+    // Block bounds x∈[1,16], z∈[-16,-1]; workcorp occupies x[5.5..10.5],
+    // z[-12..-8] in the SW of the block, and CityBuildings fillers sit
+    // at (14,-5) and (5,-14). Tower footprint x[11..15], z[-15..-11] —
+    // clears workcorp by 0.5u and stays inside secondary streets (±18).
+    // Door faces +z (south, toward main avenue z=0).
+    position: [13, 6, -13],
+    color: "#1e293b",
+    roofColor: "#fbbf24",
+    width: 4,
+    depth: 4,
+    height: 12,
+    emoji: "🏢",
+  },
+  {
     id: "botfarm",
     label: "BotFarm",
     // Far NW corner — outside the outer ring streets (±36), away from all
