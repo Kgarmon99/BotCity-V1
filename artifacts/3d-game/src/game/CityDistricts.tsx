@@ -2005,6 +2005,73 @@ export default function CityDistricts() {
       <Casino />
       <Mine />
       <Zoo />
+      <GamingHQCrown />
+    </group>
+  );
+}
+
+// ===== MoneyBot Gaming HQ rooftop crown @ (-27, *, -5) =================
+// The HQ building itself (h=10, top at y=10) is rendered by Building.tsx from
+// the BUILDING_DEFS entry. This component decorates the rooftop to make it
+// feel like a real corporate HQ rather than a tall plain box: a glowing twin-
+// ring antenna with a blinking aviation beacon, plus illuminated "MBG • HQ"
+// ledge signs on the north and south building faces.
+//   local x ∈ [-2.5, +2.5], local z ∈ [-2.1, +2.1], y ∈ [10, 13.3]
+function GamingHQCrown() {
+  const beaconRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    if (beaconRef.current) {
+      const t = state.clock.elapsedTime;
+      const mat = beaconRef.current.material as THREE.MeshStandardMaterial;
+      // Slow ~1.5 Hz aviation-style blink, 0.4 → 2.0 emissive intensity.
+      mat.emissiveIntensity = 1.2 + Math.sin(t * 3) * 0.8;
+    }
+  });
+  return (
+    <group position={[-27, 0, -5]}>
+      {/* Antenna pole rising from rooftop */}
+      <mesh position={[0, 11.5, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.1, 3, 6]} />
+        <meshStandardMaterial color="#475569" metalness={0.85} />
+      </mesh>
+      {/* Glowing antenna rings */}
+      <mesh position={[0, 11, 0]}>
+        <torusGeometry args={[0.42, 0.04, 6, 16]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 12, 0]}>
+        <torusGeometry args={[0.3, 0.04, 6, 16]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      {/* Blinking red aviation beacon (top y = 13 + 0.2 = 13.2 ≤ cap) */}
+      <mesh ref={beaconRef} position={[0, 13, 0]}>
+        <sphereGeometry args={[0.2, 12, 10]} />
+        <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.5} toneMapped={false} />
+      </mesh>
+      {/* South-facing rooftop ledge sign (toward city center). Back of the
+          sign sits at z=+2 (facade), so center = 2 - depth/2 = 1.91. */}
+      <mesh position={[0, 10.5, 1.91]} castShadow>
+        <boxGeometry args={[3.6, 0.95, 0.18]} />
+        <meshStandardMaterial color="#1e1b4b" />
+      </mesh>
+      <Text position={[0, 10.5, 2.001]} fontSize={0.55} color="#22d3ee" anchorX="center" anchorY="middle">
+        MBG • HQ
+      </Text>
+      {/* North-facing mirror sign */}
+      <mesh position={[0, 10.5, -1.91]} castShadow>
+        <boxGeometry args={[3.6, 0.95, 0.18]} />
+        <meshStandardMaterial color="#1e1b4b" />
+      </mesh>
+      <Text
+        position={[0, 10.5, -2.001]}
+        rotation={[0, Math.PI, 0]}
+        fontSize={0.55}
+        color="#22d3ee"
+        anchorX="center"
+        anchorY="middle"
+      >
+        MBG • HQ
+      </Text>
     </group>
   );
 }

@@ -72,9 +72,25 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "📋",
   },
   {
-    id: "university",
-    label: "MoneyBot University",
-    // NW inner-block corner — clear of roads (main x/z=0, secondary ±18) and other buildings.
+    id: "botusouth",
+    label: "BotU South Campus",
+    // SW inner-block corner — mirror of BotU North across the E-W avenue.
+    // Footprint x[-17.5..-12.5] z[11.5..16.5]. Clear of irs (-9,9 → south edge
+    // z=11 ⇒ 0.5u gap), and 0.4u from the south secondary road band.
+    position: [-15, 3.5, 14],
+    color: "#0ea5e9",
+    roofColor: "#fbbf24",
+    width: 5,
+    depth: 5,
+    height: 7,
+    emoji: "🎓",
+  },
+  {
+    id: "botunorth",
+    label: "BotU North Campus",
+    // NW inner-block corner — clear of roads (main x/z=0, secondary ±18) and
+    // other buildings. Paired with botusouth across the south road for a
+    // north/south split-campus university.
     position: [-14, 4, -14],
     color: "#22c55e",
     roofColor: "#fbbf24",
@@ -254,18 +270,18 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "₿",
   },
   {
-    id: "moneybotgaming",
-    label: "MoneyBot Gaming Store",
+    id: "moneybotgaminghq",
+    label: "MoneyBot Gaming HQ",
     // West middle ring, mirror of BotCrypto (at +27, -5). Offset north to
     // clear the main E-W avenue at z=0. Footprint x[-29.5..-24.5] z[-7..-3].
-    // Neon purple with a cyan arcade-style roof — reads as "retail/games"
-    // from far away to balance the financial buildings on the east side.
-    position: [-27, 2.5, -5],
+    // Tall corporate-HQ tower — neon purple body, cyan accent — visible from
+    // anywhere in the city, mirroring MoneyBotTowers on the east side.
+    position: [-27, 5, -5],
     color: "#a855f7",
     roofColor: "#22d3ee",
     width: 5,
     depth: 4,
-    height: 5,
+    height: 10,
     emoji: "🎮",
   },
   {

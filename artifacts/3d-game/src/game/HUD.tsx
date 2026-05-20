@@ -37,7 +37,7 @@ const BUILDINGS = [
   { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
   { id: "botshops", emoji: "🏪", label: "BotShops" },
   { id: "botdealer", emoji: "🚗", label: "BotDealer" },
-  { id: "moneybotgaming", emoji: "🎮", label: "MoneyBot Gaming Store" },
+  { id: "moneybotgaminghq", emoji: "🎮", label: "MoneyBot Gaming HQ" },
 
   // 🏛️  Culture & history (three corner museums)
   { id: "bothistory", emoji: "🤖", label: "Bot History Museum" },
@@ -45,7 +45,8 @@ const BUILDINGS = [
   { id: "finhistory", emoji: "💰", label: "Finance History Museum" },
 
   // 🎓  Education & transit
-  { id: "university", emoji: "🎓", label: "MoneyBot U" },
+  { id: "botunorth", emoji: "🎓", label: "BotU North Campus" },
+  { id: "botusouth", emoji: "🎓", label: "BotU South Campus" },
   { id: "bottrain", emoji: "🚆", label: "BotTrain" },
   { id: "botplane", emoji: "✈️", label: "BotPlane International" },
   { id: "botrocket", emoji: "🚀", label: "BotRocket Station" },

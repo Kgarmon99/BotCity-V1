@@ -20,6 +20,7 @@ export interface DialogContent {
     | "file"
     | "bank"
     | "study"
+    | "studysouth"
     | "train"
     | "plane"
     | "stadium"
