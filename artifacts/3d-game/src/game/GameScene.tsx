@@ -344,6 +344,49 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 3,
     emoji: "🧸",
   },
+  // ─── Culture & history district (corner museums) ──────────────────────
+  // Three museums sit at the outer corners of the inner-block intersections
+  // (±22, ±27), each one DIRECTLY BEHIND a thematically-matched Hall of Fame
+  // statue at (±22, ±22) — so walking past a statue leads the eye into the
+  // matching museum. NE/SE/SW corners are filled; the NE has the Tech
+  // museum (Founder statue), NE-mirror (the SE corner) is intentionally
+  // skipped because no 4th museum was requested.
+  {
+    id: "bothistory",
+    label: "Bot History Museum",
+    // NW: behind MOMOBOT "The Founder" statue. Footprint x[-24..-20] z[-29..-25].
+    position: [-22, 2.5, -27],
+    color: "#94a3b8",
+    roofColor: "#22d3ee",
+    width: 4,
+    depth: 4,
+    height: 5,
+    emoji: "🤖",
+  },
+  {
+    id: "eduhistory",
+    label: "Education History Museum",
+    // NE: behind Prof. Ledgerington statue. Footprint x[20..24] z[-29..-25].
+    position: [22, 2.5, -27],
+    color: "#fde68a",
+    roofColor: "#92400e",
+    width: 4,
+    depth: 4,
+    height: 5,
+    emoji: "📚",
+  },
+  {
+    id: "finhistory",
+    label: "Finance History Museum",
+    // SW: behind Mayor Bytecoin statue. Footprint x[-24..-20] z[25..29].
+    position: [-22, 2.5, 27],
+    color: "#f8fafc",
+    roofColor: "#fbbf24",
+    width: 4,
+    depth: 4,
+    height: 5,
+    emoji: "💰",
+  },
   // ─── Civic centerpiece ─────────────────────────────────────────────────
   // BotCityHall is the urban-design anchor for the city. White marble +
   // gold dome, placed at the N middle ring east of the main avenue so it

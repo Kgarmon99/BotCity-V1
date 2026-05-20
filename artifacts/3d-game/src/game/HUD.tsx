@@ -39,6 +39,11 @@ const BUILDINGS = [
   { id: "botdealer", emoji: "🚗", label: "BotDealer" },
   { id: "moneybotgaming", emoji: "🎮", label: "MoneyBot Gaming Store" },
 
+  // 🏛️  Culture & history (three corner museums)
+  { id: "bothistory", emoji: "🤖", label: "Bot History Museum" },
+  { id: "eduhistory", emoji: "📚", label: "Education History Museum" },
+  { id: "finhistory", emoji: "💰", label: "Finance History Museum" },
+
   // 🎓  Education & transit
   { id: "university", emoji: "🎓", label: "MoneyBot U" },
   { id: "bottrain", emoji: "🚆", label: "BotTrain" },

@@ -31,6 +31,9 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   botcityhall: { id: "state-return", code: "State", label: "State & local return", icon: "🏛️", line: "Sch CR" },
   littlebots: { id: "2441", code: "2441", label: "Dependent care receipts", icon: "🧸", line: "Sch 3" },
   moneybotgaming: { id: "streamer-1099", code: "1099-MISC", label: "Streaming & creator income", icon: "🎮", line: "Sch C" },
+  bothistory: { id: "tech-pass", code: "TECH", label: "Bot History Museum pass", icon: "🤖", line: "—" },
+  eduhistory: { id: "edu-pass", code: "EDU", label: "Education History Museum pass", icon: "📚", line: "—" },
+  finhistory: { id: "fin-pass", code: "FIN", label: "Finance History Museum pass", icon: "💰", line: "—" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -97,6 +100,9 @@ export default function DialogModal() {
     cityhall: "botcityhall",
     daycare: "littlebots",
     gaming: "moneybotgaming",
+    techmuseum: "bothistory",
+    edumuseum: "eduhistory",
+    finmuseum: "finhistory",
   };
 
   const handleAction = () => {
@@ -263,6 +269,9 @@ const ACTION_LABELS: Record<string, string> = {
   cityhall: "File State Return 🏛️",
   daycare: "Drop Off the Kids 🧸",
   gaming: "Cash Out Stream Earnings 🎮",
+  techmuseum: "Tour Bot History 🤖",
+  edumuseum: "Tour Education History 📚",
+  finmuseum: "Tour Finance History 💰",
 };
 
 function actionButtonLabel(action: string, income: number): string {

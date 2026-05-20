@@ -122,6 +122,26 @@ const FEATURES = [
     accent: "from-fuchsia-500/15 to-cyan-500/10 border-fuchsia-400/30",
   },
 
+  // 🏛️  Culture & history (three corner museums)
+  {
+    emoji: "🤖",
+    title: "Tech History",
+    desc: "2000 years of computing at Bot History Museum",
+    accent: "from-slate-500/15 to-cyan-500/10 border-cyan-400/30",
+  },
+  {
+    emoji: "📚",
+    title: "Edu History",
+    desc: "Schools through the ages at Education Museum",
+    accent: "from-amber-500/15 to-orange-500/10 border-amber-400/30",
+  },
+  {
+    emoji: "💰",
+    title: "Finance History",
+    desc: "Coins to crypto at Finance History Museum",
+    accent: "from-amber-500/15 to-emerald-500/10 border-amber-400/35",
+  },
+
   // 🎓  Education & transit
   {
     emoji: "🎓",

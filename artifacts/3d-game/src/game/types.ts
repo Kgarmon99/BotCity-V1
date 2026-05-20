@@ -38,7 +38,10 @@ export interface DialogContent {
     | "gigs"
     | "cityhall"
     | "daycare"
-    | "gaming";
+    | "gaming"
+    | "techmuseum"
+    | "edumuseum"
+    | "finmuseum";
   amount?: number;
 }
 
