@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text } from "@react-three/drei";
+import { Text, useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 
 // ─────────────────────────────────────────────────────────────────────
@@ -761,6 +761,53 @@ function Farm() {
   );
 }
 
+// ===== Official MoneyBot character statue (GLB) =====================
+// Loads the official MoneyBot 3D model (SilverSkin) from /public, plays the
+// "UpPoint" animation, and casts shadows. Used as a giant branded statue
+// atop MoneyBot Towers. The model ships with materials Face/Coin/Silver/
+// Hat/eyes and animations: Flip, FlyDown, FlyUp, Idle, LeftHand, RightHand,
+// TwistJump, UpPoint.
+const MONEYBOT_MODEL_URL = `${import.meta.env.BASE_URL}moneybot.glb`;
+
+interface MoneyBotStatueProps {
+  scale?: number;
+  animation?: "Idle" | "UpPoint" | "Flip" | "FlyUp" | "FlyDown" | "TwistJump" | "LeftHand" | "RightHand";
+}
+
+function MoneyBotStatue({ scale = 3, animation = "UpPoint" }: MoneyBotStatueProps) {
+  const groupRef = useRef<THREE.Group>(null!);
+  const { scene, animations } = useGLTF(MONEYBOT_MODEL_URL);
+  const { actions } = useAnimations(animations, groupRef);
+
+  // Ensure every mesh casts/receives shadows for proper grounding.
+  useEffect(() => {
+    scene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
+  }, [scene]);
+
+  useEffect(() => {
+    const action = actions[animation];
+    if (!action) return;
+    action.reset().fadeIn(0.4).play();
+    return () => {
+      action.fadeOut(0.2);
+      action.stop();
+    };
+  }, [actions, animation]);
+
+  return (
+    <group ref={groupRef} scale={scale}>
+      <primitive object={scene} />
+    </group>
+  );
+}
+
+useGLTF.preload(MONEYBOT_MODEL_URL);
+
 // ===== MoneyBot Towers @ (13, 0, -13) ================================
 // Futuristic HQ for MoneyBot Inc., occupying the NE inner block. Main
 // interactive tower comes from BUILDING_DEFS (slate body, gold roof, h=12,
@@ -781,7 +828,7 @@ function MoneyBotTowers() {
     if (ringRef.current) ringRef.current.rotation.y = t * 0.4;
     // Holo logo bobs gently and spins to stay legible from every side
     if (logoRef.current) {
-      logoRef.current.position.y = 16 + Math.sin(t * 1.2) * 0.3;
+      logoRef.current.position.y = 15 + Math.sin(t * 1.2) * 0.3;
       logoRef.current.rotation.y = t * 0.7;
     }
     // Bridge underside pulses like a data stream
@@ -911,11 +958,15 @@ function MoneyBotTowers() {
         ))}
       </group>
 
-      {/* ── Floating holographic MoneyBot logo above the tower ─────── */}
-      <group ref={logoRef} position={[0, 16, 0]}>
-        {/* Holo disk backdrop — flat ring lying horizontally */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.3, 1.55, 36]} />
+      {/* ── Official MoneyBot statue atop the towers ───────────────── */}
+      {/* The logoRef group bobs and slowly rotates (handled in useFrame
+          above). Inside: a glowing emerald pedestal disk and the real
+          MoneyBot character GLB scaled up, playing the "UpPoint" anim
+          like a HQ mascot pointing skyward. */}
+      <group ref={logoRef} position={[0, 15, 0]}>
+        {/* Glowing pedestal halo under the statue's feet */}
+        <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+          <ringGeometry args={[1.4, 1.8, 36]} />
           <meshStandardMaterial
             color="#22c55e"
             emissive="#22c55e"
@@ -924,30 +975,8 @@ function MoneyBotTowers() {
             toneMapped={false}
           />
         </mesh>
-        {/* MoneyBot $ emblem (faces +z by default; rotates with logoRef) */}
-        <Text
-          fontSize={1.4}
-          color="#fde047"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.06}
-          outlineColor="#15803d"
-        >
-          $
-        </Text>
-        {/* Mirror $ on the opposite face so it's legible from behind too */}
-        <Text
-          position={[0, 0, -0.01]}
-          rotation={[0, Math.PI, 0]}
-          fontSize={1.4}
-          color="#fde047"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.06}
-          outlineColor="#15803d"
-        >
-          $
-        </Text>
+        {/* The actual MoneyBot character — pointing up like a HQ mascot */}
+        <MoneyBotStatue scale={2.4} animation="UpPoint" />
       </group>
 
       {/* ── MONEYBOT TOWERS sign band above the main entrance ──────── */}
