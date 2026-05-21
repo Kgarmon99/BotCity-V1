@@ -627,7 +627,9 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botgolf",
     label: "BotGolf Country Club",
-    position: [-62, 3, 75],
+    // Moved south from z=75 → z=89 to put more distance between the
+    // country club and the BotPlane airport apron/runways.
+    position: [-62, 3, 89],
     color: "#ecfccb",
     roofColor: "#15803d",
     width: 5,

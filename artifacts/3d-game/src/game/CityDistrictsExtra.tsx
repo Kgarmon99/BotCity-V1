@@ -332,10 +332,13 @@ function ElementarySchool() {
 // =====================================================================
 
 function GolfCourse() {
-  // Expanded BotGolf Country Club. Anchor world (-42, 0, 75).
-  // Decor envelope: world x[-68..-28], z[57..73] for the main course
-  // (south of the new R2 runway at z[74..80] and clear of R3 at x=-25).
-  // Clubhouse building lives at world (-62, 75); its sign sits over it
+  // Expanded BotGolf Country Club. Anchor world (-42, 0, 89).
+  // Decor envelope: world x[-68..-28], z[71..87].
+  // Anchor shifted from z=75 → z=89 in tandem with the BotGolf clubhouse
+  // building (GameScene) so the course gets real separation from the
+  // BotPlane airport. R2 was simultaneously pulled north to z=30, so
+  // the south side of the field is now BotGolf-only.
+  // Clubhouse building lives at world (-62, 89); its sign sits over it
   // via local x=-20. Amenities fan out across the strip:
   //   • 18 numbered holes scattered across a 40×16 fairway
   //   • Members pool with deck, diving board, lounge chairs, umbrella
@@ -398,7 +401,7 @@ function GolfCourse() {
   ];
 
   return (
-    <group position={[-42, 0, 75]}>
+    <group position={[-42, 0, 89]}>
       {/* ─── Main fairway (40×16) ─── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.02, -10]} receiveShadow>
         <planeGeometry args={[40, 16]} />

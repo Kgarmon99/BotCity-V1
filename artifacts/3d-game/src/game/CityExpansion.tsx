@@ -201,12 +201,16 @@ const RUNWAY_CENTER_X = (RUNWAY_X_MIN + RUNWAY_X_MAX) / 2; // -47.5
 // ─── Multi-runway expansion ──────────────────────────────────────────
 // Runway 2: longer parallel E-W runway, south of the terminal.
 // Runway 3: N-S cross runway east of the terminal/apron.
-const RUNWAY2_Z = 77;
+// Runway 2 moved from z=77 to z=30 — pulled north of R1 (z=55) so the
+// south airport apron no longer crowds BotGolf Country Club at z≈85.
+// X-min shortened from -75 → -70 so R2 clears the BOTAIR hangar at
+// (-75, 19) (x[-78,-72]) and the GREEN WINGS hangar at (-78, 32).
+const RUNWAY2_Z = 30;
 const RUNWAY2_WIDTH = 6;
-const RUNWAY2_X_MIN = -75;
+const RUNWAY2_X_MIN = -70;
 const RUNWAY2_X_MAX = -15;
-const RUNWAY2_LEN = RUNWAY2_X_MAX - RUNWAY2_X_MIN; // 60
-const RUNWAY2_CX = (RUNWAY2_X_MIN + RUNWAY2_X_MAX) / 2; // -45
+const RUNWAY2_LEN = RUNWAY2_X_MAX - RUNWAY2_X_MIN; // 55
+const RUNWAY2_CX = (RUNWAY2_X_MIN + RUNWAY2_X_MAX) / 2; // -42.5
 
 const RUNWAY3_X = -25;
 const RUNWAY3_WIDTH = 5;
@@ -784,9 +788,10 @@ function AirportExpansion() {
       </group>
 
       {/* ────────── FUEL DEPOT ────────── */}
-      {/* Moved to (-50, 88) — south of runway 2 (z=80 north edge), 25u clear
-          of BotZoo at (-22.5, 87). Originally at (-66, 75) which clipped R2. */}
-      <group position={[-50, 0, 88]}>
+      {/* Moved to (-15, 22) — north of R2 (z=30) once R2 was pulled to the
+          north side of the field. Keeps fuel near the runway but well
+          clear of BotGolf Country Club to the south. */}
+      <group position={[-15, 0, 22]}>
         {[[-2, 0], [0, 0], [2, 0], [-1, 2.5], [1, 2.5]].map(([fx, fz], i) => (
           <group key={`ft-${i}`} position={[fx, 0, fz]}>
             <mesh position={[0, 1, 0]} castShadow>
@@ -946,9 +951,10 @@ function AirportExpansion() {
         </mesh>
       </group>
 
-      {/* ────────── PARKING LOT — south of terminal ────────── */}
-      {/* Moved to (-72, 87) — south of R2 (z=80 north edge), clear of R2 envelope */}
-      <group position={[-72, 0, 87]}>
+      {/* ────────── PARKING LOT ────────── */}
+      {/* Moved to (-30, 22) — north of R2 (now at z=30) and east of the
+          terminal. Frees the south side of the field for BotGolf. */}
+      <group position={[-30, 0, 22]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
           <planeGeometry args={[14, 6]} />
           <meshStandardMaterial color="#374151" roughness={0.9} />
