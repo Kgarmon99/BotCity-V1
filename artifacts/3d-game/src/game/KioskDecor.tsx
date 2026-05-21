@@ -872,6 +872,388 @@ function KioskProp({ id, color }: { id: string; color: string }) {
   }
 }
 
+// ════════════════════════════════════════════════════════════════════
+// Per-quarter signature monuments (Task #4)
+//
+// Complements the per-kiosk props above. Each of the 6 outer-ring
+// quarters gets ONE oversized landmark — readable from a distance and
+// on the minimap — so the city scans as 6 different neighborhoods,
+// not just a uniform ring of differently-colored kiosks.
+//
+// Placement rules (rebased onto the tightened city grid):
+//  • Corner quarters: positioned at (±115, ±115) — between the outer
+//    edge of the + lot cluster (~±115) and the inner ring road at
+//    ±120. Clear of all 5 lots, frames the quarter from the road.
+//  • Strip quarters: arch over the main N-S avenue at z=±115 — between
+//    the strip lots at z=±103 and the inner ring road at z=±120.
+//  • Tall (≥ 7u) so they read above kiosks (~3u) from far away.
+// ════════════════════════════════════════════════════════════════════
+
+function MonumentLabel({
+  position,
+  color,
+  text,
+}: {
+  position: [number, number, number];
+  color: string;
+  text: string;
+}) {
+  return (
+    <Text
+      position={position}
+      fontSize={0.95}
+      color={color}
+      anchorX="center"
+      anchorY="middle"
+      outlineWidth={0.07}
+      outlineColor="#0b1220"
+    >
+      {text}
+    </Text>
+  );
+}
+
+// ── Foundations: open book on a pedestal ─────────────────────────────
+function FoundationsMonument({ position }: { position: [number, number] }) {
+  const orbRef = useRef<THREE.MeshStandardMaterial>(null!);
+  useFrame((state) => {
+    if (orbRef.current) {
+      orbRef.current.emissiveIntensity =
+        1.0 + Math.sin(state.clock.elapsedTime * 1.2) * 0.4;
+    }
+  });
+  const [x, z] = position;
+  const C = "#22d3ee";
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[1.6, 1.8, 3, 8]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 3.2, 0]} castShadow>
+        <boxGeometry args={[2.6, 0.3, 2.0]} />
+        <meshStandardMaterial color="#0c4a6e" roughness={0.7} />
+      </mesh>
+      <mesh position={[-0.9, 3.9, 0]} rotation={[0, 0, 0.35]} castShadow>
+        <boxGeometry args={[1.8, 0.12, 1.9]} />
+        <meshStandardMaterial color={C} emissive={C} emissiveIntensity={0.5} toneMapped={false} />
+      </mesh>
+      <mesh position={[0.9, 3.9, 0]} rotation={[0, 0, -0.35]} castShadow>
+        <boxGeometry args={[1.8, 0.12, 1.9]} />
+        <meshStandardMaterial color={C} emissive={C} emissiveIntensity={0.5} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 6.4, 0]}>
+        <sphereGeometry args={[0.55, 16, 14]} />
+        <meshStandardMaterial
+          ref={orbRef}
+          color="#fde68a"
+          emissive={C}
+          emissiveIntensity={1.2}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[0, 5.85, 0]}>
+        <cylinderGeometry args={[0.18, 0.22, 0.4, 8]} />
+        <meshStandardMaterial color="#475569" metalness={0.7} roughness={0.3} />
+      </mesh>
+      <MonumentLabel position={[0, 7.4, 0]} color={C} text="🧠 BASICS" />
+    </group>
+  );
+}
+
+// ── Borrowing & Credit: floating credit card with pulsing stripe ─────
+function BorrowingMonument({ position }: { position: [number, number] }) {
+  const cardRef = useRef<THREE.Group>(null!);
+  const stripeRef = useRef<THREE.MeshStandardMaterial>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (cardRef.current) {
+      cardRef.current.rotation.y = t * 0.4;
+      cardRef.current.position.y = 4.5 + Math.sin(t * 1.2) * 0.25;
+    }
+    if (stripeRef.current) {
+      stripeRef.current.emissiveIntensity = 1.0 + Math.sin(t * 3) * 0.7;
+    }
+  });
+  const [x, z] = position;
+  const C = "#f472b6";
+  return (
+    <group position={[x, 0, z]}>
+      {[-1.1, 1.1].map((px) => (
+        <mesh key={px} position={[px, 1.7, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.22, 3.4, 8]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} roughness={0.4} />
+        </mesh>
+      ))}
+      <group ref={cardRef} position={[0, 4.5, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[3.2, 2.0, 0.18]} />
+          <meshStandardMaterial
+            color="#831843"
+            emissive={C}
+            emissiveIntensity={0.35}
+            metalness={0.6}
+            roughness={0.35}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh position={[0, 0.45, 0.1]}>
+          <boxGeometry args={[3.0, 0.45, 0.04]} />
+          <meshStandardMaterial
+            ref={stripeRef}
+            color={C}
+            emissive={C}
+            emissiveIntensity={1.4}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh position={[-1.0, -0.2, 0.1]}>
+          <boxGeometry args={[0.55, 0.4, 0.05]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh position={[0.4, -0.65, 0.1]}>
+          <boxGeometry args={[2.0, 0.15, 0.02]} />
+          <meshStandardMaterial color="#fce7f3" />
+        </mesh>
+      </group>
+      <MonumentLabel position={[0, 7.1, 0]} color={C} text="💳 CREDIT" />
+    </group>
+  );
+}
+
+// ── Investing: rising candlestick chart column ───────────────────────
+function InvestingMonument({ position }: { position: [number, number] }) {
+  const arrowRef = useRef<THREE.MeshStandardMaterial>(null!);
+  useFrame((state) => {
+    if (arrowRef.current) {
+      arrowRef.current.emissiveIntensity =
+        1.1 + Math.sin(state.clock.elapsedTime * 2) * 0.5;
+    }
+  });
+  const [x, z] = position;
+  const C = "#fbbf24";
+  const bars: Array<[number, string]> = [
+    [1.2, "#22c55e"],
+    [2.0, "#22c55e"],
+    [1.6, "#ef4444"],
+    [3.0, "#22c55e"],
+    [4.2, "#22c55e"],
+  ];
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 0.4, 0]} receiveShadow>
+        <boxGeometry args={[5.0, 0.8, 2.0]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.85} />
+      </mesh>
+      {bars.map(([h, col], i) => {
+        const bx = -1.8 + i * 0.9;
+        return (
+          <group key={i} position={[bx, 0.8, 0]}>
+            <mesh position={[0, h * 0.5 + 0.3, 0]}>
+              <cylinderGeometry args={[0.05, 0.05, h + 0.6, 6]} />
+              <meshStandardMaterial color="#0f172a" />
+            </mesh>
+            <mesh position={[0, h * 0.5 + 0.3, 0]} castShadow>
+              <boxGeometry args={[0.55, h, 0.55]} />
+              <meshStandardMaterial
+                color={col}
+                emissive={col}
+                emissiveIntensity={0.45}
+                toneMapped={false}
+              />
+            </mesh>
+          </group>
+        );
+      })}
+      <mesh position={[2.0, 6.0, 0]} rotation={[0, 0, -Math.PI / 4]} castShadow>
+        <coneGeometry args={[0.55, 1.4, 4]} />
+        <meshStandardMaterial
+          ref={arrowRef}
+          color={C}
+          emissive={C}
+          emissiveIntensity={1.4}
+          toneMapped={false}
+        />
+      </mesh>
+      <MonumentLabel position={[0, 7.6, 0]} color={C} text="📈 INVEST" />
+    </group>
+  );
+}
+
+// ── Life Events: wedding arch with a ring on top ─────────────────────
+function LifeEventsMonument({ position }: { position: [number, number] }) {
+  const ringRef = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    if (ringRef.current) {
+      ringRef.current.rotation.y = state.clock.elapsedTime * 0.5;
+    }
+  });
+  const [x, z] = position;
+  const C = "#a78bfa";
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[-1.8, 2.5, 0]} castShadow>
+        <cylinderGeometry args={[0.3, 0.4, 5, 10]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+      </mesh>
+      <mesh position={[1.8, 2.5, 0]} castShadow>
+        <cylinderGeometry args={[0.3, 0.4, 5, 10]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 5.0, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[1.8, 0.18, 8, 18, Math.PI]} />
+        <meshStandardMaterial color={C} emissive={C} emissiveIntensity={0.4} toneMapped={false} />
+      </mesh>
+      {[-1.4, 1.4].map((px) => (
+        <mesh key={px} position={[px, 4.6, 0]}>
+          <sphereGeometry args={[0.35, 10, 8]} />
+          <meshStandardMaterial
+            color="#fbcfe8"
+            emissive="#fb7185"
+            emissiveIntensity={0.5}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+      <group ref={ringRef} position={[0, 6.6, 0]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.7, 0.12, 10, 24]} />
+          <meshStandardMaterial
+            color="#fde047"
+            emissive="#fbbf24"
+            emissiveIntensity={1.2}
+            metalness={0.9}
+            roughness={0.2}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh position={[0, 0.1, 0.7]}>
+          <octahedronGeometry args={[0.18, 0]} />
+          <meshStandardMaterial
+            color="#e0f2fe"
+            emissive="#22d3ee"
+            emissiveIntensity={1.6}
+            toneMapped={false}
+          />
+        </mesh>
+      </group>
+      <MonumentLabel position={[0, 7.8, 0]} color={C} text="💍 LIFE EVENTS" />
+    </group>
+  );
+}
+
+// ── Consumer: giant shopping-cart arch over the main avenue ──────────
+function ConsumerArch({ position }: { position: [number, number] }) {
+  const wheelRef = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    if (wheelRef.current) {
+      wheelRef.current.rotation.z = state.clock.elapsedTime * 0.8;
+    }
+  });
+  const [x, z] = position;
+  const C = "#34d399";
+  return (
+    <group position={[x, 0, z]}>
+      {[-5, 5].map((px) => (
+        <mesh key={px} position={[px, 3.5, 0]} castShadow>
+          <cylinderGeometry args={[0.25, 0.3, 7, 8]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.7} roughness={0.4} />
+        </mesh>
+      ))}
+      <mesh position={[0, 7.1, 0]} castShadow>
+        <boxGeometry args={[10.8, 0.35, 0.6]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.6} roughness={0.4} />
+      </mesh>
+      <group position={[0, 5.8, 0]}>
+        {[-2.0, -1.2, -0.4, 0.4, 1.2, 2.0].map((bx) => (
+          <mesh key={`v${bx}`} position={[bx, 0, 0]}>
+            <boxGeometry args={[0.1, 1.5, 0.1]} />
+            <meshStandardMaterial color={C} emissive={C} emissiveIntensity={0.6} toneMapped={false} />
+          </mesh>
+        ))}
+        {[-0.7, 0.7].map((by) => (
+          <mesh key={`h${by}`} position={[0, by, 0]}>
+            <boxGeometry args={[4.4, 0.1, 0.1]} />
+            <meshStandardMaterial color={C} emissive={C} emissiveIntensity={0.6} toneMapped={false} />
+          </mesh>
+        ))}
+        <mesh position={[2.6, 0.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.45, 0.08, 6, 12, Math.PI / 2]} />
+          <meshStandardMaterial color={C} emissive={C} emissiveIntensity={0.7} toneMapped={false} />
+        </mesh>
+      </group>
+      <group ref={wheelRef} position={[-1.5, 4.7, 0]}>
+        <mesh>
+          <torusGeometry args={[0.35, 0.08, 6, 14]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh>
+          <boxGeometry args={[0.6, 0.06, 0.06]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <boxGeometry args={[0.6, 0.06, 0.06]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.3} />
+        </mesh>
+      </group>
+      <MonumentLabel position={[0, 8.0, 0]} color={C} text="🛒 CONSUMER" />
+    </group>
+  );
+}
+
+// ── Macro: rotating globe with orbital ring ──────────────────────────
+function MacroMonument({ position }: { position: [number, number] }) {
+  const globeRef = useRef<THREE.Mesh>(null!);
+  const ringRef = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (globeRef.current) globeRef.current.rotation.y = t * 0.3;
+    if (ringRef.current) {
+      ringRef.current.rotation.x = Math.PI / 2.6;
+      ringRef.current.rotation.z = t * 0.6;
+    }
+  });
+  const [x, z] = position;
+  const C = "#fb923c";
+  return (
+    <group position={[x, 0, z]}>
+      {[-3.5, 3.5].map((px) => (
+        <mesh key={px} position={[px, 2, 0]} castShadow>
+          <cylinderGeometry args={[0.2, 0.28, 4, 8]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} roughness={0.4} />
+        </mesh>
+      ))}
+      <mesh position={[0, 4.0, 0]} castShadow>
+        <boxGeometry args={[7.4, 0.3, 0.5]} />
+        <meshStandardMaterial color="#1e293b" metalness={0.6} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 5.0, 0]} castShadow>
+        <cylinderGeometry args={[0.25, 0.3, 1.2, 8]} />
+        <meshStandardMaterial color="#475569" metalness={0.6} roughness={0.4} />
+      </mesh>
+      <mesh ref={globeRef} position={[0, 6.4, 0]} castShadow>
+        <sphereGeometry args={[1.1, 24, 18]} />
+        <meshStandardMaterial color="#0c4a6e" emissive={C} emissiveIntensity={0.4} roughness={0.5} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 6.4, 0]}>
+        <sphereGeometry args={[1.11, 24, 18]} />
+        <meshStandardMaterial color="#22c55e" transparent opacity={0.18} toneMapped={false} />
+      </mesh>
+      <group ref={ringRef} position={[0, 6.4, 0]}>
+        <mesh>
+          <torusGeometry args={[1.7, 0.06, 8, 36]} />
+          <meshStandardMaterial color={C} emissive={C} emissiveIntensity={1.2} toneMapped={false} />
+        </mesh>
+        <mesh position={[1.7, 0, 0]}>
+          <boxGeometry args={[0.2, 0.2, 0.2]} />
+          <meshStandardMaterial color="#fde68a" emissive={C} emissiveIntensity={1.5} toneMapped={false} />
+        </mesh>
+      </group>
+      <MonumentLabel position={[0, 8.4, 0]} color={C} text="🌐 MACRO" />
+    </group>
+  );
+}
+
 // ── Top-level component ──────────────────────────────────────────────
 
 export default function KioskDecor() {
@@ -896,6 +1278,13 @@ export default function KioskDecor() {
           </group>
         );
       })}
+      {/* Per-quarter signature monuments (Task #4) — visible from afar */}
+      <FoundationsMonument position={[-115, -115]} />
+      <BorrowingMonument position={[115, -115]} />
+      <InvestingMonument position={[115, 115]} />
+      <LifeEventsMonument position={[-115, 115]} />
+      <ConsumerArch position={[0, -115]} />
+      <MacroMonument position={[0, 115]} />
     </group>
   );
 }
