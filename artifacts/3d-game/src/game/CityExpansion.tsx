@@ -183,11 +183,13 @@ function TrainStationSign() {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Airport addons: BotPlane International — relocated from the inner block
-// out to the far SW edge of the world. Terminal sits at (-50, *, 45),
-// footprint x=-55..-45, z=42..48. A 35u-long runway runs E-W at z=55,
-// width 5 (z=52.5..57.5), x = -65..-30. Empty corner — closest neighbors
-// are botfarm at (-40, -41) (86u north) and botgigs at (-55, 6) (39u N).
+// Airport addons: BotPlane International — pushed to the far SW outskirts.
+// All coords below are LOCAL to the airport district's wrapping <group>
+// in the default export (translated by (-15, 0, +5) into world space).
+// Local terminal sits at (-50, *, 45) → world (-65, *, 50). Runway 1 runs
+// E-W at local z=55 (world z=60), x = -65..-30 → world x = -80..-45.
+// Runway 2 (after the X_MAX shortening below) runs local x=-70..-30 →
+// world x=-85..-45, clearing BotShops west edge x=-43 by 2u.
 // All runway/apron/hangar geometry stays well within the 150x150 ground.
 // ─────────────────────────────────────────────────────────────────────
 
@@ -205,12 +207,15 @@ const RUNWAY_CENTER_X = (RUNWAY_X_MIN + RUNWAY_X_MAX) / 2; // -47.5
 // south airport apron no longer crowds BotGolf Country Club at z≈85.
 // X-min shortened from -75 → -70 so R2 clears the BOTAIR hangar at
 // (-75, 19) (x[-78,-72]) and the GREEN WINGS hangar at (-78, 32).
+// X-max shortened from -15 → -30 so after the district-wide (-15) world
+// shift, R2's east end sits at world x=-45, clearing BotShops west
+// edge x=-43 by 2u (shops fp x[-43,-38]).
 const RUNWAY2_Z = 30;
 const RUNWAY2_WIDTH = 6;
 const RUNWAY2_X_MIN = -70;
-const RUNWAY2_X_MAX = -15;
-const RUNWAY2_LEN = RUNWAY2_X_MAX - RUNWAY2_X_MIN; // 55
-const RUNWAY2_CX = (RUNWAY2_X_MIN + RUNWAY2_X_MAX) / 2; // -42.5
+const RUNWAY2_X_MAX = -30;
+const RUNWAY2_LEN = RUNWAY2_X_MAX - RUNWAY2_X_MIN; // 40
+const RUNWAY2_CX = (RUNWAY2_X_MIN + RUNWAY2_X_MAX) / 2; // -50
 
 const RUNWAY3_X = -25;
 const RUNWAY3_WIDTH = 5;
@@ -390,13 +395,12 @@ function Runway() {
           <meshStandardMaterial color={i < 2 ? "#ef4444" : "#f8fafc"} emissive={i < 2 ? "#ef4444" : "#f8fafc"} emissiveIntensity={1.6} toneMapped={false} />
         </mesh>
       ))}
-      {/* Approach lights — strobes leading into east threshold */}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <mesh key={`appr-${i}`} position={[RUNWAY2_X_MAX + 1 + i * 1.5, 0.15, RUNWAY2_Z]}>
-          <sphereGeometry args={[0.13, 6, 6]} />
-          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.5} toneMapped={false} />
-        </mesh>
-      ))}
+      {/* East-threshold approach lights removed: after the airport's
+          district-wide world shift + R2 east-end shortening, the east
+          ILS corridor would land inside BotShops kiosk at world (-40.5,
+          30.75). Real outskirts airports have their ILS corridors over
+          open land — the west approach light bars in AirportExpansion
+          serve as the (visible) runway 27 approach. */}
 
       {/* ═══════════════ RUNWAY 3 — N-S cross runway ═══════════════════
           x=-25, z[40,80], width 5, length 40 */}
@@ -1114,9 +1118,11 @@ function AirportExpansion() {
             possible interaction x=-79: u=(-79+120)/42=0.976, y=28-0.976*26≈2.62,
             wing bottom ≈1.97 — well above lamp top y=0.27. No threshold
             bar at x=-71 (would clip rollout). Clear of fuel depot
-            (berm z≤25.35). Lamp x=-94 still well east of map edge
-            (player bound ±105). */}
-      {[-79, -82, -85, -88, -91, -94].map((ax, i) => (
+            (berm z≤25.35). Westernmost lamp at local x=-82 → world x=-97
+            after district shift (1u inside ±98 ground edge). Trimmed
+            from 6 lights to 2: lamps at local -85/-88/-91/-94 would have
+            mapped to world -100..-109, past the ground plane. */}
+      {[-79, -82].map((ax, i) => (
         <group key={`appr-${i}`} position={[ax, 0, RUNWAY2_Z]}>
           {/* Light bar — 5 lamps in a row across the centerline */}
           {[-0.8, -0.4, 0, 0.4, 0.8].map((zOff, j) => (
@@ -1387,16 +1393,22 @@ export default function CityExpansion() {
       <MovingTrain />
       <TrainStationSign />
 
-      {/* ─── Airport district (far SW edge) ───
-         Runways/hangars sit against ArtDistrict's north edge so they can't
-         be shifted bodily south. Instead, the helipad/fuel/parking moved
-         south into the band freed up by BotGolf's relocation to NW. See
-         AirportExpansion for per-feature positions. */}
-      <Runway />
-      <Airplane position={[-50, 0.75, 49]} />
-      <TakeoffPlane />
-      <ControlTower />
-      <AirportExpansion />
+      {/* ─── Airport district (pushed to the far SW outskirts) ───
+         Whole district shifted by (-15, 0, +5) so the kiosk lives at
+         world (-90, *, 72.5), the terminal at (-65, *, 50), and Runway 2's
+         east end (after its X_MAX shortening below) sits at world x=-40,
+         clearing BotShops (x=-40.5, fp x[-43,-38]) with a 2u gap.
+         All inner constants (RUNWAY_Z, RUNWAY2_X_MIN/MAX, RUNWAY3_X, etc.)
+         remain local — animation refs (TakeoffPlane, landing plane,
+         fuel truck) write to refs inside this group so their coords are
+         already in local space. */}
+      <group position={[-15, 0, 5]}>
+        <Runway />
+        <Airplane position={[-50, 0.75, 49]} />
+        <TakeoffPlane />
+        <ControlTower />
+        <AirportExpansion />
+      </group>
     </group>
   );
 }

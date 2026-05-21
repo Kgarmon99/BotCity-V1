@@ -124,13 +124,14 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botplane",
     label: "BotPlane International",
-    // Real airports take a lot of land, so BotPlane has been moved out of
-    // the inner-block grid and given an entire corner of the map. Terminal
-    // sits on the far SW edge; runway 1 runs E-W behind it at z=55, with
-    // hangars + expanded airport (helipad, fuel, cargo, parking, control
-    // tower) rendered in CityExpansion. After BotGolf moved to NW, the
-    // helipad/fuel/parking expanded SOUTH into the freed z>60 band.
-    position: [-75, 3, 67.5],
+    // Real airports take a lot of land, so BotPlane has been pushed to
+    // the far SW outskirts. The whole airport district (Runway/Airplane/
+    // TakeoffPlane/ControlTower/AirportExpansion) is wrapped in a
+    // (-15, 0, +5) translation group in CityExpansion's default export,
+    // so the kiosk + every airport feature shift together. Kiosk world
+    // coord = (-75, 67.5) + (-15, +5) = (-90, 72.5). Terminal at world
+    // (-65, 50); runway 2 east edge at world x=-40 (clears BotShops).
+    position: [-90, 3, 72.5],
     color: "#38bdf8",
     roofColor: "#0c4a6e",
     width: 10,
