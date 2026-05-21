@@ -15,6 +15,10 @@ class SoundManager {
   // Sustained sound handles — kept around so we can fade/stop them later.
   private ambientNodes: { osc: OscillatorNode[]; gain: GainNode } | null = null;
   private jetpackNodes: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  // Current logical jetpack state. Kept separate from `jetpackNodes`
+  // because we keep the audio graph alive across toggles; this tracks
+  // whether the gain is currently ramping toward the on or off target.
+  private jetpackActive = false;
   private rocketNodes: { src: AudioBufferSourceNode; osc: OscillatorNode; gain: GainNode } | null = null;
 
   private ensure(): AudioContext | null {
@@ -66,10 +70,33 @@ class SoundManager {
     this.muted = m;
     if (m && this.ctx && this.master) {
       this.master.gain.value = 0;
+      // Force the jet whoosh gain to 0 immediately so the audio graph
+      // can't diverge from the logical state while muted — otherwise
+      // releasing jet during mute would only flip `jetpackActive`
+      // (ensure() returns null when muted) and unmuting could leave a
+      // stuck whoosh routed through master.
+      if (this.jetpackNodes && this.ctx) {
+        const g = this.jetpackNodes.gain.gain;
+        g.cancelScheduledValues(this.ctx.currentTime);
+        g.setValueAtTime(0, this.ctx.currentTime);
+      }
     } else if (this.master) {
       this.master.gain.value = 0.5;
       // Restart ambient on unmute in case it was skipped while muted.
       this.startAmbient();
+      // Reconcile jet state: while muted, setJetpack(active) only updated
+      // the `jetpackActive` flag without touching gain. Re-apply the
+      // current intent now so the whoosh matches whether the player is
+      // still holding jet at unmute time.
+      if (this.jetpackNodes && this.ctx) {
+        const now = this.ctx.currentTime;
+        const target = this.jetpackActive ? 0.07 : 0;
+        const ramp = this.jetpackActive ? 0.08 : 0.14;
+        const g = this.jetpackNodes.gain.gain;
+        g.cancelScheduledValues(now);
+        g.setValueAtTime(g.value, now);
+        g.linearRampToValueAtTime(target, now + ramp);
+      }
     } else if (!m) {
       // No context yet — try to bring up ambient (and the context) now.
       this.startAmbient();
@@ -127,24 +154,31 @@ class SoundManager {
 
   /**
    * Toggle the jetpack whoosh — bandpass-filtered white noise that fades
-   * in/out instead of cutting hard so quick taps don't click. Calling
-   * with the same value back-to-back is a no-op.
+   * in/out instead of cutting hard so quick taps don't click.
+   *
+   * Implementation: nodes are created LAZILY on the first activation and
+   * then kept alive for the lifetime of the audio context. Subsequent
+   * calls just ramp the gain. This avoids the bug where rapid press +
+   * release within ~200ms would overlap a tearing-down source with a
+   * freshly-created one, producing audible double-whooshes or leaked
+   * BufferSourceNodes feeding into master.
+   *
+   * Safe to call every frame — repeat calls with the same value short-
+   * circuit via `jetpackActive` and never reschedule the ramp.
    */
   setJetpack(active: boolean) {
+    if (active === this.jetpackActive) return; // no-op on repeats
     const ctx = this.ensure();
     if (!ctx || !this.master) {
-      // Audio is unavailable (e.g. muted). If a previous activation left a
-      // live source running, tear it down BEFORE dropping the handle so the
-      // node doesn't keep running forever and we can't allocate a duplicate
-      // on the next activation. We can still reach the source via the saved
-      // refs even when ensure() refuses to vend a context.
-      if (this.jetpackNodes) {
-        try { this.jetpackNodes.src.stop(); } catch { /* already stopped */ }
-        this.jetpackNodes = null;
-      }
+      // Audio unavailable (muted or context refused). Just track the
+      // intent so we don't drift out of sync — next ensure() will see
+      // the right state.
+      this.jetpackActive = active;
       return;
     }
-    if (active && !this.jetpackNodes) {
+    if (!this.jetpackNodes) {
+      // First-ever activation: build the persistent noise + filter + gain
+      // chain. Gain starts at 0 so we can ramp up smoothly below.
       const src = ctx.createBufferSource();
       src.buffer = this.getNoise(ctx);
       src.loop = true;
@@ -153,23 +187,19 @@ class SoundManager {
       filter.frequency.value = 900;
       filter.Q.value = 0.6;
       const g = ctx.createGain();
-      const now = ctx.currentTime;
-      g.gain.setValueAtTime(0, now);
-      g.gain.linearRampToValueAtTime(0.07, now + 0.08);
+      g.gain.value = 0;
       src.connect(filter).connect(g).connect(this.master);
       src.start();
       this.jetpackNodes = { src, gain: g };
-    } else if (!active && this.jetpackNodes) {
-      const { src, gain } = this.jetpackNodes;
-      const now = ctx.currentTime;
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setValueAtTime(gain.gain.value, now);
-      gain.gain.linearRampToValueAtTime(0, now + 0.14);
-      setTimeout(() => {
-        try { src.stop(); } catch { /* already stopped */ }
-      }, 200);
-      this.jetpackNodes = null;
     }
+    const now = ctx.currentTime;
+    const { gain } = this.jetpackNodes;
+    const target = active ? 0.07 : 0;
+    const rampTime = active ? 0.08 : 0.14;
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(target, now + rampTime);
+    this.jetpackActive = active;
   }
 
   /**

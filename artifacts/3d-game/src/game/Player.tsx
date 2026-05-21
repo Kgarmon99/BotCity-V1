@@ -38,6 +38,10 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   const ridingRef = useRef(false);
   const [riding, setRiding] = useState(false);
   const [jetting, setJetting] = useState(false);
+  // Track the last value pushed to sound.setJetpack so we only call it on
+  // transitions, not 60x/sec from useFrame. Belt-and-suspenders alongside
+  // sound.ts's own idempotency check.
+  const lastJetSound = useRef(false);
   const cameraMode = useGameStore((s) => s.cameraMode);
   // Track the last touch interact tick we've consumed so a single tap fires
   // onInteract exactly once.
@@ -110,6 +114,10 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       window.removeEventListener("blur", onBlur);
+      // If the Player unmounts mid-thrust (HMR, route change), make sure
+      // the whoosh doesn't outlive the component.
+      sound.setJetpack(false);
+      lastJetSound.current = false;
     };
   }, [onInteract]);
 
@@ -176,9 +184,13 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       // ── Jetpack: Shift (or on-screen button) adds upward thrust; gravity
       // pulls back down. Disabled while riding the BotMobile (cars don't fly).
       const jetActive = (keys.current.jet || touchInput.jetHeld) && !ridingRef.current;
-      // Drive the jetpack whoosh sound on/off as the player toggles thrust.
-      // setJetpack is idempotent so calling it every frame is fine.
-      sound.setJetpack(jetActive);
+      // Drive the jetpack whoosh sound only on transitions. The sound
+      // module is also idempotent, but skipping the call on steady-state
+      // frames avoids any chance of stacking scheduled WebAudio events.
+      if (jetActive !== lastJetSound.current) {
+        lastJetSound.current = jetActive;
+        sound.setJetpack(jetActive);
+      }
       const accel = (jetActive ? JETPACK_THRUST : 0) - GRAVITY;
       verticalVel.current = Math.max(TERMINAL_FALL, verticalVel.current + accel * delta);
       groupRef.current.position.y += verticalVel.current * delta;
