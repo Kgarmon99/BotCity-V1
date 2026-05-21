@@ -5,72 +5,143 @@ import { useEffect, useState } from "react";
 import TouchControls from "./TouchControls";
 import MiniMap from "./MiniMap";
 
-const BUILDINGS = [
-  // Ordered by city district, not insertion order. Reading the checklist
-  // top-to-bottom now matches the conceptual zones of the city — civic
-  // core, then commerce wedges, then outer suburbs. The IDs themselves
-  // are unchanged so save state stays compatible.
+// Objectives checklist — every kiosk in the city, grouped by theme.
+// Sections render as small headers in the HUD so the 49-item list
+// is scannable. Adding a new kiosk? Drop it into the matching section
+// (or add a new section). IDs must match BUILDING_DEFS in GameScene.
+type BuildingItem = { id: string; emoji: string; label: string };
+type BuildingSection = { title: string; emoji: string; items: BuildingItem[] };
+const BUILDING_SECTIONS: BuildingSection[] = [
+  {
+    title: "Civic & Justice",
+    emoji: "🏛️",
+    items: [
+      { id: "botcityhall", emoji: "🏛️", label: "BotCityHall" },
+      { id: "irs", emoji: "📋", label: "IRS Office" },
+      { id: "botpolice", emoji: "🚓", label: "BotPolice Precinct" },
+      { id: "botfire", emoji: "🚒", label: "BotFire Station" },
+      { id: "botcourt", emoji: "⚖️", label: "BotCourt (Tax Court)" },
+    ],
+  },
+  {
+    title: "Work & Business",
+    emoji: "💼",
+    items: [
+      { id: "workcorp", emoji: "💼", label: "WorkCorp" },
+      { id: "moneybottowers", emoji: "🏢", label: "MoneyBot Towers" },
+      { id: "botgigs", emoji: "🛵", label: "BotGigs" },
+      { id: "botfactory", emoji: "🏭", label: "BotFactory" },
+    ],
+  },
+  {
+    title: "Finance",
+    emoji: "💰",
+    items: [
+      { id: "firstbank", emoji: "🏦", label: "First Bank" },
+      { id: "botbroker", emoji: "📈", label: "BotBroker" },
+      { id: "botcrypto", emoji: "₿", label: "BotCrypto" },
+    ],
+  },
+  {
+    title: "Health & Insurance",
+    emoji: "🏥",
+    items: [
+      { id: "bothospital", emoji: "🏥", label: "BotHospital" },
+      { id: "botinsurance", emoji: "🛡️", label: "BotInsurance HQ" },
+    ],
+  },
+  {
+    title: "Family & Home",
+    emoji: "👨‍👩‍👧",
+    items: [
+      { id: "botkids", emoji: "🧒", label: "BotKids" },
+      { id: "littlebots", emoji: "🧸", label: "LittleBots DayCare" },
+      { id: "botcharity", emoji: "❤️", label: "BotCharity" },
+      { id: "botretirement", emoji: "🏛️", label: "BotRetirement" },
+      { id: "bothaus", emoji: "🏠", label: "BotHaus" },
+    ],
+  },
+  {
+    title: "Retail & Services",
+    emoji: "🛒",
+    items: [
+      { id: "taxmart", emoji: "🛒", label: "TaxMart" },
+      { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
+      { id: "botshops", emoji: "🏪", label: "BotShops" },
+      { id: "botdealer", emoji: "🚗", label: "BotDealer" },
+    ],
+  },
+  {
+    title: "Schools & Universities",
+    emoji: "🎓",
+    items: [
+      { id: "botelementary", emoji: "🏫", label: "BotElementary" },
+      { id: "botmiddle", emoji: "🏫", label: "BotMiddle School" },
+      { id: "bothigh", emoji: "🏫", label: "BotHigh School" },
+      { id: "botunorth", emoji: "🎓", label: "BotU North Campus" },
+      { id: "botusouth", emoji: "🎓", label: "BotU South Campus" },
+    ],
+  },
+  {
+    title: "Museums & Galleries",
+    emoji: "🖼️",
+    items: [
+      { id: "bothistory", emoji: "🤖", label: "Bot History Museum" },
+      { id: "eduhistory", emoji: "📚", label: "Education History Museum" },
+      { id: "finhistory", emoji: "💰", label: "Finance History Museum" },
+      { id: "botgallery", emoji: "🎨", label: "BotGallery" },
+    ],
+  },
+  {
+    title: "Entertainment",
+    emoji: "🎭",
+    items: [
+      { id: "botfashion", emoji: "👗", label: "BotFashion District" },
+      { id: "moneybotgaminghq", emoji: "🎮", label: "MoneyBot Gaming HQ" },
+      { id: "botcasino", emoji: "🎰", label: "BotCasino" },
+    ],
+  },
+  {
+    title: "Sports",
+    emoji: "⚽",
+    items: [
+      { id: "botstadium", emoji: "🏟️", label: "BotStadium" },
+      { id: "botsoccer", emoji: "⚽", label: "BotSoccer Stadium" },
+      { id: "botbasketball", emoji: "🏀", label: "BotHoops Arena" },
+      { id: "botgolf", emoji: "⛳", label: "BotGolf Course" },
+    ],
+  },
+  {
+    title: "Transit",
+    emoji: "🚆",
+    items: [
+      { id: "bottrain", emoji: "🚆", label: "BotTrain" },
+      { id: "botplane", emoji: "✈️", label: "BotPlane International" },
+      { id: "botrocket", emoji: "🚀", label: "BotRocket Station" },
+    ],
+  },
+  {
+    title: "Nature & Leisure",
+    emoji: "🌳",
+    items: [
+      { id: "botbeach", emoji: "🏖️", label: "BotBeach" },
+      { id: "botfarm", emoji: "🚜", label: "BotFarm" },
+      { id: "botzoo", emoji: "🦒", label: "BotZoo" },
+      { id: "botpark", emoji: "🏔️", label: "BotNational Park" },
+    ],
+  },
+  {
+    title: "Industry & Specialty",
+    emoji: "⚓",
+    items: [
+      { id: "botport", emoji: "⚓", label: "BotPort Harbor" },
+      { id: "botmine", emoji: "⛏️", label: "BotMine" },
+      { id: "botenergy", emoji: "⚡", label: "BotEnergy" },
+    ],
+  },
+];
 
-  // 🏛️  Civic core
-  { id: "botcityhall", emoji: "🏛️", label: "BotCityHall" },
-  { id: "irs", emoji: "📋", label: "IRS Office" },
-  { id: "botpolice", emoji: "🚓", label: "BotPolice Precinct" },
-  { id: "botfire", emoji: "🚒", label: "BotFire Station" },
-
-  // 💼  Work & entity
-  { id: "workcorp", emoji: "💼", label: "WorkCorp" },
-  { id: "moneybottowers", emoji: "🏢", label: "MoneyBot Towers" },
-  { id: "botgigs", emoji: "🛵", label: "BotGigs" },
-
-  // 💰  Financial district
-  { id: "firstbank", emoji: "🏦", label: "First Bank" },
-  { id: "botbroker", emoji: "📈", label: "BotBroker" },
-  { id: "botcrypto", emoji: "₿", label: "BotCrypto" },
-
-  // 🏥  Life & family
-  { id: "bothospital", emoji: "🏥", label: "BotHospital" },
-  { id: "botkids", emoji: "🧒", label: "BotKids" },
-  { id: "littlebots", emoji: "🧸", label: "LittleBots DayCare" },
-  { id: "botcharity", emoji: "❤️", label: "BotCharity" },
-  { id: "botretirement", emoji: "🏛️", label: "BotRetirement" },
-
-  // 🛒  Retail & services
-  { id: "taxmart", emoji: "🛒", label: "TaxMart" },
-  { id: "botmarket", emoji: "🛍️", label: "BotMarket" },
-  { id: "botshops", emoji: "🏪", label: "BotShops" },
-  { id: "botdealer", emoji: "🚗", label: "BotDealer" },
-  { id: "moneybotgaminghq", emoji: "🎮", label: "MoneyBot Gaming HQ" },
-
-  // 🏛️  Culture & history (three corner museums)
-  { id: "bothistory", emoji: "🤖", label: "Bot History Museum" },
-  { id: "eduhistory", emoji: "📚", label: "Education History Museum" },
-  { id: "finhistory", emoji: "💰", label: "Finance History Museum" },
-
-  // 🎓  Education & transit
-  { id: "botunorth", emoji: "🎓", label: "BotU North Campus" },
-  { id: "botusouth", emoji: "🎓", label: "BotU South Campus" },
-  { id: "bottrain", emoji: "🚆", label: "BotTrain" },
-  { id: "botplane", emoji: "✈️", label: "BotPlane International" },
-  { id: "botrocket", emoji: "🚀", label: "BotRocket Station" },
-
-  // 🏠  Home & lifestyle
-  { id: "bothaus", emoji: "🏠", label: "BotHaus" },
-  { id: "botbeach", emoji: "🏖️", label: "BotBeach" },
-  { id: "botstadium", emoji: "🏟️", label: "BotStadium" },
-  { id: "botfarm", emoji: "🚜", label: "BotFarm" },
-
-  // ⚓  Industry & specialty taxes
-  { id: "botport", emoji: "⚓", label: "BotPort Harbor" },
-  { id: "botcasino", emoji: "🎰", label: "BotCasino" },
-  { id: "botmine", emoji: "⛏️", label: "BotMine" },
-  { id: "botzoo", emoji: "🦒", label: "BotZoo & Park" },
-  { id: "botfactory", emoji: "🏭", label: "BotFactory" },
-  { id: "botenergy", emoji: "⚡", label: "BotEnergy" },
-
-  // ⚖️  Justice, risk & disputes
-  { id: "botcourt", emoji: "⚖️", label: "BotCourt (Tax Court)" },
-  { id: "botinsurance", emoji: "🛡️", label: "BotInsurance HQ" },
-] as const;
+const BUILDINGS: BuildingItem[] = BUILDING_SECTIONS.flatMap((s) => s.items);
 
 interface RowProps {
   label: string;
@@ -194,24 +265,53 @@ export default function HUD() {
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <div className="space-y-2 text-sm">
-            {BUILDINGS.map(({ id, emoji, label }) => {
-              const done = visitedBuildings.includes(id);
+          <div className="space-y-3 text-sm max-h-[55vh] overflow-y-auto pr-1">
+            {BUILDING_SECTIONS.map((section, idx) => {
+              const sectionCompleted = section.items.filter((b) =>
+                visitedBuildings.includes(b.id),
+              ).length;
+              const sectionTotal = section.items.length;
+              const sectionDone = sectionCompleted === sectionTotal;
+              const dividerCls = idx > 0 ? "pt-2 border-t border-emerald-500/15" : "";
               return (
-                <div key={id} className="flex items-center gap-2.5">
-                  <span
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
-                      done
-                        ? "bg-emerald-500 text-slate-950 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
-                        : "bg-emerald-950/60 border border-emerald-500/30 text-emerald-300/40"
-                    }`}
-                  >
-                    {done ? "✓" : "○"}
-                  </span>
-                  <span className={done ? "line-through text-emerald-200/40" : "text-emerald-100"}>
-                    <span className="mr-1">{emoji}</span>
-                    {label}
-                  </span>
+                <div key={section.title} className={`space-y-1.5 ${dividerCls}`}>
+                  {/* Section header */}
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div
+                      className={`text-[10px] uppercase tracking-[0.16em] font-semibold ${
+                        sectionDone ? "text-amber-300/70" : "text-emerald-300/70"
+                      }`}
+                    >
+                      <span className="mr-1">{section.emoji}</span>
+                      {section.title}
+                    </div>
+                    <div className="text-[10px] font-mono text-emerald-300/50 tabular-nums">
+                      {sectionCompleted}/{sectionTotal}
+                    </div>
+                  </div>
+                  {/* Section items */}
+                  <div className="space-y-1.5">
+                    {section.items.map(({ id, emoji, label }) => {
+                      const done = visitedBuildings.includes(id);
+                      return (
+                        <div key={id} className="flex items-center gap-2.5">
+                          <span
+                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors flex-shrink-0 ${
+                              done
+                                ? "bg-emerald-500 text-slate-950 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                                : "bg-emerald-950/60 border border-emerald-500/30 text-emerald-300/40"
+                            }`}
+                          >
+                            {done ? "✓" : "○"}
+                          </span>
+                          <span className={done ? "line-through text-emerald-200/40" : "text-emerald-100"}>
+                            <span className="mr-1">{emoji}</span>
+                            {label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
