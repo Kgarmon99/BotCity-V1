@@ -785,12 +785,12 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   { id: "botcommodities", label: "BotCommodities Pit",   position: [103, 1.5, 111], color: "#d97706", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🌾" },
   { id: "botventure",     label: "BotVenture Capital",   position: [111, 1.5, 103], color: "#b45309", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🚀" },
   { id: "botbonds",       label: "BotBonds Desk",        position: [95, 1.5, 103], color: "#92400e", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "🧾" },
-  // ── Life Events 💍 (purple #a78bfa), centered (-103, 103) ──
-  { id: "botchapel",      label: "BotChapel",            position: [-103, 1.5, 103], color: "#a78bfa", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "💒" },
-  { id: "botmaternity",   label: "BotMaternity Ward",    position: [-103, 1.5, 95], color: "#8b5cf6", roofColor: "#fce7f3", width: 1.8, depth: 1.8, height: 3, emoji: "👶" },
-  { id: "botestate",      label: "BotEstate Office",     position: [-103, 1.5, 111], color: "#7c3aed", roofColor: "#1f2937", width: 1.8, depth: 1.8, height: 3, emoji: "⚰️" },
-  { id: "bothealthplan",  label: "BotHealthPlan Clinic", position: [-95, 1.5, 103], color: "#6d28d9", roofColor: "#f8fafc", width: 1.8, depth: 1.8, height: 3, emoji: "🩺" },
-  { id: "botdivorce",     label: "BotDivorce Mediation", position: [-111, 1.5, 103], color: "#5b21b6", roofColor: "#fda4af", width: 1.8, depth: 1.8, height: 3, emoji: "💔" },
+  // ── Life Events 💍 (purple #a78bfa), centered (-103, 135) — pushed south, away from airport ──
+  { id: "botchapel",      label: "BotChapel",            position: [-103, 1.5, 135], color: "#a78bfa", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "💒" },
+  { id: "botmaternity",   label: "BotMaternity Ward",    position: [-103, 1.5, 127], color: "#8b5cf6", roofColor: "#fce7f3", width: 1.8, depth: 1.8, height: 3, emoji: "👶" },
+  { id: "botestate",      label: "BotEstate Office",     position: [-103, 1.5, 143], color: "#7c3aed", roofColor: "#1f2937", width: 1.8, depth: 1.8, height: 3, emoji: "⚰️" },
+  { id: "bothealthplan",  label: "BotHealthPlan Clinic", position: [-95, 1.5, 135], color: "#6d28d9", roofColor: "#f8fafc", width: 1.8, depth: 1.8, height: 3, emoji: "🩺" },
+  { id: "botdivorce",     label: "BotDivorce Mediation", position: [-111, 1.5, 135], color: "#5b21b6", roofColor: "#fda4af", width: 1.8, depth: 1.8, height: 3, emoji: "💔" },
   // ── Consumer & Behavioral 🛒 (green #34d399), strip z=-103 ──
   { id: "botconsumer",    label: "BotConsumer Protection",position: [-95, 1.5, -103], color: "#34d399", roofColor: "#1e293b", width: 1.8, depth: 1.8, height: 3, emoji: "🛡️" },
   { id: "botads",         label: "BotAds & Marketing",    position: [-40, 1.5, -103], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" },

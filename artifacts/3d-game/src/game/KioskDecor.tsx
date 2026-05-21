@@ -1282,7 +1282,7 @@ export default function KioskDecor() {
       <FoundationsMonument position={[-102, -102]} />
       <BorrowingMonument position={[115, -115]} />
       <InvestingMonument position={[115, 115]} />
-      <LifeEventsMonument position={[-115, 115]} />
+      <LifeEventsMonument position={[-115, 147]} />
       <ConsumerArch position={[0, -115]} />
       <MacroMonument position={[0, 115]} />
     </group>

@@ -128,9 +128,11 @@ export const QUARTERS: Quarter[] = [
     emoji: "💍",
     hudTitle: "Life Events",
     color: "#a78bfa",
-    signpost: [-117, 0, 117],
+    signpost: [-117, 0, 142],
     signpostRotY: -(3 * Math.PI) / 4, // faces center (NE)
-    lots: plusLots(-103, 103, "life"),
+    // Pushed south into the outer-ring band so kiosks are 50u clear of
+    // BotPlane International airport (south edge ~z=85).
+    lots: plusLots(-103, 135, "life"),
   },
   {
     id: "consumer",
