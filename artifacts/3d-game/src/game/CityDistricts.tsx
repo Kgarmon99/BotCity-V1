@@ -2332,19 +2332,30 @@ function Dealer() {
   });
   return (
     <group position={[-13.5, 0, -40.5]}>
-      {/* Parking lot tarmac — south of the showroom */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 3]}>
-        <planeGeometry args={[7.5, 4]} />
+      {/* Big parking lot tarmac — south of the showroom (expanded 7.5×4 → 16×8) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 6]}>
+        <planeGeometry args={[16, 8]} />
         <meshStandardMaterial color="#1f2937" emissive="#4ade80" emissiveIntensity={0.12} />
       </mesh>
-      {/* Parking line stripes (3 bays for 3 cars) */}
-      {[-2.4, -0.8, 0.8, 2.4].map((x, i) => (
+      {/* Center aisle stripe — dashed white line between the two car rows */}
+      {[-6.5, -4.5, -2.5, -0.5, 1.5, 3.5, 5.5].map((x, i) => (
+        <mesh
+          key={`aisle-${i}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[x, 0.045, 5.75]}
+        >
+          <planeGeometry args={[1.2, 0.15]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.9} />
+        </mesh>
+      ))}
+      {/* Parking line stripes — 7 yellow dividers across 6 bays per row */}
+      {[-7.5, -5, -2.5, 0, 2.5, 5, 7.5].map((x, i) => (
         <mesh
           key={`line-${i}`}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[x, 0.05, 3]}
+          position={[x, 0.05, 6]}
         >
-          <planeGeometry args={[0.08, 3.6]} />
+          <planeGeometry args={[0.08, 7]} />
           <meshStandardMaterial
             color="#fde047"
             emissive="#fde047"
@@ -2353,10 +2364,21 @@ function Dealer() {
           />
         </mesh>
       ))}
-      {/* 3 BotMobiles on display */}
-      <BotMobile pos={[-1.6, 0, 3.5]} color="#22d3ee" accent="#67e8f9" />
-      <BotMobile pos={[0, 0, 3.5]} color="#dc2626" accent="#fde047" />
-      <BotMobile pos={[1.6, 0, 3.5]} color="#a78bfa" accent="#22c55e" />
+      {/* 12 BotMobiles on display — 2 rows of 6, varied colors */}
+      {/* Row 1 (north, near showroom) */}
+      <BotMobile pos={[-6.25, 0, 3.5]} color="#22d3ee" accent="#67e8f9" />
+      <BotMobile pos={[-3.75, 0, 3.5]} color="#dc2626" accent="#fde047" />
+      <BotMobile pos={[-1.25, 0, 3.5]} color="#a78bfa" accent="#22c55e" />
+      <BotMobile pos={[1.25, 0, 3.5]} color="#f59e0b" accent="#fef3c7" />
+      <BotMobile pos={[3.75, 0, 3.5]} color="#06b6d4" accent="#a5f3fc" />
+      <BotMobile pos={[6.25, 0, 3.5]} color="#16a34a" accent="#bbf7d0" />
+      {/* Row 2 (south) */}
+      <BotMobile pos={[-6.25, 0, 8.25]} color="#ec4899" accent="#fbcfe8" />
+      <BotMobile pos={[-3.75, 0, 8.25]} color="#0b1220" accent="#64748b" />
+      <BotMobile pos={[-1.25, 0, 8.25]} color="#f97316" accent="#fed7aa" />
+      <BotMobile pos={[1.25, 0, 8.25]} color="#7c3aed" accent="#c4b5fd" />
+      <BotMobile pos={[3.75, 0, 8.25]} color="#b91c1c" accent="#fecaca" />
+      <BotMobile pos={[6.25, 0, 8.25]} color="#475569" accent="#cbd5e1" />
       {/* Flagpole + waving flag */}
       <mesh position={[3.6, 4, 0]}>
         <cylinderGeometry args={[0.07, 0.07, 8, 6]} />

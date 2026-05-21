@@ -229,9 +229,10 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botdealer",
     label: "BotDealer",
-    // North middle-ring, replaces the removed filler at (-9, -27). Showroom
-    // footprint x=-11.5..-6.5, z=-29..-25. Parking lot + cars rendered south
-    // of the building in CityDistricts.tsx (z = -26..-22).
+    // Middle ring, north side. Showroom footprint x[-16,-11], z[-42.5,-38.5].
+    // Big parking lot + 12 cars rendered south of the showroom in
+    // CityDistricts.tsx Dealer() — lot envelope world x[-21.5,-5.5],
+    // z[-38.5,-30.5]; 2.2u gap to inner ring road at z=-27 (north edge -28.3).
     position: [-13.5, 2.5, -40.5],
     color: "#22d3ee",
     roofColor: "#fde047",
