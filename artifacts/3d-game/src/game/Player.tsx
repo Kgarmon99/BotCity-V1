@@ -206,7 +206,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       const showJet = jetActive || isAirborne;
       if (showJet !== jetting) setJetting(showJet);
 
-      const bound = 64;
+      const bound = 105;
       groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
 

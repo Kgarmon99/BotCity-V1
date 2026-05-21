@@ -270,8 +270,8 @@ function OceanWaves() {
     }
   });
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[88, 0.05, 50]}>
-      <planeGeometry args={[40, 180, 1, 1]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[112, 0.05, 50]}>
+      <planeGeometry args={[34, 200, 1, 1]} />
       <meshStandardMaterial
         ref={ref}
         color="#0e7490"
@@ -380,16 +380,42 @@ function Beach() {
           </mesh>
         ))}
       </group>
-      {/* The ocean — huge animated water plane reaching the world edge */}
+      {/* Shallow shoreline — bridges the gap between wet-sand (x≈78.75)
+          and the open-ocean plane (x=95). Lighter, more transparent. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[86.5, 0.045, 50]}>
+        <planeGeometry args={[16, 130]} />
+        <meshStandardMaterial
+          color="#0891b2"
+          emissive="#22d3ee"
+          emissiveIntensity={0.45}
+          transparent
+          opacity={0.7}
+          roughness={0.3}
+          metalness={0.3}
+        />
+      </mesh>
+      {/* Foam line right at the shore */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[80, 0.055, 50]}>
+        <planeGeometry args={[1.2, 125]} />
+        <meshStandardMaterial
+          color="#ecfeff"
+          emissive="#a5f3fc"
+          emissiveIntensity={0.7}
+          transparent
+          opacity={0.55}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* The ocean — huge animated water plane east of the city */}
       <OceanWaves />
-      {/* Distant waves / breakers — emissive strips ON the ocean surface */}
-      {[82, 92, 100].map((wx) => (
+      {/* Distant waves / breakers — emissive strips ON the open-ocean surface */}
+      {[100, 110, 120].map((wx) => (
         <mesh
           key={`wave-${wx}`}
           rotation={[-Math.PI / 2, 0, 0]}
           position={[wx, 0.07, 50]}
         >
-          <planeGeometry args={[0.5, 160]} />
+          <planeGeometry args={[0.5, 180]} />
           <meshStandardMaterial
             color="#67e8f9"
             emissive="#a5f3fc"
