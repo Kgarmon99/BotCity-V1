@@ -624,6 +624,308 @@ function Beach() {
       >
         🏖️ BOTBEACH
       </Text>
+
+      {/* ── LIFEGUARD TOWER — classic red-and-white stilt hut, back of sand
+            at (62, 0, 50). Faces east (toward the ocean). Sand strip
+            spans x[55.75, 77.75] z[2.5, 102.5], so (62, 50) is well
+            within bounds. ── */}
+      <group position={[62, 0, 50]}>
+        {/* Stilts */}
+        {[[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([px, pz], i) => (
+          <mesh key={`lg-stilt-${i}`} position={[px, 1, pz]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 2, 6]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+        ))}
+        {/* Floor */}
+        <mesh position={[0, 2.1, 0]} castShadow>
+          <boxGeometry args={[2.6, 0.16, 2.6]} />
+          <meshStandardMaterial color="#fbbf24" roughness={0.6} />
+        </mesh>
+        {/* Back wall (west, facing inland) */}
+        <mesh position={[-1.2, 2.85, 0]} castShadow>
+          <boxGeometry args={[0.12, 1.5, 2.6]} />
+          <meshStandardMaterial color="#dc2626" />
+        </mesh>
+        {/* Side walls */}
+        {[1.2, -1.2].map((sz, i) => (
+          <mesh key={`lg-side-${i}`} position={[0, 2.85, sz]} castShadow>
+            <boxGeometry args={[2.4, 1.5, 0.12]} />
+            <meshStandardMaterial color="#dc2626" />
+          </mesh>
+        ))}
+        {/* Front rail (east, half-height window opening) */}
+        <mesh position={[1.2, 2.3, 0]}>
+          <boxGeometry args={[0.08, 0.4, 2.4]} />
+          <meshStandardMaterial color="#7c2d12" />
+        </mesh>
+        {/* Hip roof */}
+        <mesh position={[0, 3.85, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+          <coneGeometry args={[2.05, 0.9, 4]} />
+          <meshStandardMaterial color="#7c2d12" roughness={0.85} />
+        </mesh>
+        {/* Red cross on back wall (visible from city side) */}
+        <mesh position={[-1.27, 3.0, 0]}>
+          <boxGeometry args={[0.04, 0.18, 0.7]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        <mesh position={[-1.27, 3.0, 0]}>
+          <boxGeometry args={[0.04, 0.7, 0.18]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        {/* Ladder on west side */}
+        <mesh position={[-1.4, 1.0, 0]} rotation={[0, 0, -Math.PI / 8]}>
+          <boxGeometry args={[0.06, 2.1, 0.6]} />
+          <meshStandardMaterial color="#78350f" />
+        </mesh>
+        {/* Lifebuoy hung on front */}
+        <mesh position={[1.3, 2.75, 0.6]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.22, 0.07, 8, 16]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        <mesh position={[1.3, 2.75, 0.6]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.22, 0.072, 8, 16, Math.PI / 2]} />
+          <meshStandardMaterial color="#dc2626" />
+        </mesh>
+      </group>
+
+      {/* ── BEACH VOLLEYBALL COURT — south end of beach at (68, 0, 14).
+            Court is a 6×9 sand band with the existing umbrellas
+            (closest is at z=22.5, 8.5u away) and surfboards (z=22.5,
+            8.5u away). ── */}
+      <group position={[68, 0, 14]}>
+        {/* Court boundary stripes — slightly darker sand */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.045, 0]}>
+          <planeGeometry args={[6.2, 9.2]} />
+          <meshStandardMaterial color="#f59e0b" emissive="#fbbf24" emissiveIntensity={0.18} transparent opacity={0.6} />
+        </mesh>
+        {/* Net posts */}
+        <mesh position={[-3, 1.1, 0]} castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 2.2, 6]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        <mesh position={[3, 1.1, 0]} castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 2.2, 6]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {/* Net (wireframe) */}
+        <mesh position={[0, 1.6, 0]}>
+          <boxGeometry args={[6, 0.7, 0.04]} />
+          <meshStandardMaterial color="#f8fafc" transparent opacity={0.55} wireframe />
+        </mesh>
+        {/* Net top tape */}
+        <mesh position={[0, 1.95, 0]}>
+          <boxGeometry args={[6, 0.06, 0.06]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        {/* Volleyball lying on court */}
+        <mesh position={[1.4, 0.32, 1.6]} castShadow>
+          <sphereGeometry args={[0.28, 14, 12]} />
+          <meshStandardMaterial color="#fef9c3" emissive="#facc15" emissiveIntensity={0.3} />
+        </mesh>
+        {/* Black volleyball seam panel */}
+        <mesh position={[1.4, 0.32, 1.6]} rotation={[0, 0, Math.PI / 6]}>
+          <torusGeometry args={[0.28, 0.015, 4, 16]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+      </group>
+
+      {/* ── TIKI BAR — thatched-roof beach shack at (61, 0, 30), just east
+            of the pavilion (66, 37.5) but well clear: shack footprint
+            x[59, 63], z[28.5, 31.5] — 6u south of pavilion's footprint. ── */}
+      <group position={[61, 0, 30]}>
+        {/* Bamboo deck */}
+        <mesh position={[0, 0.08, 0]}>
+          <boxGeometry args={[4, 0.16, 3]} />
+          <meshStandardMaterial color="#a16207" roughness={0.85} />
+        </mesh>
+        {/* Bamboo support posts */}
+        {[[-1.7, -1.3], [1.7, -1.3], [-1.7, 1.3], [1.7, 1.3]].map(([px, pz], i) => (
+          <mesh key={`tiki-post-${i}`} position={[px, 1.3, pz]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 2.6, 6]} />
+            <meshStandardMaterial color="#854d0e" roughness={0.8} />
+          </mesh>
+        ))}
+        {/* Back wall (counter side) */}
+        <mesh position={[0, 1.0, -1.3]}>
+          <boxGeometry args={[3.6, 1.0, 0.12]} />
+          <meshStandardMaterial color="#78350f" roughness={0.85} />
+        </mesh>
+        {/* Counter top */}
+        <mesh position={[0, 1.05, 1.0]}>
+          <boxGeometry args={[3.6, 0.1, 0.5]} />
+          <meshStandardMaterial color="#fbbf24" roughness={0.5} />
+        </mesh>
+        {/* Thatched roof — overlapping cones */}
+        <mesh position={[0, 2.95, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+          <coneGeometry args={[2.8, 1.1, 4]} />
+          <meshStandardMaterial color="#a16207" roughness={0.95} />
+        </mesh>
+        {/* Roof fringe — darker thatch overhang */}
+        <mesh position={[0, 2.45, 0]} rotation={[0, Math.PI / 4, 0]}>
+          <coneGeometry args={[2.5, 0.45, 4]} />
+          <meshStandardMaterial color="#78350f" roughness={0.95} />
+        </mesh>
+        {/* Tiki torches at the corners */}
+        {[[-1.9, 1.5], [1.9, 1.5]].map(([tx, tz], i) => (
+          <group key={`torch-${i}`} position={[tx, 0, tz]}>
+            <mesh position={[0, 1.0, 0]} castShadow>
+              <cylinderGeometry args={[0.07, 0.07, 2.0, 6]} />
+              <meshStandardMaterial color="#451a03" roughness={0.85} />
+            </mesh>
+            <mesh position={[0, 2.1, 0]}>
+              <coneGeometry args={[0.16, 0.4, 6]} />
+              <meshStandardMaterial color="#f97316" emissive="#fde047" emissiveIntensity={1.6} toneMapped={false} />
+            </mesh>
+          </group>
+        ))}
+        {/* Bar sign */}
+        <Text
+          position={[0, 2.0, 1.28]}
+          fontSize={0.22}
+          color="#fbbf24"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#451a03"
+        >
+          🍹 TIKI BAR
+        </Text>
+      </group>
+
+      {/* ── PIER — wooden boardwalk extending east into the ocean at z=68.
+            Sits between the wet-sand line (x≈78.75) and reaches out to
+            x=92, with the pier head ending well shy of the distant
+            waves (first wave at x=100). Pier walking surface at y=0.6
+            sits above the water plane (y≈0.045..0.07). ── */}
+      <group position={[80, 0, 68]}>
+        {/* Pier deck */}
+        <mesh position={[6, 0.6, 0]} castShadow>
+          <boxGeometry args={[14, 0.18, 2.4]} />
+          <meshStandardMaterial color="#92400e" roughness={0.85} />
+        </mesh>
+        {/* Pier head — wider platform at far end */}
+        <mesh position={[12.5, 0.6, 0]} castShadow>
+          <boxGeometry args={[3.5, 0.18, 4.5]} />
+          <meshStandardMaterial color="#a16207" roughness={0.85} />
+        </mesh>
+        {/* Pilings under the pier */}
+        {[0, 3, 6, 9, 12].map((dx, i) => (
+          <group key={`piling-${i}`} position={[dx, 0, 0]}>
+            <mesh position={[0, 0.25, -1.1]} castShadow>
+              <cylinderGeometry args={[0.12, 0.14, 0.6, 6]} />
+              <meshStandardMaterial color="#451a03" roughness={0.9} />
+            </mesh>
+            <mesh position={[0, 0.25, 1.1]} castShadow>
+              <cylinderGeometry args={[0.12, 0.14, 0.6, 6]} />
+              <meshStandardMaterial color="#451a03" roughness={0.9} />
+            </mesh>
+          </group>
+        ))}
+        {/* Pier rails */}
+        {[-1.15, 1.15].map((rz, i) => (
+          <mesh key={`rail-${i}`} position={[6, 1.0, rz]}>
+            <boxGeometry args={[14, 0.06, 0.04]} />
+            <meshStandardMaterial color="#7c2d12" />
+          </mesh>
+        ))}
+        {/* Rail posts */}
+        {[0, 2, 4, 6, 8, 10, 12].map((dx, i) => (
+          <group key={`rail-post-${i}`} position={[dx, 0, 0]}>
+            <mesh position={[0, 0.85, -1.15]}>
+              <boxGeometry args={[0.07, 0.5, 0.07]} />
+              <meshStandardMaterial color="#7c2d12" />
+            </mesh>
+            <mesh position={[0, 0.85, 1.15]}>
+              <boxGeometry args={[0.07, 0.5, 0.07]} />
+              <meshStandardMaterial color="#7c2d12" />
+            </mesh>
+          </group>
+        ))}
+        {/* Lantern at the pier head */}
+        <group position={[12.5, 0.6, 0]}>
+          <mesh position={[0, 1.6, 0]}>
+            <cylinderGeometry args={[0.06, 0.06, 2.0, 6]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.7} />
+          </mesh>
+          <mesh position={[0, 2.7, 0]}>
+            <boxGeometry args={[0.32, 0.32, 0.32]} />
+            <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={2.2} toneMapped={false} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ── BEACH FIREPIT — stone ring with logs, north of sandcastle at
+            (66, 0, 80). Sand strip clear (sandcastle is at (68, 55),
+            beach ball at (69, 75)). ── */}
+      <group position={[66, 0, 80]}>
+        {/* Stone ring */}
+        {Array.from({ length: 10 }).map((_, i) => {
+          const a = (i / 10) * Math.PI * 2;
+          return (
+            <mesh
+              key={`stone-${i}`}
+              position={[Math.cos(a) * 0.85, 0.18, Math.sin(a) * 0.85]}
+              castShadow
+            >
+              <sphereGeometry args={[0.22, 8, 6]} />
+              <meshStandardMaterial color="#525252" roughness={0.95} />
+            </mesh>
+          );
+        })}
+        {/* Crossed logs */}
+        <mesh position={[0, 0.25, 0]} rotation={[0, Math.PI / 6, 0]}>
+          <cylinderGeometry args={[0.08, 0.1, 1.4, 6]} />
+          <meshStandardMaterial color="#451a03" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.25, 0]} rotation={[0, -Math.PI / 4, 0]}>
+          <cylinderGeometry args={[0.08, 0.1, 1.4, 6]} />
+          <meshStandardMaterial color="#78350f" roughness={0.9} />
+        </mesh>
+        {/* Flames */}
+        <mesh position={[0, 0.65, 0]}>
+          <coneGeometry args={[0.35, 0.85, 8]} />
+          <meshStandardMaterial color="#f97316" emissive="#fde047" emissiveIntensity={1.8} toneMapped={false} transparent opacity={0.85} />
+        </mesh>
+        <mesh position={[0.1, 0.55, -0.05]}>
+          <coneGeometry args={[0.22, 0.55, 6]} />
+          <meshStandardMaterial color="#dc2626" emissive="#f97316" emissiveIntensity={1.5} toneMapped={false} transparent opacity={0.8} />
+        </mesh>
+        {/* Two driftwood log seats nearby */}
+        <mesh position={[1.6, 0.18, 0.4]} rotation={[0, 0.3, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.22, 0.22, 1.3, 8]} />
+          <meshStandardMaterial color="#78350f" roughness={0.9} />
+        </mesh>
+        <mesh position={[-1.6, 0.18, -0.4]} rotation={[0, -0.3, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.22, 0.22, 1.3, 8]} />
+          <meshStandardMaterial color="#92400e" roughness={0.9} />
+        </mesh>
+      </group>
+
+      {/* ── KITE FLYING IN THE SKY — colorful diamond tethered to the sand ── */}
+      <group position={[64, 8, 65]} rotation={[0.3, 0.5, 0.4]}>
+        {/* Kite diamond */}
+        <mesh>
+          <boxGeometry args={[1.1, 1.1, 0.02]} />
+          <meshStandardMaterial color="#ec4899" emissive="#ec4899" emissiveIntensity={0.5} side={THREE.DoubleSide} />
+        </mesh>
+        {/* Cross spars */}
+        <mesh>
+          <boxGeometry args={[1.15, 0.06, 0.04]} />
+          <meshStandardMaterial color="#1c1917" />
+        </mesh>
+        <mesh>
+          <boxGeometry args={[0.06, 1.15, 0.04]} />
+          <meshStandardMaterial color="#1c1917" />
+        </mesh>
+        {/* Kite tail bows */}
+        {[0.6, 0.95, 1.3].map((d, i) => (
+          <mesh key={`bow-${i}`} position={[-d * 0.4, -d, 0]}>
+            <boxGeometry args={[0.22, 0.08, 0.02]} />
+            <meshStandardMaterial color={i % 2 ? "#fde047" : "#22d3ee"} emissive={i % 2 ? "#facc15" : "#22d3ee"} emissiveIntensity={0.6} />
+          </mesh>
+        ))}
+      </group>
     </group>
   );
 }
@@ -2211,6 +2513,34 @@ function Farm() {
           <sphereGeometry args={[0.12, 10, 10]} />
           <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={2} toneMapped={false} />
         </mesh>
+        {/* Weather vane atop silo cone — rooster cutout on a cross */}
+        <group position={[0, 5.7, 0]}>
+          {/* Vertical post */}
+          <mesh position={[0, 0.18, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.36, 6]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.7} />
+          </mesh>
+          {/* N/S arm */}
+          <mesh position={[0, 0.32, 0]}>
+            <boxGeometry args={[0.04, 0.04, 0.46]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.7} />
+          </mesh>
+          {/* E/W arm */}
+          <mesh position={[0, 0.32, 0]}>
+            <boxGeometry args={[0.46, 0.04, 0.04]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.7} />
+          </mesh>
+          {/* Rooster silhouette (thin plate) */}
+          <mesh position={[0.18, 0.45, 0]}>
+            <boxGeometry args={[0.32, 0.22, 0.02]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.7} />
+          </mesh>
+          {/* Comb */}
+          <mesh position={[0.30, 0.58, 0]}>
+            <boxGeometry args={[0.08, 0.06, 0.02]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.7} />
+          </mesh>
+        </group>
       </group>
 
       {/* ── SUNFLOWER PATCH — west of barn, local x[-11.5,-5.5], z[-1,2] ── */}
@@ -2396,6 +2726,62 @@ function Farm() {
           {[[-0.3, -0.18], [0.3, -0.18], [-0.3, 0.18], [0.3, 0.18]].map(([lx, lz], i) => (
             <mesh key={`cow2-leg-${i}`} position={[lx, 0.15, lz]}>
               <boxGeometry args={[0.1, 0.3, 0.1]} />
+              <meshStandardMaterial color="#1c1917" />
+            </mesh>
+          ))}
+        </group>
+        {/* Horse — brown body, white blaze on head, in the far SW corner of
+            the pasture (sheep cluster is at z<-1.4, cows at z=0.5/1.5 with
+            x>-1, so (-2.6, 2.0) is clear of all of them). */}
+        <group position={[-2.6, 0, 2.0]} rotation={[0, -0.8, 0]}>
+          {/* Body */}
+          <mesh position={[0, 0.7, 0]} castShadow>
+            <boxGeometry args={[1.0, 0.55, 0.42]} />
+            <meshStandardMaterial color="#92400e" roughness={0.85} />
+          </mesh>
+          {/* Neck */}
+          <mesh position={[0.5, 0.95, 0]} rotation={[0, 0, -0.4]} castShadow>
+            <boxGeometry args={[0.5, 0.28, 0.28]} />
+            <meshStandardMaterial color="#92400e" roughness={0.85} />
+          </mesh>
+          {/* Head */}
+          <mesh position={[0.78, 1.18, 0]} castShadow>
+            <boxGeometry args={[0.42, 0.28, 0.26]} />
+            <meshStandardMaterial color="#92400e" roughness={0.85} />
+          </mesh>
+          {/* White blaze on muzzle */}
+          <mesh position={[0.95, 1.10, 0]}>
+            <boxGeometry args={[0.08, 0.18, 0.06]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          {/* Mane (dark stripe along the neck top) */}
+          <mesh position={[0.5, 1.12, 0]} rotation={[0, 0, -0.4]}>
+            <boxGeometry args={[0.55, 0.06, 0.05]} />
+            <meshStandardMaterial color="#1c1917" />
+          </mesh>
+          {/* Ears */}
+          {[-0.07, 0.07].map((ez, i) => (
+            <mesh key={`h-ear-${i}`} position={[0.7, 1.36, ez]} castShadow>
+              <coneGeometry args={[0.05, 0.12, 4]} />
+              <meshStandardMaterial color="#78350f" />
+            </mesh>
+          ))}
+          {/* Tail */}
+          <mesh position={[-0.55, 0.7, 0]} rotation={[0, 0, 0.35]}>
+            <boxGeometry args={[0.12, 0.45, 0.1]} />
+            <meshStandardMaterial color="#1c1917" />
+          </mesh>
+          {/* Legs */}
+          {[[-0.35, -0.16], [0.35, -0.16], [-0.35, 0.16], [0.35, 0.16]].map(([lx, lz], i) => (
+            <mesh key={`h-leg-${i}`} position={[lx, 0.25, lz]} castShadow>
+              <boxGeometry args={[0.12, 0.5, 0.12]} />
+              <meshStandardMaterial color="#451a03" />
+            </mesh>
+          ))}
+          {/* Hooves */}
+          {[[-0.35, -0.16], [0.35, -0.16], [-0.35, 0.16], [0.35, 0.16]].map(([lx, lz], i) => (
+            <mesh key={`h-hoof-${i}`} position={[lx, 0.04, lz]}>
+              <boxGeometry args={[0.13, 0.08, 0.13]} />
               <meshStandardMaterial color="#1c1917" />
             </mesh>
           ))}
@@ -2849,63 +3235,111 @@ function MoneyBotTowers() {
   );
 }
 
-// ===== BotPort Harbor @ (50, 0, 48) =====================================
+// ===== BotPort Harbor @ (75, 0, 72) =====================================
 // Far SE coast. Harbor building is rendered by Building.tsx via BUILDING_DEFS
-// at (50, 2, 48), footprint 6×5 → world x[47..53], z[45.5..50.5]. The
-// decorations sit BETWEEN the harbor and the world edge (player bound ±64),
-// so all props live east of x=53 (the "water" side) and immediately south.
-//   world envelope used: x ∈ [47, 63], z ∈ [43, 62.5]
-//   → local x ∈ [-3, +13], local z ∈ [-5, +14.5] (origin at 50, 48)
+// at world (75, 2, 72), footprint 6×5 → world x[72..78], z[69.5..74.5].
+// Decor envelope (expanded): world x[68, 100], z[63, 90]
+//   → local x ∈ [-7, +25], local z ∈ [-9, +18]   (origin at 75, 72)
+// World player bound is ±105, so east edge at world x=100 still has 5u
+// clear; south edge at world z=90 has 15u clear.
+//
+// Layout summary (all local coords):
+//   • Building            x[-3, 3]    z[-2.5, 2.5]  (rendered by Building.tsx)
+//   • Container yard pad  x[-6.75,-3.25] z[-2.25, 6.25] (west of building)
+//   • Fuel depot pad      x[-2.25, 3.25] z[3.6, 7.4]    (south of building)
+//   • Sea surface         x[3.5, 23]  z[-9, 17]     (east + N + S of building)
+//   • Main dock           x[1, 9]     z[-1.5, 1.5]
+//   • Gantry cranes       x=3.5       z ∈ {-7, 0, 9}  (#3 moved to z=9 to
+//                                                       clear fuel tank C)
+//   • Ship 1 (red)        x=8         z=-2
+//   • Ship 2 (blue)       x=9         z=6
+//   • Ship 3 (mega green) x=17        z=2
+//   • Tugboat (animated)  x=14, z drifts 9..14
+//   • Lighthouse          x=10.5      z=11
 function Port() {
   const waveRef = useRef<THREE.Mesh>(null!);
   const beaconRef = useRef<THREE.Mesh>(null!);
   const ship1Ref = useRef<THREE.Group>(null!);
   const ship2Ref = useRef<THREE.Group>(null!);
+  const ship3Ref = useRef<THREE.Group>(null!);
+  const tugRef = useRef<THREE.Group>(null!);
+  const crane2ArmRef = useRef<THREE.Group>(null!);
+  const crane3ArmRef = useRef<THREE.Group>(null!);
+  const forkliftRef = useRef<THREE.Group>(null!);
   useFrame((s) => {
     const t = s.clock.elapsedTime;
-    // Subtle vertical bob to sell the water surface.
     if (waveRef.current) {
       const mat = waveRef.current.material as THREE.MeshStandardMaterial;
       mat.emissiveIntensity = 0.18 + Math.sin(t * 1.3) * 0.06;
     }
-    // Lighthouse beacon pulse.
     if (beaconRef.current) {
       const mat = beaconRef.current.material as THREE.MeshStandardMaterial;
       mat.emissiveIntensity = 2.2 + Math.sin(t * 2.5) * 1.4;
     }
-    // Ships rock gently in place — small rotation around Z (roll).
+    // Ships rock gently in place (Z roll). Each ship gets a different phase
+    // so they don't all sway in lock-step.
     if (ship1Ref.current) ship1Ref.current.rotation.z = Math.sin(t * 0.7) * 0.04;
     if (ship2Ref.current) ship2Ref.current.rotation.z = Math.sin(t * 0.7 + 1.4) * 0.05;
+    if (ship3Ref.current) ship3Ref.current.rotation.z = Math.sin(t * 0.55 + 2.3) * 0.03;
+    // Tugboat patrols slowly N↔S between local z=9..14, faces its motion
+    // direction (heading flips when the sine derivative crosses zero).
+    if (tugRef.current) {
+      tugRef.current.position.z = 11.5 + Math.sin(t * 0.18) * 2.5;
+      tugRef.current.rotation.z = Math.sin(t * 1.2) * 0.06;
+      tugRef.current.rotation.y = Math.cos(t * 0.18) >= 0 ? 0 : Math.PI;
+    }
+    if (crane2ArmRef.current) crane2ArmRef.current.rotation.y = Math.sin(t * 0.35) * 0.6;
+    if (crane3ArmRef.current) crane3ArmRef.current.rotation.y = Math.sin(t * 0.35 + Math.PI) * 0.6;
+    if (forkliftRef.current) {
+      forkliftRef.current.position.x = -5 + Math.sin(t * 0.4) * 1.5;
+    }
   });
   return (
     <group position={[75, 0, 72]}>
-      {/* ── Sea surface — wide plane east of the building (x≥4 local).
-          Spans local x[4, 13] z[-5, 14], i.e. world x[54..63] z[43..62] */}
-      <mesh ref={waveRef} rotation={[-Math.PI / 2, 0, 0]} position={[8.5, 0.04, 4.5]}>
-        <planeGeometry args={[9, 19, 6, 6]} />
+      {/* ── Sea surface — wider plane east, N and S of the building.
+          Center (13.25, 0.04, 4), 19.5×26 → local x[3.5, 23], z[-9, 17]. */}
+      <mesh ref={waveRef} rotation={[-Math.PI / 2, 0, 0]} position={[13.25, 0.04, 4]}>
+        <planeGeometry args={[19.5, 26, 10, 12]} />
         <meshStandardMaterial color="#075985" emissive="#0ea5e9" emissiveIntensity={0.2} />
       </mesh>
+      {/* Shoreline trim — slim darker strip just east of land */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[3.6, 0.045, 4]}>
+        <planeGeometry args={[0.3, 26]} />
+        <meshStandardMaterial color="#0c4a6e" />
+      </mesh>
 
-      {/* ── Dock — wooden pier extending east from the harbor */}
-      {/* Local center (3.5, 0.18, 0), 5×3 → world x[51..56] z[46.5..49.5] */}
-      <mesh position={[3.5, 0.18, 0]}>
-        <boxGeometry args={[5, 0.35, 3]} />
+      {/* ── Main dock — wooden pier extending east from the harbor.
+          Center (5, 0.18, 0), 8×3 → local x[1, 9], z[-1.5, 1.5]. */}
+      <mesh position={[5, 0.18, 0]}>
+        <boxGeometry args={[8, 0.35, 3]} />
         <meshStandardMaterial color="#78350f" roughness={0.9} />
       </mesh>
-      {/* Plank seams */}
-      {[-1.5, -0.5, 0.5, 1.5].map((dx) => (
-        <mesh key={`plank-${dx}`} position={[3.5 + dx, 0.36, 0]}>
+      {/* Plank seams along the extended dock */}
+      {[-3, -2, -1, 0, 1, 2, 3].map((dx) => (
+        <mesh key={`plank-${dx}`} position={[5 + dx, 0.36, 0]}>
           <boxGeometry args={[0.05, 0.02, 3]} />
           <meshStandardMaterial color="#451a03" />
         </mesh>
       ))}
-      {/* Mooring bollards (3 short cylinders along the dock edge) */}
-      {[-1.5, 0.5, 2.5].map((dx, i) => (
-        <mesh key={`bollard-${i}`} position={[3.5 + dx, 0.55, 1.4]}>
+      {/* Mooring bollards — south edge */}
+      {[-3, -1.5, 0, 1.5, 3].map((dx, i) => (
+        <mesh key={`bollard-s-${i}`} position={[5 + dx, 0.55, 1.4]}>
           <cylinderGeometry args={[0.18, 0.22, 0.7, 8]} />
           <meshStandardMaterial color="#0f172a" metalness={0.5} roughness={0.5} />
         </mesh>
       ))}
+      {/* Mooring bollards — north edge */}
+      {[-3, -1.5, 0, 1.5, 3].map((dx, i) => (
+        <mesh key={`bollard-n-${i}`} position={[5 + dx, 0.55, -1.4]}>
+          <cylinderGeometry args={[0.18, 0.22, 0.7, 8]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.5} roughness={0.5} />
+        </mesh>
+      ))}
+      {/* Coil of rope on the dock near the easternmost bollard */}
+      <mesh position={[7.6, 0.45, 1.0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.22, 0.08, 6, 14]} />
+        <meshStandardMaterial color="#fef3c7" roughness={0.95} />
+      </mesh>
 
       {/* ── Cargo ship #1 — red hull with container stack, moored north */}
       <group ref={ship1Ref} position={[8, 0.5, -2]}>
@@ -2982,6 +3416,292 @@ function Port() {
           <boxGeometry args={[0.85, 0.55, 0.65]} />
           <meshStandardMaterial color="#ef4444" />
         </mesh>
+      </group>
+
+      {/* ── Cargo ship #3 — MEGA green container ship anchored further out.
+          7.5u long × 2u wide hull, 4-tall container stack (20 boxes), twin
+          smokestacks. Bobs slowly out of phase with ships 1 & 2. */}
+      <group ref={ship3Ref} position={[17, 0.5, 2]}>
+        {/* Hull */}
+        <mesh position={[0, 0.35, 0]}>
+          <boxGeometry args={[7.5, 1.0, 2]} />
+          <meshStandardMaterial color="#15803d" metalness={0.3} roughness={0.6} />
+        </mesh>
+        {/* Red waterline stripe */}
+        <mesh position={[0, -0.05, 0]}>
+          <boxGeometry args={[7.55, 0.3, 2.04]} />
+          <meshStandardMaterial color="#7f1d1d" />
+        </mesh>
+        {/* Bow taper */}
+        <mesh position={[4.2, 0.35, 0]}>
+          <coneGeometry args={[1.05, 1.5, 4]} />
+          <meshStandardMaterial color="#15803d" />
+        </mesh>
+        {/* Container stack — 5 long × 2 wide × 2 tall = 20 boxes */}
+        {[-2.8, -1.6, -0.4, 0.8, 2.0].map((cx, ix) =>
+          [-0.55, 0.55].map((cz, iz) =>
+            [0, 0.7].map((dy, iy) => (
+              <mesh key={`c3-${ix}-${iz}-${iy}`} position={[cx, 1.3 + dy, cz]}>
+                <boxGeometry args={[1.1, 0.6, 0.95]} />
+                <meshStandardMaterial
+                  color={["#0ea5e9", "#f97316", "#fde047", "#a855f7", "#22d3ee", "#ef4444"][(ix * 4 + iz * 2 + iy) % 6]}
+                />
+              </mesh>
+            ))
+          )
+        )}
+        {/* Bridge superstructure at stern */}
+        <mesh position={[-3.3, 1.6, 0]}>
+          <boxGeometry args={[0.9, 1.6, 1.6]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        <mesh position={[-2.85, 2.0, 0]}>
+          <boxGeometry args={[0.02, 0.35, 1.4]} />
+          <meshStandardMaterial color="#0f172a" emissive="#22d3ee" emissiveIntensity={0.5} />
+        </mesh>
+        {/* Twin smokestacks */}
+        {[-0.25, 0.25].map((sz) => (
+          <mesh key={`stk-${sz}`} position={[-3.3, 2.85, sz]}>
+            <cylinderGeometry args={[0.22, 0.22, 0.9, 10]} />
+            <meshStandardMaterial color="#fde047" />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ── Tugboat — small red patrol boat, slowly drifts N↔S along z */}
+      <group ref={tugRef} position={[14, 0.5, 11.5]}>
+        <mesh position={[0, 0.2, 0]}>
+          <boxGeometry args={[2.0, 0.55, 0.9]} />
+          <meshStandardMaterial color="#dc2626" metalness={0.3} roughness={0.6} />
+        </mesh>
+        <mesh position={[0, -0.05, 0]}>
+          <boxGeometry args={[2.02, 0.18, 0.92]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        <mesh position={[1.1, 0.2, 0]}>
+          <coneGeometry args={[0.48, 0.65, 4]} />
+          <meshStandardMaterial color="#dc2626" />
+        </mesh>
+        <mesh position={[-0.2, 0.7, 0]}>
+          <boxGeometry args={[0.7, 0.55, 0.7]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        <mesh position={[-0.7, 1.05, 0]}>
+          <cylinderGeometry args={[0.14, 0.14, 0.5, 10]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[-0.7, 1.32, 0]}>
+          <cylinderGeometry args={[0.17, 0.17, 0.08, 10]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.3} />
+        </mesh>
+      </group>
+
+      {/* ── Gantry crane #2 — north shore, animated swing arm. Base on land
+          (z=-7 = world z=65, safely north of building z_min=-2.5 → 4.5u gap). */}
+      <group position={[3.5, 0, -7]}>
+        <mesh position={[0, 0.15, 0]}>
+          <boxGeometry args={[2.4, 0.3, 2.4]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 3.5, 0]}>
+          <boxGeometry args={[0.5, 6.5, 0.5]} />
+          <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.15} />
+        </mesh>
+        <group ref={crane2ArmRef} position={[0, 6.6, 0]}>
+          <mesh position={[1.8, 0, 0]}>
+            <boxGeometry args={[3.6, 0.35, 0.35]} />
+            <meshStandardMaterial color="#dc2626" />
+          </mesh>
+          <mesh position={[-0.9, 0, 0]}>
+            <boxGeometry args={[1.1, 0.55, 0.6]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh position={[3.3, -1.1, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 2.2, 6]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh position={[3.3, -2.4, 0]}>
+            <boxGeometry args={[0.85, 0.55, 0.65]} />
+            <meshStandardMaterial color="#0ea5e9" />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ── Gantry crane #3 — south shore mirror of crane #2. Moved from
+          z=7 to z=9 to clear fuel tank C (centered at z=5.5, radius 0.85
+          → north edge z=6.35). Crane base 2.4u square → south edge z=7.8,
+          giving 1.45u clearance to tank C. World z=81, still 9u clear of
+          envelope south edge (world z=90). */}
+      <group position={[3.5, 0, 9]}>
+        <mesh position={[0, 0.15, 0]}>
+          <boxGeometry args={[2.4, 0.3, 2.4]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 3.5, 0]}>
+          <boxGeometry args={[0.5, 6.5, 0.5]} />
+          <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={0.15} />
+        </mesh>
+        <group ref={crane3ArmRef} position={[0, 6.6, 0]}>
+          <mesh position={[1.8, 0, 0]}>
+            <boxGeometry args={[3.6, 0.35, 0.35]} />
+            <meshStandardMaterial color="#0ea5e9" />
+          </mesh>
+          <mesh position={[-0.9, 0, 0]}>
+            <boxGeometry args={[1.1, 0.55, 0.6]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh position={[3.3, -1.1, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 2.2, 6]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh position={[3.3, -2.4, 0]}>
+            <boxGeometry args={[0.85, 0.55, 0.65]} />
+            <meshStandardMaterial color="#fde047" />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ── Container yard — west of harbor building on land.
+          Concrete pad x[-6.5,-3.5], z[-2, 6]. Yellow lane stripes + a
+          scattered grid of stacked containers (some 1 tall, some 2 tall). */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5, 0.05, 2]}>
+        <planeGeometry args={[3.5, 8.5]} />
+        <meshStandardMaterial color="#475569" roughness={0.95} />
+      </mesh>
+      {[-1.4, 0, 1.4].map((dx) => (
+        <mesh key={`yard-stripe-${dx}`} rotation={[-Math.PI / 2, 0, 0]} position={[-5 + dx, 0.06, 2]}>
+          <planeGeometry args={[0.06, 8]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.25} />
+        </mesh>
+      ))}
+      {[-1.3, -0.4, 0.5, 1.4].map((dx, ix) =>
+        [-1.4, -0.3, 0.8, 1.9, 3.0, 4.1, 5.2].map((dz, iz) => {
+          const occupied = (ix * 7 + iz) % 3 !== 2;
+          if (!occupied) return null;
+          const tall = (ix + iz) % 2 === 0;
+          const colors = ["#0ea5e9", "#dc2626", "#fde047", "#16a34a", "#a855f7", "#f97316", "#22d3ee"];
+          return (
+            <group key={`yard-${ix}-${iz}`} position={[-6.0 + dx, 0, dz]}>
+              <mesh position={[0, 0.4, 0]}>
+                <boxGeometry args={[0.85, 0.65, 0.95]} />
+                <meshStandardMaterial color={colors[(ix * 7 + iz) % colors.length]} />
+              </mesh>
+              {tall && (
+                <mesh position={[0, 1.1, 0]}>
+                  <boxGeometry args={[0.85, 0.65, 0.95]} />
+                  <meshStandardMaterial color={colors[(ix * 7 + iz + 3) % colors.length]} />
+                </mesh>
+              )}
+            </group>
+          );
+        })
+      )}
+
+      {/* ── Forklift — idles back and forth along the south aisle of the
+          yard. position.x is overridden in useFrame, base value here is the
+          midpoint of its travel. */}
+      <group ref={forkliftRef} position={[-5, 0, 5.4]}>
+        <mesh position={[0, 0.45, 0]}>
+          <boxGeometry args={[0.7, 0.6, 0.55]} />
+          <meshStandardMaterial color="#f97316" />
+        </mesh>
+        <mesh position={[-0.05, 0.95, 0]}>
+          <boxGeometry args={[0.5, 0.05, 0.55]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        {[[-0.2, -0.25], [-0.2, 0.25], [0.15, -0.25], [0.15, 0.25]].map(([px, pz], i) => (
+          <mesh key={`fl-post-${i}`} position={[px, 0.8, pz]}>
+            <boxGeometry args={[0.04, 0.35, 0.04]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+        ))}
+        <mesh position={[0.45, 0.6, 0]}>
+          <boxGeometry args={[0.08, 1.2, 0.5]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        {[-0.12, 0.12].map((fz) => (
+          <mesh key={`fork-${fz}`} position={[0.65, 0.18, fz]}>
+            <boxGeometry args={[0.5, 0.06, 0.06]} />
+            <meshStandardMaterial color="#fde047" metalness={0.6} />
+          </mesh>
+        ))}
+        {[[-0.25, -0.27], [-0.25, 0.27], [0.25, -0.27], [0.25, 0.27]].map(([wx, wz], i) => (
+          <mesh key={`fl-wh-${i}`} position={[wx, 0.18, wz]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.16, 0.16, 0.14, 10]} />
+            <meshStandardMaterial color="#111827" />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ── Fuel depot — south of the harbor building on land. Three white
+          fuel tanks with red bands, connected by a low pipe, plus a
+          flammable-warning post. Pad x[-2.25, 3.25], z[3.6, 7.4]. Building
+          z_max=2.5 → 1.1u north clearance. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.5, 0.05, 5.5]}>
+        <planeGeometry args={[5.5, 3.8]} />
+        <meshStandardMaterial color="#52525b" roughness={0.95} />
+      </mesh>
+      {[-1.5, 0.5, 2.5].map((tx, i) => (
+        <group key={`tank-${i}`} position={[tx, 0, 5.5]}>
+          <mesh position={[0, 0.95, 0]}>
+            <cylinderGeometry args={[0.85, 0.85, 1.9, 18]} />
+            <meshStandardMaterial color="#e5e7eb" metalness={0.5} roughness={0.5} />
+          </mesh>
+          <mesh position={[0, 1.55, 0]}>
+            <cylinderGeometry args={[0.86, 0.86, 0.15, 18]} />
+            <meshStandardMaterial color="#dc2626" />
+          </mesh>
+          <mesh position={[0, 2.0, 0]}>
+            <sphereGeometry args={[0.85, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+            <meshStandardMaterial color="#e5e7eb" metalness={0.5} roughness={0.5} />
+          </mesh>
+          {[0.4, 0.8, 1.2, 1.6].map((ly) => (
+            <mesh key={`rung-${ly}`} position={[0.87, ly, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.025, 0.025, 0.2, 6]} />
+              <meshStandardMaterial color="#374151" />
+            </mesh>
+          ))}
+          <Text
+            position={[0, 1.0, 0.87]}
+            fontSize={0.18}
+            color="#0f172a"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {`FUEL ${["A", "B", "C"][i]}`}
+          </Text>
+        </group>
+      ))}
+      {/* Connecting pipe along the south of all tanks */}
+      <mesh position={[0.5, 0.45, 6.55]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.08, 0.08, 4.5, 10]} />
+        <meshStandardMaterial color="#94a3b8" metalness={0.6} />
+      </mesh>
+      {[-1.5, 0.5, 2.5].map((tx, i) => (
+        <mesh key={`pipe-r-${i}`} position={[tx, 0.65, 6.4]}>
+          <boxGeometry args={[0.1, 0.55, 0.1]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.6} />
+        </mesh>
+      ))}
+      {/* Flammable warning post */}
+      <group position={[-1.85, 0, 3.9]}>
+        <mesh position={[0, 0.6, 0]}>
+          <boxGeometry args={[0.06, 1.2, 0.06]} />
+          <meshStandardMaterial color="#475569" />
+        </mesh>
+        <mesh position={[0, 1.0, 0]} rotation={[0, 0, Math.PI / 4]}>
+          <boxGeometry args={[0.55, 0.55, 0.04]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.4} />
+        </mesh>
+        <Text
+          position={[0, 1.0, 0.04]}
+          fontSize={0.18}
+          color="#0f172a"
+          anchorX="center"
+          anchorY="middle"
+        >
+          ⚠
+        </Text>
       </group>
 
       {/* ── Lighthouse — red+white stripes, at the very SE corner */}

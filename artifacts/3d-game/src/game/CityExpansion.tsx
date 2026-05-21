@@ -1028,6 +1028,119 @@ function AirportExpansion() {
         ))}
       </group>
 
+      {/* ────────── BAGGAGE CART TRAIN — tractor + 3 wagons ──────────
+            Parked east of the ATC tower (-30, 62, base x[-32,-28] z[60,64])
+            on the south side of the airfield road, at world (-25, 0, 66).
+            Train span world x[-25.5, -20.5], z[65.7, 66.3]:
+              • 5u east of fuel-truck patrol band (truck reaches at most
+                x≈-36 at z=64; train sits at z=66 anyway → no overlap).
+              • 2u south of ATC base (z=64); 3u east of ATC east face.
+              • 2.5u west of departures sign (-15, 67.5), 6×2.5 footprint.
+              • south of concourse-B box (z=65..70 only between x=-65..-51). */}
+      <group position={[-25, 0, 66]}>
+        {/* Tractor cab */}
+        <group position={[0, 0, 0]}>
+          <mesh position={[0, 0.45, 0]} castShadow>
+            <boxGeometry args={[1.0, 0.6, 0.7]} />
+            <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.4} metalness={0.5} />
+          </mesh>
+          <mesh position={[0.1, 0.8, 0]}>
+            <boxGeometry args={[0.5, 0.35, 0.62]} />
+            <meshStandardMaterial color="#22d3ee" transparent opacity={0.65} emissive="#22d3ee" emissiveIntensity={0.5} />
+          </mesh>
+          {/* Wheels */}
+          {[[-0.35, 0.35], [-0.35, -0.35], [0.35, 0.35], [0.35, -0.35]].map(([wx, wz], i) => (
+            <mesh key={`bt-w-${i}`} position={[wx, 0.15, wz]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.15, 0.15, 0.1, 8]} />
+              <meshStandardMaterial color="#0b1220" />
+            </mesh>
+          ))}
+        </group>
+        {/* 3 baggage wagons trailing east */}
+        {[1.4, 2.7, 4.0].map((bx, i) => (
+          <group key={`bag-wagon-${i}`} position={[bx, 0, 0]}>
+            {/* Flatbed */}
+            <mesh position={[0, 0.22, 0]} castShadow>
+              <boxGeometry args={[1.0, 0.1, 0.65]} />
+              <meshStandardMaterial color="#475569" metalness={0.6} />
+            </mesh>
+            {/* Side rails */}
+            {[-0.3, 0.3].map((rz, j) => (
+              <mesh key={`bw-rail-${i}-${j}`} position={[0, 0.45, rz]}>
+                <boxGeometry args={[0.95, 0.35, 0.04]} />
+                <meshStandardMaterial color="#334155" />
+              </mesh>
+            ))}
+            {/* Suitcases piled inside */}
+            {[
+              { p: [-0.3, 0.5, -0.05], c: "#7c2d12" },
+              { p: [0.0, 0.5, 0.1], c: "#0c4a6e" },
+              { p: [0.3, 0.5, -0.08], c: "#7f1d1d" },
+              { p: [-0.1, 0.75, 0.0], c: "#15803d" },
+            ].map((sc, j) => (
+              <mesh key={`bw-sc-${i}-${j}`} position={sc.p as [number, number, number]} castShadow>
+                <boxGeometry args={[0.32, 0.22, 0.18]} />
+                <meshStandardMaterial color={sc.c} roughness={0.7} />
+              </mesh>
+            ))}
+            {/* Wheels */}
+            {[[-0.35, 0.3], [-0.35, -0.3], [0.35, 0.3], [0.35, -0.3]].map(([wx, wz], j) => (
+              <mesh key={`bw-w-${i}-${j}`} position={[wx, 0.1, wz]} rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.1, 0.1, 0.07, 6]} />
+                <meshStandardMaterial color="#0b1220" />
+              </mesh>
+            ))}
+            {/* Coupling bar */}
+            <mesh position={[-0.55, 0.22, 0]}>
+              <boxGeometry args={[0.2, 0.04, 0.04]} />
+              <meshStandardMaterial color="#1c1917" />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* ────────── APPROACH LIGHTS — runway 2 west threshold ──────────
+            Standard ALSF-style row of light bars extending west from R2
+            threshold (x=-70). Lamps at x=-79, -82, -85, -88, -91, -94 at
+            z=RUNWAY2_Z=30. Landing plane animation:
+              • approach (y: 28→2 over x: -120→-78)
+              • flare    (y:  2→0.75 over x: -78→-72)
+              • rollout  (y=0.75 from x=-77 east)
+            Plane wing box [1.3,0.16,5.2] under rotation.z=-π/2 has
+            world-Y half-extent ≈0.65, so its bottom reaches y≈0.10
+            during rollout. Lamps are kept STRICTLY WEST of x=-78 so the
+            plane is in approach (y ≥ ~2.05 at x=-79) or beyond reach
+            (rollout begins at x=-77, never crosses west). At westmost
+            possible interaction x=-79: u=(-79+120)/42=0.976, y=28-0.976*26≈2.62,
+            wing bottom ≈1.97 — well above lamp top y=0.27. No threshold
+            bar at x=-71 (would clip rollout). Clear of fuel depot
+            (berm z≤25.35). Lamp x=-94 still well east of map edge
+            (player bound ±105). */}
+      {[-79, -82, -85, -88, -91, -94].map((ax, i) => (
+        <group key={`appr-${i}`} position={[ax, 0, RUNWAY2_Z]}>
+          {/* Light bar — 5 lamps in a row across the centerline */}
+          {[-0.8, -0.4, 0, 0.4, 0.8].map((zOff, j) => (
+            <mesh key={`appr-l-${i}-${j}`} position={[0, 0.18, zOff]}>
+              <boxGeometry args={[0.18, 0.18, 0.18]} />
+              <meshStandardMaterial
+                color="#fef9c3"
+                emissive="#fde047"
+                emissiveIntensity={1.6}
+                toneMapped={false}
+              />
+            </mesh>
+          ))}
+          {/* Stanchion bar holding the lights */}
+          <mesh position={[0, 0.06, 0]}>
+            <boxGeometry args={[0.08, 0.12, 1.9]} />
+            <meshStandardMaterial color="#1c1917" />
+          </mesh>
+        </group>
+      ))}
+      {/* (No threshold bar at x=-71: that strip would sit directly under
+          the landing plane's rolled-out belly at y=0.75 and clip its wing
+          box, whose world-Y bottom is ~0.10 after the z=-π/2 rotation.) */}
+
       {/* ────────── HANGARS row — new airline-branded hangars west ────────── */}
       {/* North hangar moved from (-78, 14) to (-75, 19) — clears BotGigs at
           (-82.5, 9). South hangar at (-78, 32) is clear of all neighbors. */}
