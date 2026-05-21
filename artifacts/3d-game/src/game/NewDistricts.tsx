@@ -105,11 +105,13 @@ function BotCourt() {
   );
 }
 
-// ===== BotInsurance @ (-85, 0, 97) ====================================
-// Insurance HQ — health/auto/life/disability premiums. NW corner gap
-// between Airport (z<=85) and National Park (z<=85), south edge inside
-// the player movement clamp at ±105. Footprint x[-95, -75] z[89, 105]
-// = 20×16. Clear of all roads (0, ±27, ±54 are far east).
+// ===== BotInsurance @ (75, 0, -90) ====================================
+// Insurance HQ — health/auto/life/disability premiums. Moved to the SE
+// mid-band (opposite side of the map from its original NW spot). 20×16
+// footprint x[65, 85] z[-98, -82] sits in an empty pocket between the
+// inner ring road (x=54 east edge ~55.5, 9.5u west gap) and the
+// Borrowing & Credit quarter (bankruptcy @ 95,-103: 10u east / 4u south
+// clear). 17u gap south to the new BotEcon Lab kiosk at (70,-103).
 function BotInsurance() {
   const umbrellaRef = useRef<THREE.Group>(null!);
   const towerLightRef = useRef<THREE.MeshStandardMaterial>(null!);
@@ -119,7 +121,7 @@ function BotInsurance() {
     if (towerLightRef.current) towerLightRef.current.emissiveIntensity = 1.0 + Math.sin(t * 3) * 0.6;
   });
   return (
-    <group position={[-85, 0, 97]}>
+    <group position={[75, 0, -90]}>
       {/* Slate-blue corporate plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[20, 16]} />

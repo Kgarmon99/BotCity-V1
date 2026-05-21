@@ -717,14 +717,14 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 3,
     emoji: "⚖️",
   },
-  // ─── BotInsurance kiosk @ (-85, 0, 87) ──────────────────────────────
-  // South entrance, just outside Insurance plaza at z[89,105]. Sits in
-  // the 4u gap between Airport/NatPark south edge (z=85) and the
-  // Insurance plaza north edge (z=89).
+  // ─── BotInsurance kiosk @ (75, 0, -80) ──────────────────────────────
+  // North entrance (toward city center), just outside the Insurance
+  // plaza at x[65,85] z[-98,-82]. Moved to SE mid-band — opposite side
+  // of the map from its original NW spot. 2u gap to plaza north edge.
   {
     id: "botinsurance",
     label: "BotInsurance HQ",
-    position: [-85, 1.5, 87],
+    position: [75, 1.5, -80],
     color: "#1e40af",
     roofColor: "#f59e0b",
     width: 1.8,
@@ -799,7 +799,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   { id: "botgiving",      label: "BotGiving Foundation",  position: [40,  1.5, -103], color: "#047857", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🎁" },
   { id: "botfintech",     label: "BotFinTech Hub",        position: [95,  1.5, -103], color: "#065f46", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📱" },
   // ── Macro & Money 🌐 (orange #fb923c), strip z=103 ──
-  { id: "botecon",        label: "BotEcon Lab",           position: [-70, 1.5, 103], color: "#fb923c", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "🧪" }, // moved from -95 (inside BotInsurance HQ plaza)
+  { id: "botecon",        label: "BotEcon Lab",           position: [70, 1.5, -103], color: "#fb923c", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "🧪" }, // moved to opposite side of map (SE strip z=-103), 25u west of botfintech (95,-103) and 30u east of botgiving (40,-103)
   { id: "botforex",       label: "BotForex Exchange",     position: [-40, 1.5, 103], color: "#f97316", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "💱" },
   { id: "bottrade",       label: "BotTrade Hall",         position: [-13, 1.5, 103], color: "#ea580c", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🌐" },
   { id: "botinflation",   label: "BotInflation Park",     position: [22,  1.5, 103], color: "#c2410c", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎈" }, // moved from 40 (inside BotEnergy Plaza)
