@@ -26,7 +26,7 @@ interface PlayerProps {
 
 const WALK_SPEED = 9;
 const RIDE_SPEED = 22; // BotMobile boost (~2.4x walking)
-const VETTE_SPEED = 42; // BotVette boost (~4.7x walking) — held with C
+const VETTE_SPEED = 42; // BotVette boost (~4.7x walking) — held with V
 const JETPACK_THRUST = 28; // upward accel when Shift held (m/s²)
 const GRAVITY = 22; // downward accel (m/s²)
 const MAX_ALTITUDE = 55; // ceiling so we don't fly off the skybox
@@ -99,8 +99,8 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
           setRiding(true);
         }
       }
-      if (e.key === "c" || e.key === "C") {
-        // Hold C to swap the BotMobile for a faster BotVette (Corvette-style).
+      if (e.key === "v" || e.key === "V") {
+        // Hold V to swap the BotMobile for a faster BotVette (Corvette-style).
         if (!vetteRef.current) {
           vetteRef.current = true;
           setVetteOn(true);
@@ -122,7 +122,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       if (e.code === "Space" || e.key === " ") {
         stopRiding();
       }
-      if (e.key === "c" || e.key === "C") {
+      if (e.key === "v" || e.key === "V") {
         stopVette();
       }
     };

@@ -2192,7 +2192,7 @@ export function BotMobile({
   );
 }
 
-// BotVette — low-slung sports-car silhouette used when the player holds C.
+// BotVette — low-slung sports-car silhouette used when the player holds V.
 // Same forward axis as BotMobile (local +X = front) so the existing -π/2 Y
 // rotation in Player.tsx aligns the nose with the player's heading.
 export function BotVette({
