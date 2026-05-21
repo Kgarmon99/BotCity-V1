@@ -7,7 +7,9 @@
 //  • +X = east, +Z = south. Player at y=0 plane.
 //  • Existing kiosks live within |x|,|z| ≤ 92.
 //  • Inner road grid (legacy): x/z ∈ {0, ±27, ±54}.
-//  • Outer ring (new): x/z ∈ {±115, ±150}.
+//  • Outer ring (tightened): x/z ∈ {±120, ±150}.
+//  • New financial-ed kiosks ring the city at ±103 — just outside the
+//    existing kiosk footprint and 5u clear of the inner ring road.
 //  • Player clamp: ±160 (10u buffer outside outer ring road at ±150).
 //  • Ground plane is 500×500 in World.tsx, so the whole expansion fits.
 // ════════════════════════════════════════════════════════════════════
@@ -18,13 +20,13 @@ export const PLAYER_BOUND = 160;
 export const ROAD_HALF = PLAYER_BOUND;
 
 /** Vertical roads run along the z-axis. Listed left → right. */
-export const ROAD_XS = [-150, -115, -54, -27, 0, 27, 54, 115, 150] as const;
+export const ROAD_XS = [-150, -120, -54, -27, 0, 27, 54, 120, 150] as const;
 
 /** Horizontal roads run along the x-axis. Listed north → south. */
-export const ROAD_ZS = [-150, -115, -54, -27, 0, 27, 54, 115, 150] as const;
+export const ROAD_ZS = [-150, -120, -54, -27, 0, 27, 54, 120, 150] as const;
 
-/** Outer ring road coordinates (added in Task #1). */
-export const OUTER_RING_INNER = 115;
+/** Outer ring road coordinates (added in Task #1, tightened in Task #8). */
+export const OUTER_RING_INNER = 120;
 export const OUTER_RING_OUTER = 150;
 
 /** MiniMap world extent — derives from player bound + small margin so the
@@ -37,7 +39,7 @@ export const ROAD_STYLE: Record<number, { width: number; color: string }> = {
   0:   { width: 3,   color: "#22c55e" }, // main avenue
   27:  { width: 2.2, color: "#4ade80" }, // secondary
   54:  { width: 2.2, color: "#86efac" }, // secondary outer
-  115: { width: 2.6, color: "#a7f3d0" }, // inner ring (new)
+  120: { width: 2.6, color: "#a7f3d0" }, // inner ring (new)
   150: { width: 2.6, color: "#fef3c7" }, // outer ring (new)
 };
 
@@ -65,11 +67,12 @@ export interface Quarter {
 
 // ── Lot layouts ─────────────────────────────────────────────────────
 // Corner quarters: 5 lots in a + pattern centered on the corner.
-// Strip quarters: 5 lots in a row at the strip midline (z=±132.5 or
-//   x=±132.5), spaced to avoid existing inner roads at x/z ∈ {0,±27,±54}.
+// Strip quarters: 5 lots in a row at the strip midline (z=±103 or
+//   x=±103), spaced to avoid existing inner roads at x/z ∈ {0,±27,±54}.
 
 function plusLots(cx: number, cz: number, prefix: string): Quarter["lots"] {
-  // 8u offsets keep lots ≥4u clear of the framing roads at ±115/±150.
+  // 8u offsets keep lots clear of the inner ring road at ±120 and the
+  // existing inner-city kiosks at |x|,|z| ≈ 92.
   return [
     { id: `${prefix}-c`, position: [cx, cz] },
     { id: `${prefix}-n`, position: [cx, cz - 8] },
@@ -97,7 +100,7 @@ export const QUARTERS: Quarter[] = [
     color: "#22d3ee",
     signpost: [-117, 0, -117],
     signpostRotY: Math.PI / 4, // faces center (SE)
-    lots: plusLots(-132.5, -132.5, "fnd"),
+    lots: plusLots(-103, -103, "fnd"),
   },
   {
     id: "borrowing",
@@ -107,7 +110,7 @@ export const QUARTERS: Quarter[] = [
     color: "#f472b6",
     signpost: [117, 0, -117],
     signpostRotY: -Math.PI / 4, // faces center (SW)
-    lots: plusLots(132.5, -132.5, "bor"),
+    lots: plusLots(103, -103, "bor"),
   },
   {
     id: "investing",
@@ -117,7 +120,7 @@ export const QUARTERS: Quarter[] = [
     color: "#fbbf24",
     signpost: [117, 0, 117],
     signpostRotY: (3 * Math.PI) / 4, // faces center (NW)
-    lots: plusLots(132.5, 132.5, "inv"),
+    lots: plusLots(103, 103, "inv"),
   },
   {
     id: "lifeevents",
@@ -127,7 +130,7 @@ export const QUARTERS: Quarter[] = [
     color: "#a78bfa",
     signpost: [-117, 0, 117],
     signpostRotY: -(3 * Math.PI) / 4, // faces center (NE)
-    lots: plusLots(-132.5, 132.5, "life"),
+    lots: plusLots(-103, 103, "life"),
   },
   {
     id: "consumer",
@@ -135,9 +138,9 @@ export const QUARTERS: Quarter[] = [
     emoji: "🛒",
     hudTitle: "Consumer & Behavioral",
     color: "#34d399",
-    signpost: [0, 0, -113],
+    signpost: [0, 0, -117],
     signpostRotY: Math.PI, // faces south (toward center)
-    lots: stripLotsX(-132.5, "csm"),
+    lots: stripLotsX(-103, "csm"),
   },
   {
     id: "macro",
@@ -145,9 +148,9 @@ export const QUARTERS: Quarter[] = [
     emoji: "🌐",
     hudTitle: "Macro & Money",
     color: "#fb923c",
-    signpost: [0, 0, 113],
+    signpost: [0, 0, 117],
     signpostRotY: 0, // faces north (toward center)
-    lots: stripLotsX(132.5, "mac"),
+    lots: stripLotsX(103, "mac"),
   },
 ];
 

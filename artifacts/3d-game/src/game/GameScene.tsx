@@ -767,42 +767,42 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   // Standard kiosk footprint: 1.8×1.8×3, y=1.5 — same as botstadium, etc.
   // Body/roof colors are themed to the quarter signpost color.
   // ════════════════════════════════════════════════════════════════════
-  // ── Foundations 🧠 (cyan #22d3ee), centered (-132.5, -132.5) ──
-  { id: "botmint",        label: "BotMint",              position: [-132.5, 1.5, -132.5], color: "#22d3ee", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "💵" },
-  { id: "botbudget",      label: "BotBudget Cafe",       position: [-132.5, 1.5, -140.5], color: "#06b6d4", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "📒" },
-  { id: "botsavings",     label: "BotSavings Plaza",     position: [-132.5, 1.5, -124.5], color: "#0891b2", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🐷" },
-  { id: "botcreditbureau",label: "BotCredit Bureau",     position: [-124.5, 1.5, -132.5], color: "#0e7490", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📇" },
-  { id: "botbehavioral",  label: "BotBehavioral Lab",    position: [-140.5, 1.5, -132.5], color: "#155e75", roofColor: "#67e8f9", width: 1.8, depth: 1.8, height: 3, emoji: "🧠" },
-  // ── Borrowing & Credit 💳 (pink #f472b6), centered (132.5, -132.5) ──
-  { id: "botmortgage",    label: "BotMortgage Bank",     position: [132.5, 1.5, -132.5], color: "#f472b6", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🏘️" },
-  { id: "botstudentaid",  label: "BotStudentAid Office", position: [132.5, 1.5, -140.5], color: "#ec4899", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎓" },
-  { id: "botautoloans",   label: "BotAuto Loans",        position: [132.5, 1.5, -124.5], color: "#db2777", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🚙" },
-  { id: "botpayday",      label: "BotPayday & Pawn",     position: [140.5, 1.5, -132.5], color: "#be185d", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "⏱️" },
-  { id: "botbankruptcy",  label: "BotBankruptcy Court",  position: [124.5, 1.5, -132.5], color: "#9d174d", roofColor: "#f9a8d4", width: 1.8, depth: 1.8, height: 3, emoji: "⚖️" },
-  // ── Investing 📈 (amber #fbbf24), centered (132.5, 132.5) ──
-  { id: "botindex",       label: "BotIndex Funds",       position: [132.5, 1.5, 132.5], color: "#fbbf24", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "📊" },
-  { id: "botreit",        label: "BotREIT Tower",        position: [132.5, 1.5, 124.5], color: "#f59e0b", roofColor: "#7c2d12", width: 1.8, depth: 1.8, height: 4, emoji: "🏢" },
-  { id: "botcommodities", label: "BotCommodities Pit",   position: [132.5, 1.5, 140.5], color: "#d97706", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🌾" },
-  { id: "botventure",     label: "BotVenture Capital",   position: [140.5, 1.5, 132.5], color: "#b45309", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🚀" },
-  { id: "botbonds",       label: "BotBonds Desk",        position: [124.5, 1.5, 132.5], color: "#92400e", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "🧾" },
-  // ── Life Events 💍 (purple #a78bfa), centered (-132.5, 132.5) ──
-  { id: "botchapel",      label: "BotChapel",            position: [-132.5, 1.5, 132.5], color: "#a78bfa", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "💒" },
-  { id: "botmaternity",   label: "BotMaternity Ward",    position: [-132.5, 1.5, 124.5], color: "#8b5cf6", roofColor: "#fce7f3", width: 1.8, depth: 1.8, height: 3, emoji: "👶" },
-  { id: "botestate",      label: "BotEstate Office",     position: [-132.5, 1.5, 140.5], color: "#7c3aed", roofColor: "#1f2937", width: 1.8, depth: 1.8, height: 3, emoji: "⚰️" },
-  { id: "bothealthplan",  label: "BotHealthPlan Clinic", position: [-124.5, 1.5, 132.5], color: "#6d28d9", roofColor: "#f8fafc", width: 1.8, depth: 1.8, height: 3, emoji: "🩺" },
-  { id: "botdivorce",     label: "BotDivorce Mediation", position: [-140.5, 1.5, 132.5], color: "#5b21b6", roofColor: "#fda4af", width: 1.8, depth: 1.8, height: 3, emoji: "💔" },
-  // ── Consumer & Behavioral 🛒 (green #34d399), strip z=-132.5 ──
-  { id: "botconsumer",    label: "BotConsumer Protection",position: [-95, 1.5, -132.5], color: "#34d399", roofColor: "#1e293b", width: 1.8, depth: 1.8, height: 3, emoji: "🛡️" },
-  { id: "botads",         label: "BotAds & Marketing",    position: [-40, 1.5, -132.5], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" },
-  { id: "botthrift",      label: "BotThrift & Resale",    position: [-13, 1.5, -132.5], color: "#059669", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "♻️" },
-  { id: "botgiving",      label: "BotGiving Foundation",  position: [40,  1.5, -132.5], color: "#047857", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🎁" },
-  { id: "botfintech",     label: "BotFinTech Hub",        position: [95,  1.5, -132.5], color: "#065f46", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📱" },
-  // ── Macro & Money 🌐 (orange #fb923c), strip z=132.5 ──
-  { id: "botecon",        label: "BotEcon Lab",           position: [-95, 1.5, 132.5], color: "#fb923c", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "🧪" },
-  { id: "botforex",       label: "BotForex Exchange",     position: [-40, 1.5, 132.5], color: "#f97316", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "💱" },
-  { id: "bottrade",       label: "BotTrade Hall",         position: [-13, 1.5, 132.5], color: "#ea580c", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🌐" },
-  { id: "botinflation",   label: "BotInflation Park",     position: [40,  1.5, 132.5], color: "#c2410c", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎈" },
-  { id: "botpolicy",      label: "BotPolicyHall",         position: [95,  1.5, 132.5], color: "#9a3412", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "🏛️" },
+  // ── Foundations 🧠 (cyan #22d3ee), centered (-103, -103) ──
+  { id: "botmint",        label: "BotMint",              position: [-103, 1.5, -103], color: "#22d3ee", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "💵" },
+  { id: "botbudget",      label: "BotBudget Cafe",       position: [-103, 1.5, -111], color: "#06b6d4", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "📒" },
+  { id: "botsavings",     label: "BotSavings Plaza",     position: [-103, 1.5, -95], color: "#0891b2", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🐷" },
+  { id: "botcreditbureau",label: "BotCredit Bureau",     position: [-95, 1.5, -103], color: "#0e7490", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📇" },
+  { id: "botbehavioral",  label: "BotBehavioral Lab",    position: [-111, 1.5, -103], color: "#155e75", roofColor: "#67e8f9", width: 1.8, depth: 1.8, height: 3, emoji: "🧠" },
+  // ── Borrowing & Credit 💳 (pink #f472b6), centered (103, -103) ──
+  { id: "botmortgage",    label: "BotMortgage Bank",     position: [103, 1.5, -103], color: "#f472b6", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🏘️" },
+  { id: "botstudentaid",  label: "BotStudentAid Office", position: [103, 1.5, -111], color: "#ec4899", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎓" },
+  { id: "botautoloans",   label: "BotAuto Loans",        position: [103, 1.5, -95], color: "#db2777", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🚙" },
+  { id: "botpayday",      label: "BotPayday & Pawn",     position: [111, 1.5, -103], color: "#be185d", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "⏱️" },
+  { id: "botbankruptcy",  label: "BotBankruptcy Court",  position: [95, 1.5, -103], color: "#9d174d", roofColor: "#f9a8d4", width: 1.8, depth: 1.8, height: 3, emoji: "⚖️" },
+  // ── Investing 📈 (amber #fbbf24), centered (103, 103) ──
+  { id: "botindex",       label: "BotIndex Funds",       position: [103, 1.5, 103], color: "#fbbf24", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "📊" },
+  { id: "botreit",        label: "BotREIT Tower",        position: [103, 1.5, 95], color: "#f59e0b", roofColor: "#7c2d12", width: 1.8, depth: 1.8, height: 4, emoji: "🏢" },
+  { id: "botcommodities", label: "BotCommodities Pit",   position: [103, 1.5, 111], color: "#d97706", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🌾" },
+  { id: "botventure",     label: "BotVenture Capital",   position: [111, 1.5, 103], color: "#b45309", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🚀" },
+  { id: "botbonds",       label: "BotBonds Desk",        position: [95, 1.5, 103], color: "#92400e", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "🧾" },
+  // ── Life Events 💍 (purple #a78bfa), centered (-103, 103) ──
+  { id: "botchapel",      label: "BotChapel",            position: [-103, 1.5, 103], color: "#a78bfa", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "💒" },
+  { id: "botmaternity",   label: "BotMaternity Ward",    position: [-103, 1.5, 95], color: "#8b5cf6", roofColor: "#fce7f3", width: 1.8, depth: 1.8, height: 3, emoji: "👶" },
+  { id: "botestate",      label: "BotEstate Office",     position: [-103, 1.5, 111], color: "#7c3aed", roofColor: "#1f2937", width: 1.8, depth: 1.8, height: 3, emoji: "⚰️" },
+  { id: "bothealthplan",  label: "BotHealthPlan Clinic", position: [-95, 1.5, 103], color: "#6d28d9", roofColor: "#f8fafc", width: 1.8, depth: 1.8, height: 3, emoji: "🩺" },
+  { id: "botdivorce",     label: "BotDivorce Mediation", position: [-111, 1.5, 103], color: "#5b21b6", roofColor: "#fda4af", width: 1.8, depth: 1.8, height: 3, emoji: "💔" },
+  // ── Consumer & Behavioral 🛒 (green #34d399), strip z=-103 ──
+  { id: "botconsumer",    label: "BotConsumer Protection",position: [-95, 1.5, -103], color: "#34d399", roofColor: "#1e293b", width: 1.8, depth: 1.8, height: 3, emoji: "🛡️" },
+  { id: "botads",         label: "BotAds & Marketing",    position: [-40, 1.5, -103], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" },
+  { id: "botthrift",      label: "BotThrift & Resale",    position: [-13, 1.5, -103], color: "#059669", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "♻️" },
+  { id: "botgiving",      label: "BotGiving Foundation",  position: [40,  1.5, -103], color: "#047857", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🎁" },
+  { id: "botfintech",     label: "BotFinTech Hub",        position: [95,  1.5, -103], color: "#065f46", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📱" },
+  // ── Macro & Money 🌐 (orange #fb923c), strip z=103 ──
+  { id: "botecon",        label: "BotEcon Lab",           position: [-95, 1.5, 103], color: "#fb923c", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "🧪" },
+  { id: "botforex",       label: "BotForex Exchange",     position: [-40, 1.5, 103], color: "#f97316", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "💱" },
+  { id: "bottrade",       label: "BotTrade Hall",         position: [-13, 1.5, 103], color: "#ea580c", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🌐" },
+  { id: "botinflation",   label: "BotInflation Park",     position: [40,  1.5, 103], color: "#c2410c", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎈" },
+  { id: "botpolicy",      label: "BotPolicyHall",         position: [95,  1.5, 103], color: "#9a3412", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "🏛️" },
 ];
 
 const INTERACT_RADIUS = 4.5;
