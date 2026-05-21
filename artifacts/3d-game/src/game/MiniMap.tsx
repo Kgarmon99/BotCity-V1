@@ -2,16 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "./gameStore";
 import { BUILDING_DEFS } from "./GameScene";
 import { playerTracker } from "./playerTracker";
-import { MINIMAP_EXTENT } from "./cityConstants";
+import { MINIMAP_EXTENT, ROAD_XS, ROAD_ZS, ROAD_STYLE, QUARTERS } from "./cityConstants";
 
 // Mini-map / objectives radar.
 //
-// World extent: the player is clamped to ±44 in x/z (see Player.tsx), and the
-// outermost buildings (botfarm) sit at ±41. We map this ±48 box to a square
-// SVG so blips always fit comfortably inside the radar even at the edge.
-
-// Derived from PLAYER_BOUND (+5) via cityConstants so the radar bound stays
-// in sync with the player movement clamp and outer ring of roads.
+// Radar extent is derived from PLAYER_BOUND (+5) via cityConstants so the
+// radar bound stays in sync with the player movement clamp and outer ring
+// of roads. Road grid lines and quarter labels are also driven from the
+// shared constants so the radar can never drift from the rendered city.
 const WORLD_EXTENT = MINIMAP_EXTENT;
 const RADAR_SIZE = 168; // px
 
@@ -99,10 +97,66 @@ export default function MiniMap() {
               <circle cx={RADAR_SIZE / 2} cy={RADAR_SIZE / 2} r={RADAR_SIZE / 2 - 2} fill="none" stroke="rgba(34,197,94,0.18)" />
               <circle cx={RADAR_SIZE / 2} cy={RADAR_SIZE / 2} r={(RADAR_SIZE / 2 - 2) * 0.66} fill="none" stroke="rgba(34,197,94,0.12)" />
               <circle cx={RADAR_SIZE / 2} cy={RADAR_SIZE / 2} r={(RADAR_SIZE / 2 - 2) * 0.33} fill="none" stroke="rgba(34,197,94,0.08)" />
-              {/* Main avenue crosshairs (N-S + E-W) — purely cosmetic, matches
-                  the city's grid so the radar feels like a real map. */}
-              <line x1={RADAR_SIZE / 2} y1="0" x2={RADAR_SIZE / 2} y2={RADAR_SIZE} stroke="rgba(34,197,94,0.1)" />
-              <line x1="0" y1={RADAR_SIZE / 2} x2={RADAR_SIZE} y2={RADAR_SIZE / 2} stroke="rgba(34,197,94,0.1)" />
+              {/* Full road grid: every vertical (x = const) and horizontal
+                  (z = const) road from ROAD_XS / ROAD_ZS, including the new
+                  outer ring. Color/width derive from ROAD_STYLE so the radar
+                  matches the rendered city in 3D. */}
+              {ROAD_XS.map((x) => {
+                const { px } = worldToRadar(x, 0);
+                const style = ROAD_STYLE[Math.abs(x)];
+                const op = x === 0 ? 0.42 : Math.abs(x) >= 115 ? 0.3 : 0.18;
+                return (
+                  <line
+                    key={`vr-${x}`}
+                    x1={px}
+                    y1={0}
+                    x2={px}
+                    y2={RADAR_SIZE}
+                    stroke={style.color}
+                    strokeOpacity={op}
+                    strokeWidth={x === 0 ? 1.4 : 0.8}
+                  />
+                );
+              })}
+              {ROAD_ZS.map((z) => {
+                const { py } = worldToRadar(0, z);
+                const style = ROAD_STYLE[Math.abs(z)];
+                const op = z === 0 ? 0.42 : Math.abs(z) >= 115 ? 0.3 : 0.18;
+                return (
+                  <line
+                    key={`hr-${z}`}
+                    x1={0}
+                    y1={py}
+                    x2={RADAR_SIZE}
+                    y2={py}
+                    stroke={style.color}
+                    strokeOpacity={op}
+                    strokeWidth={z === 0 ? 1.4 : 0.8}
+                  />
+                );
+              })}
+
+              {/* Quarter labels: one tag per outer-ring quarter so the player
+                  can see at a glance which content pack lives where. */}
+              {QUARTERS.map((q) => {
+                const { px, py } = worldToRadar(q.signpost[0], q.signpost[2]);
+                return (
+                  <g key={`q-${q.id}`} style={{ pointerEvents: "none" }}>
+                    <text
+                      x={px}
+                      y={py}
+                      fontSize={8}
+                      textAnchor="middle"
+                      fill={q.color}
+                      fillOpacity={0.85}
+                      fontWeight="bold"
+                      style={{ letterSpacing: "0.02em" }}
+                    >
+                      {q.emoji}
+                    </text>
+                  </g>
+                );
+              })}
               {/* Cardinal compass labels — sit just inside the outer ring so
                   the player can tell at a glance which way is which. World
                   +Z is south on the radar (see worldToRadar comment). */}
