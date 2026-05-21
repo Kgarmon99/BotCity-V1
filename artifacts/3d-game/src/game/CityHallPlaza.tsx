@@ -7,13 +7,18 @@
 // to CityHall's north face, 2.9u gap north to the road sidewalk.
 //
 // Features:
-//   • Two-tone checker-tile floor + gold inset border
+//   • Two-tone checker-tile floor + gold inset border + gold ring inlay
+//     around the fountain base
 //   • Cross walkway radiating N/S/E/W from the central fountain
 //   • Two-tier fountain with rotating ring + bobbing water spray
+//   • Welcome arch at the north entrance with hanging banner
+//   • Memorial obelisk north of the fountain
+//   • Bronze founder statue south of the fountain (mirrors obelisk)
 //   • 4 ornate lamp posts (corners) with emissive lantern tops
-//   • 4 wooden benches flanking the walkways
+//   • 6 small glowing bollards lining the cross walkways
+//   • 4 wooden benches flanking the E-W walkway
 //   • 4 planter trees in the inter-axis quadrants
-//   • Central memorial obelisk just north of the fountain
+//   • 3 animated pigeons pecking at the plaza floor
 //   • Flagpole with green city flag
 
 import { useRef } from "react";
@@ -286,6 +291,265 @@ function Bench({ pos, rotY = 0 }: { pos: [number, number]; rotY?: number }) {
   );
 }
 
+function WelcomeArch() {
+  // Spans the plaza's north entrance with two columns + a hanging banner.
+  // Columns sit just inside the north plaza edge (z = PLAZA_CZ + hd - 0.2 ≈ -31.2),
+  // 3u east/west of center so the central N-S walkway (1.6u wide) passes
+  // cleanly between them.
+  const bannerRef = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    if (bannerRef.current) {
+      bannerRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 1.2) * 0.05;
+    }
+  });
+  const Z = PLAZA_CZ + PLAZA_D / 2 - 0.2;
+  return (
+    <group>
+      {/* Left column */}
+      <group position={[PLAZA_CX - 3, 0, Z]}>
+        <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.7, 0.4, 0.7]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 2.1, 0]} castShadow>
+          <boxGeometry args={[0.4, 3.4, 0.4]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.5} metalness={0.2} />
+        </mesh>
+        <mesh position={[0, 3.95, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.25, 0.55]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.6} />
+        </mesh>
+      </group>
+      {/* Right column */}
+      <group position={[PLAZA_CX + 3, 0, Z]}>
+        <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.7, 0.4, 0.7]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 2.1, 0]} castShadow>
+          <boxGeometry args={[0.4, 3.4, 0.4]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.5} metalness={0.2} />
+        </mesh>
+        <mesh position={[0, 3.95, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.25, 0.55]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.6} />
+        </mesh>
+      </group>
+      {/* Crossbeam spanning both columns */}
+      <mesh position={[PLAZA_CX, 4.2, Z]} castShadow>
+        <boxGeometry args={[6.6, 0.18, 0.4]} />
+        <meshStandardMaterial color="#78350f" roughness={0.85} />
+      </mesh>
+      {/* Hanging banner — green city cloth with text */}
+      <mesh ref={bannerRef} position={[PLAZA_CX, 3.45, Z + 0.02]} castShadow>
+        <planeGeometry args={[5.4, 1.3]} />
+        <meshStandardMaterial
+          color="#16a34a"
+          emissive="#15803d"
+          emissiveIntensity={0.35}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Gold trim along the banner top + bottom */}
+      <mesh position={[PLAZA_CX, 4.05, Z + 0.03]}>
+        <planeGeometry args={[5.4, 0.08]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.7} toneMapped={false} />
+      </mesh>
+      <mesh position={[PLAZA_CX, 2.85, Z + 0.03]}>
+        <planeGeometry args={[5.4, 0.08]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.7} toneMapped={false} />
+      </mesh>
+      <Text
+        position={[PLAZA_CX, 3.55, Z + 0.04]}
+        fontSize={0.46}
+        color="#fef3c7"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#052e16"
+      >
+        WELCOME TO BOTCITY
+      </Text>
+      <Text
+        position={[PLAZA_CX, 3.05, Z + 0.04]}
+        fontSize={0.18}
+        color="#bbf7d0"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#052e16"
+      >
+        ★  CIVIC PLAZA  ★
+      </Text>
+    </group>
+  );
+}
+
+function FounderStatue() {
+  // Bronze figure on a stone plinth, mirroring the obelisk to the south
+  // of the fountain. Local placement at PLAZA_CZ - 3 (≈ z=-38), 1u from
+  // the plaza's south edge at z=-39.
+  return (
+    <group position={[PLAZA_CX, 0, PLAZA_CZ - 3]}>
+      {/* Wide stone base */}
+      <mesh position={[0, 0.18, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.7, 0.78, 0.36, 18]} />
+        <meshStandardMaterial color="#64748b" roughness={0.65} />
+      </mesh>
+      {/* Mid plinth (square) */}
+      <mesh position={[0, 0.62, 0]} castShadow>
+        <boxGeometry args={[0.9, 0.5, 0.9]} />
+        <meshStandardMaterial color="#cbd5e1" roughness={0.5} metalness={0.2} />
+      </mesh>
+      {/* Plaque face — bronze, facing north toward fountain */}
+      <mesh position={[0, 0.62, 0.46]}>
+        <planeGeometry args={[0.65, 0.36]} />
+        <meshStandardMaterial color="#92400e" emissive="#b45309" emissiveIntensity={0.35} metalness={0.7} roughness={0.4} />
+      </mesh>
+      <Text
+        position={[0, 0.72, 0.47]}
+        fontSize={0.1}
+        color="#fde68a"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.008}
+        outlineColor="#451a03"
+      >
+        FOUNDER
+      </Text>
+      <Text
+        position={[0, 0.58, 0.47]}
+        fontSize={0.07}
+        color="#fde68a"
+        anchorX="center"
+        anchorY="middle"
+      >
+        BOT McCITIZEN
+      </Text>
+      <Text
+        position={[0, 0.48, 0.47]}
+        fontSize={0.055}
+        color="#fcd34d"
+        anchorX="center"
+        anchorY="middle"
+      >
+        "FINANCIAL LITERACY FOR ALL"
+      </Text>
+      {/* Bronze statue — legs / robe (tapered cylinder) */}
+      <mesh position={[0, 1.45, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.28, 1.2, 12]} />
+        <meshStandardMaterial color="#7c2d12" metalness={0.65} roughness={0.45} emissive="#92400e" emissiveIntensity={0.15} />
+      </mesh>
+      {/* Torso */}
+      <mesh position={[0, 2.25, 0]} castShadow>
+        <boxGeometry args={[0.42, 0.6, 0.32]} />
+        <meshStandardMaterial color="#7c2d12" metalness={0.65} roughness={0.45} emissive="#92400e" emissiveIntensity={0.15} />
+      </mesh>
+      {/* Left arm — bent, holding a tablet */}
+      <mesh position={[-0.28, 2.2, 0.1]} rotation={[0.3, 0, 0.6]} castShadow>
+        <cylinderGeometry args={[0.07, 0.07, 0.55, 8]} />
+        <meshStandardMaterial color="#7c2d12" metalness={0.65} roughness={0.45} emissive="#92400e" emissiveIntensity={0.15} />
+      </mesh>
+      {/* Tablet of laws / financial principles */}
+      <mesh position={[-0.42, 2.0, 0.22]} rotation={[0.4, 0.2, 0]} castShadow>
+        <boxGeometry args={[0.32, 0.42, 0.05]} />
+        <meshStandardMaterial color="#a16207" metalness={0.6} roughness={0.5} emissive="#78350f" emissiveIntensity={0.2} />
+      </mesh>
+      {/* Right arm — raised slightly */}
+      <mesh position={[0.28, 2.25, 0]} rotation={[0, 0, -0.25]} castShadow>
+        <cylinderGeometry args={[0.07, 0.07, 0.6, 8]} />
+        <meshStandardMaterial color="#7c2d12" metalness={0.65} roughness={0.45} emissive="#92400e" emissiveIntensity={0.15} />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 2.75, 0]} castShadow>
+        <sphereGeometry args={[0.2, 16, 14]} />
+        <meshStandardMaterial color="#7c2d12" metalness={0.65} roughness={0.45} emissive="#92400e" emissiveIntensity={0.15} />
+      </mesh>
+      {/* Tiny laurel-wreath circlet */}
+      <mesh position={[0, 2.92, 0]}>
+        <torusGeometry args={[0.18, 0.025, 8, 24]} />
+        <meshStandardMaterial color="#16a34a" emissive="#22c55e" emissiveIntensity={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+function Bollard({ pos }: { pos: [number, number] }) {
+  // Small glowing post lining the walkways.
+  return (
+    <group position={[pos[0], 0, pos[1]]}>
+      <mesh position={[0, 0.25, 0]} castShadow>
+        <cylinderGeometry args={[0.1, 0.13, 0.5, 12]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.6} metalness={0.4} />
+      </mesh>
+      {/* Emissive cap */}
+      <mesh position={[0, 0.54, 0]}>
+        <sphereGeometry args={[0.13, 14, 12]} />
+        <meshStandardMaterial color="#fef3c7" emissive="#fbbf24" emissiveIntensity={2.0} toneMapped={false} />
+      </mesh>
+      <pointLight color="#fbbf24" intensity={0.25} distance={2.5} position={[0, 0.55, 0]} />
+    </group>
+  );
+}
+
+function Pigeon({ pos, phase }: { pos: [number, number]; phase: number }) {
+  // Small bird that pecks (head bob) and occasionally hops in place.
+  const bodyRef = useRef<THREE.Group>(null);
+  const headRef = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime + phase;
+    if (bodyRef.current) {
+      // Hop on every ~3.5s cycle, brief upward arc.
+      const cyc = (t * 0.6) % 1;
+      const hop = cyc < 0.18 ? Math.sin(cyc * Math.PI / 0.18) * 0.18 : 0;
+      bodyRef.current.position.y = hop;
+      // Slight body rotation when hopping forward.
+      bodyRef.current.rotation.y = phase + Math.sin(t * 0.25) * 0.3;
+    }
+    if (headRef.current) {
+      // Pecking head bob at ~3Hz.
+      const bob = Math.max(0, Math.sin(t * 6));
+      headRef.current.position.y = 0.16 - bob * 0.1;
+      headRef.current.rotation.x = bob * 0.6;
+    }
+  });
+  return (
+    <group position={[pos[0], 0, pos[1]]}>
+      <group ref={bodyRef}>
+        {/* Body */}
+        <mesh position={[0, 0.1, 0]} castShadow>
+          <sphereGeometry args={[0.12, 12, 10]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.85} />
+        </mesh>
+        {/* Tail */}
+        <mesh position={[-0.13, 0.11, 0]} rotation={[0, 0, 0.25]}>
+          <boxGeometry args={[0.1, 0.04, 0.08]} />
+          <meshStandardMaterial color="#64748b" roughness={0.85} />
+        </mesh>
+        {/* Head */}
+        <mesh ref={headRef} position={[0.11, 0.16, 0]} castShadow>
+          <sphereGeometry args={[0.07, 10, 8]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.8} />
+        </mesh>
+        {/* Beak */}
+        <mesh position={[0.19, 0.15, 0]}>
+          <coneGeometry args={[0.025, 0.06, 6]} />
+          <meshStandardMaterial color="#f59e0b" />
+        </mesh>
+        {/* Tiny legs (suggestion only — two thin sticks) */}
+        <mesh position={[0.02, 0.02, 0.04]}>
+          <boxGeometry args={[0.015, 0.04, 0.015]} />
+          <meshStandardMaterial color="#f97316" />
+        </mesh>
+        <mesh position={[0.02, 0.02, -0.04]}>
+          <boxGeometry args={[0.015, 0.04, 0.015]} />
+          <meshStandardMaterial color="#f97316" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
 function PlanterTree({ pos }: { pos: [number, number] }) {
   return (
     <group position={[pos[0], 0, pos[1]]}>
@@ -392,16 +656,53 @@ export default function CityHallPlaza() {
         <planeGeometry args={[PLAZA_W - 0.5, 1.6]} />
         <meshStandardMaterial color="#94a3b8" roughness={0.7} />
       </mesh>
+      {/* Gold ring inlay around the fountain — ties the fountain to the
+          floor pattern and reads as a civic medallion at night. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.046, PLAZA_CZ]}>
+        <ringGeometry args={[1.95, 2.15, 48]} />
+        <meshStandardMaterial
+          color="#fbbf24"
+          emissive="#fbbf24"
+          emissiveIntensity={0.7}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Eight short gold rays radiating outward from the ring */}
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+        const a = (i / 8) * Math.PI * 2;
+        return (
+          <mesh
+            key={`ray-${i}`}
+            rotation={[-Math.PI / 2, 0, -a]}
+            position={[PLAZA_CX + Math.cos(a) * 2.45, 0.046, PLAZA_CZ + Math.sin(a) * 2.45]}
+          >
+            <planeGeometry args={[0.45, 0.1]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.55} toneMapped={false} />
+          </mesh>
+        );
+      })}
 
       <Fountain />
       <Obelisk />
+      <FounderStatue />
       <Flagpole />
+      <WelcomeArch />
 
       {/* Lamp posts at the four plaza corners */}
       <LampPost pos={[PLAZA_CX - hw + 0.5, PLAZA_CZ - hd + 0.5]} />
       <LampPost pos={[PLAZA_CX + hw - 0.5, PLAZA_CZ - hd + 0.5]} />
       <LampPost pos={[PLAZA_CX - hw + 0.5, PLAZA_CZ + hd - 0.5]} />
       <LampPost pos={[PLAZA_CX + hw - 0.5, PLAZA_CZ + hd - 0.5]} />
+
+      {/* Walkway bollards — small glowing posts lining the cross walks.
+          Pairs at ±2.6 along each axis flank the fountain ring without
+          blocking the 1.6u walkway. */}
+      <Bollard pos={[PLAZA_CX - 2.6, PLAZA_CZ - 0.95]} />
+      <Bollard pos={[PLAZA_CX - 2.6, PLAZA_CZ + 0.95]} />
+      <Bollard pos={[PLAZA_CX + 2.6, PLAZA_CZ - 0.95]} />
+      <Bollard pos={[PLAZA_CX + 2.6, PLAZA_CZ + 0.95]} />
+      <Bollard pos={[PLAZA_CX - 0.95, PLAZA_CZ - 2.6]} />
+      <Bollard pos={[PLAZA_CX + 0.95, PLAZA_CZ - 2.6]} />
 
       {/* Benches flanking the E-W walkway, facing it */}
       <Bench pos={[PLAZA_CX - 3.0, PLAZA_CZ - 1.4]} rotY={Math.PI} />
@@ -414,6 +715,12 @@ export default function CityHallPlaza() {
       <PlanterTree pos={[PLAZA_CX + hw - 1.4, PLAZA_CZ - hd + 1.6]} />
       <PlanterTree pos={[PLAZA_CX - hw + 1.4, PLAZA_CZ + hd - 1.6]} />
       <PlanterTree pos={[PLAZA_CX + hw - 1.4, PLAZA_CZ + hd - 1.6]} />
+
+      {/* Pigeons pecking at the plaza floor — scattered, with phase
+          offsets so they peck and hop on staggered cycles. */}
+      <Pigeon pos={[PLAZA_CX - 1.2, PLAZA_CZ - 2.1]} phase={0} />
+      <Pigeon pos={[PLAZA_CX + 1.6, PLAZA_CZ + 2.2]} phase={1.8} />
+      <Pigeon pos={[PLAZA_CX + 2.1, PLAZA_CZ - 0.4]} phase={3.4} />
     </group>
   );
 }
