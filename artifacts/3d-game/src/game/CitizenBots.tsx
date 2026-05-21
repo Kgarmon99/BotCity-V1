@@ -113,22 +113,12 @@ function CitizenBot({ waypoints, speed, scale, anim, phase, hover }: Citizen) {
   const nextChangeRef = useRef(2 + phase * 8 + Math.random() * 4);
 
   useFrame((state, delta) => {
-    // Chat scheduler — refs only, with exactly one setChat per threshold cross.
-    nextChangeRef.current -= delta;
-    if (nextChangeRef.current <= 0) {
-      if (chatRef.current === null) {
-        // Pick a fresh line, hold for ~4 seconds
-        const line = CHATTER[Math.floor(Math.random() * CHATTER.length)];
-        chatRef.current = line;
-        nextChangeRef.current = 3.5 + Math.random() * 1.5;
-        setChat(line);
-      } else {
-        // Go quiet for 6–10 seconds
-        chatRef.current = null;
-        nextChangeRef.current = 6 + Math.random() * 4;
-        setChat(null);
-      }
-    }
+    // Chat bubbles are hidden by default — NPCs only chatter when prompted.
+    // (Scheduler intentionally disabled; `chat` stays null.)
+    void delta;
+    void setChat;
+    void chatRef;
+    void nextChangeRef;
 
     if (waypoints.length < 2) return;
     const i = segIdx.current;
