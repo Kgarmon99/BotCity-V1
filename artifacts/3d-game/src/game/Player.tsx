@@ -8,6 +8,7 @@ import { cameraInput } from "./cameraInput";
 import { touchInput } from "./touchInput";
 import { playerTracker } from "./playerTracker";
 import { sound } from "./sound";
+import { PLAYER_BOUND } from "./cityConstants";
 
 interface Keys {
   forward: boolean;
@@ -224,7 +225,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       }
       if (nextAnim !== anim) setAnim(nextAnim);
 
-      const bound = 105;
+      const bound = PLAYER_BOUND;
       groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
 

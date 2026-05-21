@@ -139,6 +139,15 @@ const BUILDING_SECTIONS: BuildingSection[] = [
       { id: "botenergy", emoji: "⚡", label: "BotEnergy" },
     ],
   },
+  // ── New outer-ring quarters (reserved for Task #2 content packs) ──
+  // These render with an empty item list until kiosks are added. The
+  // section header shows a "coming soon" hint instead of a 0/0 count.
+  { title: "Foundations",            emoji: "🧠", items: [] },
+  { title: "Borrowing & Credit",     emoji: "💳", items: [] },
+  { title: "Investing",              emoji: "📈", items: [] },
+  { title: "Life Events",            emoji: "💍", items: [] },
+  { title: "Consumer & Behavioral",  emoji: "🛒", items: [] },
+  { title: "Macro & Money",          emoji: "🌐", items: [] },
 ];
 
 const BUILDINGS: BuildingItem[] = BUILDING_SECTIONS.flatMap((s) => s.items);
@@ -271,7 +280,8 @@ export default function HUD() {
                 visitedBuildings.includes(b.id),
               ).length;
               const sectionTotal = section.items.length;
-              const sectionDone = sectionCompleted === sectionTotal;
+              const sectionEmpty = sectionTotal === 0;
+              const sectionDone = !sectionEmpty && sectionCompleted === sectionTotal;
               const dividerCls = idx > 0 ? "pt-2 border-t border-emerald-500/15" : "";
               return (
                 <div key={section.title} className={`space-y-1.5 ${dividerCls}`}>
@@ -279,16 +289,26 @@ export default function HUD() {
                   <div className="flex items-baseline justify-between gap-2">
                     <div
                       className={`text-[10px] uppercase tracking-[0.16em] font-semibold ${
-                        sectionDone ? "text-amber-300/70" : "text-emerald-300/70"
+                        sectionEmpty
+                          ? "text-emerald-300/40"
+                          : sectionDone
+                          ? "text-amber-300/70"
+                          : "text-emerald-300/70"
                       }`}
                     >
                       <span className="mr-1">{section.emoji}</span>
                       {section.title}
                     </div>
                     <div className="text-[10px] font-mono text-emerald-300/50 tabular-nums">
-                      {sectionCompleted}/{sectionTotal}
+                      {sectionEmpty ? "soon" : `${sectionCompleted}/${sectionTotal}`}
                     </div>
                   </div>
+                  {/* Empty-section placeholder */}
+                  {sectionEmpty && (
+                    <div className="text-[10px] italic text-emerald-200/40 pl-1">
+                      Kiosks coming soon…
+                    </div>
+                  )}
                   {/* Section items */}
                   <div className="space-y-1.5">
                     {section.items.map(({ id, emoji, label }) => {

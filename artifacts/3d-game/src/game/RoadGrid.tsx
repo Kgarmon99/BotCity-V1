@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { ROAD_HALF, ROAD_XS, ROAD_ZS, ROAD_STYLE } from "./cityConstants";
 
 interface RoadProps {
   position: [number, number, number];
@@ -13,12 +13,10 @@ function Road({ position, length, width, axis, color = "#052e16", emissive = "#2
   const args: [number, number] = axis === "z" ? [width, length] : [length, width];
   return (
     <group position={position}>
-      {/* Road surface */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={args} />
         <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={0.45} metalness={0.5} roughness={0.4} />
       </mesh>
-      {/* Center dashed line — emissive strip */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
         <planeGeometry args={axis === "z" ? [0.12, length * 0.92] : [length * 0.92, 0.12]} />
         <meshStandardMaterial color={emissive} emissive={emissive} emissiveIntensity={1.8} toneMapped={false} />
@@ -44,7 +42,6 @@ function Sidewalk({ position, length, width, axis }: SidewalkProps) {
   );
 }
 
-// Crosswalk: a stripe pattern at an intersection
 function Crosswalk({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
@@ -58,7 +55,6 @@ function Crosswalk({ position }: { position: [number, number, number] }) {
   );
 }
 
-// Streetlight to anchor blocks
 function Streetlight({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
@@ -74,35 +70,20 @@ function Streetlight({ position }: { position: [number, number, number] }) {
   );
 }
 
-const HALF = 98;       // city half-extent (extended for suburbs ring)
-const MAIN_W = 3;      // main avenue width
-const SEC_W = 2.2;     // secondary street width
+const HALF = ROAD_HALF;
+const INNER_ROAD_LIMIT = 54;
 
-// Main avenues: at x=0 and z=0
-// Secondary streets: at x=±18 and z=±18
-// Outer ring streets: at x=±36 and z=±36
-const verticalRoads = [
-  { x: 0,   w: MAIN_W, color: "#22c55e" },
-  { x: 27,  w: SEC_W,  color: "#4ade80" },
-  { x: -27, w: SEC_W,  color: "#4ade80" },
-  { x: 54,  w: SEC_W,  color: "#86efac" },
-  { x: -54, w: SEC_W,  color: "#86efac" },
-];
-
-const horizontalRoads = [
-  { z: 0,   w: MAIN_W, color: "#4ade80" },
-  { z: 27,  w: SEC_W,  color: "#22c55e" },
-  { z: -27, w: SEC_W,  color: "#22c55e" },
-  { z: 54,  w: SEC_W,  color: "#86efac" },
-  { z: -54, w: SEC_W,  color: "#86efac" },
-];
+// Build road descriptors from the canonical constant arrays so any future
+// edit to ROAD_XS / ROAD_ZS or ROAD_STYLE propagates here automatically.
+const verticalRoads = ROAD_XS.map((x) => ({ x, ...ROAD_STYLE[Math.abs(x)] }));
+const horizontalRoads = ROAD_ZS.map((z) => ({ z, ...ROAD_STYLE[Math.abs(z)] }));
 
 const streetlights: [number, number, number][] = [];
-// Place streetlights at every intersection of main+secondary roads (skip 0,0 which is plaza)
 for (const v of verticalRoads) {
+  if (Math.abs(v.x) > INNER_ROAD_LIMIT) continue;
   for (const h of horizontalRoads) {
+    if (Math.abs(h.z) > INNER_ROAD_LIMIT) continue;
     if (v.x === 0 && h.z === 0) continue;
-    // Offset slightly off the road so they sit on corner sidewalks
     const ox = v.x === 0 ? 2.4 : (v.x > 0 ? -1.8 : 1.8);
     const oz = h.z === 0 ? 2.4 : (h.z > 0 ? -1.8 : 1.8);
     streetlights.push([v.x + ox, 0, h.z + oz]);
@@ -110,47 +91,24 @@ for (const v of verticalRoads) {
 }
 
 const crosswalks: [number, number, number][] = [];
-// Crosswalks where main avenues meet secondary streets
-for (const v of [-54, -27, 27, 54]) {
-  crosswalks.push([v, 0, 0]); // east-west avenue crosses vertical street
-}
-for (const h of [-54, -27, 27, 54]) {
-  crosswalks.push([0, 0, h]); // north-south avenue crosses horizontal street
-}
+for (const v of [-54, -27, 27, 54]) crosswalks.push([v, 0, 0]);
+for (const h of [-54, -27, 27, 54]) crosswalks.push([0, 0, h]);
 
 export default function RoadGrid() {
   return (
     <group>
-      {/* Vertical roads (run along z-axis) */}
       {verticalRoads.map((r) => (
-        <Road
-          key={`vr-${r.x}`}
-          position={[r.x, 0.015, 0]}
-          length={HALF * 2}
-          width={r.w}
-          axis="z"
-          emissive={r.color}
-        />
+        <Road key={`vr-${r.x}`} position={[r.x, 0.015, 0]} length={HALF * 2} width={r.width} axis="z" emissive={r.color} />
       ))}
-      {/* Horizontal roads (run along x-axis) */}
       {horizontalRoads.map((r) => (
-        <Road
-          key={`hr-${r.z}`}
-          position={[0, 0.015, r.z]}
-          length={HALF * 2}
-          width={r.w}
-          axis="x"
-          emissive={r.color}
-        />
+        <Road key={`hr-${r.z}`} position={[0, 0.015, r.z]} length={HALF * 2} width={r.width} axis="x" emissive={r.color} />
       ))}
 
-      {/* Sidewalks flanking main avenues */}
       <Sidewalk position={[ 2.4, 0.02, 0]} length={HALF * 2} width={1.2} axis="z" />
       <Sidewalk position={[-2.4, 0.02, 0]} length={HALF * 2} width={1.2} axis="z" />
       <Sidewalk position={[0, 0.02,  2.4]} length={HALF * 2} width={1.2} axis="x" />
       <Sidewalk position={[0, 0.02, -2.4]} length={HALF * 2} width={1.2} axis="x" />
 
-      {/* Sidewalks flanking secondary streets */}
       {[-18, 18].map((x) => (
         <group key={`vs-${x}`}>
           <Sidewalk position={[x + 1.9, 0.02, 0]} length={HALF * 2} width={0.8} axis="z" />
@@ -164,15 +122,8 @@ export default function RoadGrid() {
         </group>
       ))}
 
-      {/* Crosswalks */}
-      {crosswalks.map((p, i) => (
-        <Crosswalk key={`cw-${i}`} position={p} />
-      ))}
-
-      {/* Streetlights at intersections */}
-      {streetlights.map((p, i) => (
-        <Streetlight key={`sl-${i}`} position={p} />
-      ))}
+      {crosswalks.map((p, i) => <Crosswalk key={`cw-${i}`} position={p} />)}
+      {streetlights.map((p, i) => <Streetlight key={`sl-${i}`} position={p} />)}
     </group>
   );
 }

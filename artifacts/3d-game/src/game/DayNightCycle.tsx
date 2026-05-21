@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { PLAYER_BOUND } from "./cityConstants";
 
 // =====================================================================
 // DayNightCycle — animated lighting + visible sun that orbits the city.
@@ -92,10 +93,10 @@ export default function DayNightCycle() {
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={270}
-        shadow-camera-left={-105}
-        shadow-camera-right={105}
-        shadow-camera-top={105}
-        shadow-camera-bottom={-105}
+        shadow-camera-left={-PLAYER_BOUND}
+        shadow-camera-right={PLAYER_BOUND}
+        shadow-camera-top={PLAYER_BOUND}
+        shadow-camera-bottom={-PLAYER_BOUND}
       />
       <hemisphereLight ref={hemiRef} args={["#4ade80", "#16a34a", 0.6]} />
       {/* Visible sun + soft halo */}

@@ -22,11 +22,17 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- **BotCity 3D game**: `artifacts/3d-game/`
+  - City-wide constants (player bound, road grid, quarters, reserved lots): `src/game/cityConstants.ts` — single source of truth, consumed by `Player.tsx`, `RoadGrid.tsx`, `Traffic.tsx`, `MiniMap.tsx`, `DayNightCycle.tsx`, `ExpansionQuarters.tsx`.
+  - Existing kiosk definitions: `BUILDING_DEFS` in `src/game/GameScene.tsx`.
+  - HUD section model (Objectives panel): `BUILDING_SECTIONS` in `src/game/HUD.tsx`.
+  - Outer-ring expansion (6 quarters / 30 reserved lots for upcoming financial-ed kiosks): `src/game/ExpansionQuarters.tsx`.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- **One source of truth for the city map.** Player bound, road grid, reserved lots, and MiniMap extent are all derived from `cityConstants.ts`. Bumping `PLAYER_BOUND` or editing `ROAD_XS`/`ROAD_ZS` propagates automatically.
+- **Outer ring is ±115 / ±150**, not ±81 / ±108 — existing kiosks already reach |x|,|z| ≈ 92, so the original spec coordinates would have bisected them.
+- **Empty HUD sections render as "soon"** with a placeholder line; they intentionally do not count toward the 0/N progress denominator until Task #2 adds kiosks.
 
 ## Product
 

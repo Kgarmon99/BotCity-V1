@@ -23,6 +23,7 @@ import Landmarks from "./Landmarks";
 import CityDistricts from "./CityDistricts";
 import CityDistrictsExtra from "./CityDistrictsExtra";
 import NewDistricts from "./NewDistricts";
+import ExpansionQuarters from "./ExpansionQuarters";
 import CityHallPlaza from "./CityHallPlaza";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
@@ -902,6 +903,7 @@ export default function GameScene() {
           <CityDistricts />
           <CityDistrictsExtra />
           <NewDistricts />
+          <ExpansionQuarters />
           <Streetscape />
           <BuildingAccents />
           <DistrictDetails />

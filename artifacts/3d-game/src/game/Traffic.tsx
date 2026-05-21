@@ -23,10 +23,12 @@ interface CarPath {
   phase: number;
 }
 
-// City extends roughly ±60 along each main avenue; using ±65 keeps the
-// wrap-around well outside the visible spawn camera frame.
-const RANGE_MIN = -105;
-const RANGE_MAX = 105;
+// City extends to ±PLAYER_BOUND along each main avenue; traffic wraps
+// at the same extent so cars cycle the full road length, including the
+// new outer expansion ring.
+import { PLAYER_BOUND } from "./cityConstants";
+const RANGE_MIN = -PLAYER_BOUND;
+const RANGE_MAX = PLAYER_BOUND;
 const RANGE = RANGE_MAX - RANGE_MIN;
 
 const CARS: CarPath[] = [
