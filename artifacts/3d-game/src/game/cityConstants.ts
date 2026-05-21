@@ -98,11 +98,12 @@ export const QUARTERS: Quarter[] = [
     emoji: "🧠",
     hudTitle: "Foundations",
     color: "#22d3ee",
-    signpost: [-80, 0, -110],
+    signpost: [-85, 0, -110],
     signpostRotY: Math.PI / 4, // faces center (SE)
     // Shifted east of BotNational Park (pine floor x∈[-109,-85], z∈[-104,-72])
-    // so kiosks sit just east of the park entrance, near the inner city.
-    lots: plusLots(-70, -90, "fnd"),
+    // and west of Golf Course (x∈[-64,-24], z∈[-103,-87]), so the cluster
+    // threads the narrow corridor between them.
+    lots: plusLots(-75, -90, "fnd"),
   },
   {
     id: "borrowing",

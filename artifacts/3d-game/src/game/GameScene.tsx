@@ -767,12 +767,12 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   // Standard kiosk footprint: 1.8×1.8×3, y=1.5 — same as botstadium, etc.
   // Body/roof colors are themed to the quarter signpost color.
   // ════════════════════════════════════════════════════════════════════
-  // ── Foundations 🧠 (cyan #22d3ee), centered (-70, -90) — east of BotNational Park ──
-  { id: "botmint",        label: "BotMint",              position: [-70, 1.5, -90], color: "#22d3ee", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "💵" },
-  { id: "botbudget",      label: "BotBudget Cafe",       position: [-70, 1.5, -98], color: "#06b6d4", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "📒" },
-  { id: "botsavings",     label: "BotSavings Plaza",     position: [-70, 1.5, -82], color: "#0891b2", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🐷" },
-  { id: "botcreditbureau",label: "BotCredit Bureau",     position: [-62, 1.5, -90], color: "#0e7490", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📇" },
-  { id: "botbehavioral",  label: "BotBehavioral Lab",    position: [-78, 1.5, -90], color: "#155e75", roofColor: "#67e8f9", width: 1.8, depth: 1.8, height: 3, emoji: "🧠" },
+  // ── Foundations 🧠 (cyan #22d3ee), centered (-75, -90) — between Park (x≤-85) and Golf (x≥-64) ──
+  { id: "botmint",        label: "BotMint",              position: [-75, 1.5, -90], color: "#22d3ee", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "💵" },
+  { id: "botbudget",      label: "BotBudget Cafe",       position: [-75, 1.5, -98], color: "#06b6d4", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "📒" },
+  { id: "botsavings",     label: "BotSavings Plaza",     position: [-75, 1.5, -82], color: "#0891b2", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🐷" },
+  { id: "botcreditbureau",label: "BotCredit Bureau",     position: [-67, 1.5, -90], color: "#0e7490", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📇" },
+  { id: "botbehavioral",  label: "BotBehavioral Lab",    position: [-83, 1.5, -90], color: "#155e75", roofColor: "#67e8f9", width: 1.8, depth: 1.8, height: 3, emoji: "🧠" },
   // ── Borrowing & Credit 💳 (pink #f472b6), centered (103, -103) ──
   { id: "botmortgage",    label: "BotMortgage Bank",     position: [103, 1.5, -103], color: "#f472b6", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🏘️" },
   { id: "botstudentaid",  label: "BotStudentAid Office", position: [103, 1.5, -111], color: "#ec4899", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎓" },
@@ -793,15 +793,15 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   { id: "botdivorce",     label: "BotDivorce Mediation", position: [-111, 1.5, 135], color: "#5b21b6", roofColor: "#fda4af", width: 1.8, depth: 1.8, height: 3, emoji: "💔" },
   // ── Consumer & Behavioral 🛒 (green #34d399), strip z=-103 ──
   { id: "botconsumer",    label: "BotConsumer Protection",position: [-95, 1.5, -103], color: "#34d399", roofColor: "#1e293b", width: 1.8, depth: 1.8, height: 3, emoji: "🛡️" },
-  { id: "botads",         label: "BotAds & Marketing",    position: [-40, 1.5, -103], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" },
+  { id: "botads",         label: "BotAds & Marketing",    position: [-67, 1.5, -103], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" }, // moved from -40 (inside Golf Course fairway)
   { id: "botthrift",      label: "BotThrift & Resale",    position: [-13, 1.5, -103], color: "#059669", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "♻️" },
   { id: "botgiving",      label: "BotGiving Foundation",  position: [40,  1.5, -103], color: "#047857", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🎁" },
   { id: "botfintech",     label: "BotFinTech Hub",        position: [95,  1.5, -103], color: "#065f46", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📱" },
   // ── Macro & Money 🌐 (orange #fb923c), strip z=103 ──
-  { id: "botecon",        label: "BotEcon Lab",           position: [-95, 1.5, 103], color: "#fb923c", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "🧪" },
+  { id: "botecon",        label: "BotEcon Lab",           position: [-70, 1.5, 103], color: "#fb923c", roofColor: "#1e3a8a", width: 1.8, depth: 1.8, height: 3, emoji: "🧪" }, // moved from -95 (inside BotInsurance HQ plaza)
   { id: "botforex",       label: "BotForex Exchange",     position: [-40, 1.5, 103], color: "#f97316", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "💱" },
   { id: "bottrade",       label: "BotTrade Hall",         position: [-13, 1.5, 103], color: "#ea580c", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🌐" },
-  { id: "botinflation",   label: "BotInflation Park",     position: [40,  1.5, 103], color: "#c2410c", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎈" },
+  { id: "botinflation",   label: "BotInflation Park",     position: [22,  1.5, 103], color: "#c2410c", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎈" }, // moved from 40 (inside BotEnergy Plaza)
   { id: "botpolicy",      label: "BotPolicyHall",         position: [95,  1.5, 103], color: "#9a3412", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "🏛️" },
 ];
 
