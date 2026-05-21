@@ -284,7 +284,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
           <BotMobile pos={[0, 0, 0]} color="#dc2626" accent="#fde047" />
         </group>
       ) : (
-        <MoneyBotModel scale={0.75} animation={anim} />
+        <MoneyBotModel scale={0.4} animation={anim} />
       )}
     </group>
   );
