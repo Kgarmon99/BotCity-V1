@@ -1393,18 +1393,28 @@ export default function CityExpansion() {
       <MovingTrain />
       <TrainStationSign />
 
-      {/* ─── Airport district (pushed to the far SW outskirts) ───
-         Whole district shifted by (-15, 0, +5) so the kiosk lives at
-         world (-90, *, 72.5), the terminal at (-65, *, 50), and Runway 2's
-         east end (after its X_MAX shortening below) sits at world x=-45,
-         clearing BotShops west edge x=-43 by 2u. ArtDistrict, which used
-         to anchor against the airport's north edge at z=40.5, has moved
-         to the NW band at (-75, -10), so the airport corner is empty.
-         All inner constants (RUNWAY_Z, RUNWAY2_X_MIN/MAX, RUNWAY3_X, etc.)
-         remain local — animation refs (TakeoffPlane, landing plane,
-         fuel truck) write to refs inside this group so their coords are
-         already in local space. */}
-      <group position={[-15, 0, 5]}>
+      {/* ─── Airport district (pushed FURTHER OUT to the far SW corner,
+         and expanded 2.25× by area) ───
+         Whole district shifted by (-30, 0, -12) AND uniformly scaled 1.5×
+         around the local origin. The detailed terminal now spans world
+         x=-105±, z=55.5±, runways and parking lot all 1.5× longer/wider.
+         World envelope after transform: x[-147, -63.75] × z[16.5, 117].
+         Clearances:
+           • Outer ring road x=-150 inner edge -148.7 → 1.7u gap to airport
+             west edge -147 (airport sits between the two ring roads).
+           • Inner ring road z=120 north edge 118.7 → 1.7u gap to airport
+             south edge 117 (parking lot world z[108,117]).
+           • Life Events quarter (-103,135), nearest lot north edge z=123
+             → 6u gap to airport south edge.
+           • Airport east edge -63.75 sits 8u west of the inner ring road
+             at x=-54 (band west edge -55.1) — no road crossing on the
+             east side now.
+         Inner constants (RUNWAY_Z, RUNWAY2_X_MIN/MAX, RUNWAY3_X, etc.)
+         remain local. Animation refs (TakeoffPlane, landing plane, fuel
+         truck) write to refs inside this group so their coords are
+         already local — under scale 1.5 their travel range expands
+         proportionally with the runway, which is correct. */}
+      <group position={[-30, 0, -12]} scale={1.5}>
         <Runway />
         <Airplane position={[-50, 0.75, 49]} />
         <TakeoffPlane />

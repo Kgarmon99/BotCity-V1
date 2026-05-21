@@ -127,14 +127,16 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botplane",
     label: "BotPlane International",
-    // Real airports take a lot of land, so BotPlane has been pushed to
-    // the far SW outskirts. The whole airport district (Runway/Airplane/
-    // TakeoffPlane/ControlTower/AirportExpansion) is wrapped in a
-    // (-15, 0, +5) translation group in CityExpansion's default export,
-    // so the kiosk + every airport feature shift together. Kiosk world
-    // coord = (-75, 67.5) + (-15, +5) = (-90, 72.5). Terminal at world
-    // (-65, 50); runway 2 east edge at world x=-40 (clears BotShops).
-    position: [-90, 3, 72.5],
+    // Pushed FURTHER OUT to the far SW corner and expanded 2.25× by area.
+    // The whole airport district (Runway/Airplane/TakeoffPlane/
+    // ControlTower/AirportExpansion) is wrapped in a (-30, 0, -12)
+    // translation group with scale=1.5 in CityExpansion's default export.
+    // New world envelope: x[-147, -63.75] × z[16.5, 117]. Detailed
+    // terminal world center ≈ (-105, 55.5); parking lot world z[108,117].
+    // Kiosk relocated to the SE corner of the new airport plaza so the
+    // player can walk up to it from the city center (gap to inner ring
+    // road z=120 is 5.7u; well inside the new airport footprint).
+    position: [-75, 3, 110],
     color: "#38bdf8",
     roofColor: "#0c4a6e",
     width: 10,
