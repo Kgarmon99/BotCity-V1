@@ -320,19 +320,21 @@ const mountainPalette = ["#1e3a2e", "#22463a", "#1a3326", "#264a3b", "#1f3d30"];
 const peakPalette = ["#a7c4b5", "#c8d8cd", "#9fb8aa", "#b8cdc0"];
 const hillPalette = ["#1f4332", "#28543f", "#1b3a2b", "#2e6049", "#224836"];
 
-// Footprint-safe constants. The map ground is 340×340 centered at origin
-// (edge at ±170). The city/player walkable zone extends to ~±105. We add
-// 2u buffers on each side so feature FOOTPRINTS (r ± baseR), not just
-// centers, stay inside [107, 168].
-const CITY_EDGE = 107;
-const MAP_EDGE = 168;
+// Footprint-safe constants. The map ground is 500×500 centered at origin
+// (edge at ±250). The city extends further than the player bound:
+//   • ocean plane reaches x≈129 (CityDistricts.tsx)
+//   • Eiffel Tower & St. Louis Arch are at radial distance ≈170
+// CITY_EDGE=185 gives ~15u buffer past the landmarks; MAP_EDGE=248 keeps
+// terrain footprints just inside the ground plane.
+const CITY_EDGE = 185;
+const MAP_EDGE = 248;
 
-// Lower rolling foothills — innermost terrain band, hugging the city edge.
-// baseR 6..11, r 118..128 → footprint range ~[107, 139]. 48 around.
+// Lower rolling foothills — innermost terrain band, just outside the city.
+// baseR 6..11, r 196..211 → footprint range ~[185, 222]. 48 around.
 const hillPositions: TerrainFeature[] = Array.from({ length: 48 }).map((_, i) => {
   const angle = (i / 48) * Math.PI * 2 + jitter(i, 5) * 0.13;
   const baseR = 6 + jitter(i, 8) * 5;         // 6..11
-  const r = 118 + jitter(i, 6) * 10;          // 118..128 (rMin-baseRMax = 107)
+  const r = 196 + jitter(i, 6) * 15;          // 196..211
   const height = 4 + jitter(i, 7) * 6;        // 4..10
   return {
     pos: [Math.cos(angle) * r, 0, Math.sin(angle) * r],
@@ -343,12 +345,12 @@ const hillPositions: TerrainFeature[] = Array.from({ length: 48 }).map((_, i) =>
   };
 });
 
-// Tall jagged mountains — middle ring. baseR 9..15, r 124..150 →
-// footprint range ~[109, 165]. 36 around the circle.
+// Tall jagged mountains — middle ring. baseR 9..15, r 214..232 →
+// footprint range ~[199, 247]. 36 around the circle.
 const mountainPositions: TerrainFeature[] = Array.from({ length: 36 }).map((_, i) => {
   const angle = (i / 36) * Math.PI * 2 + jitter(i, 1) * 0.16;
   const baseR = 9 + jitter(i, 4) * 6;         // 9..15
-  const r = 124 + jitter(i, 2) * 26;          // 124..150
+  const r = 214 + jitter(i, 2) * 18;          // 214..232
   const height = 18 + jitter(i, 3) * 18;      // 18..36
   return {
     pos: [Math.cos(angle) * r, 0, Math.sin(angle) * r],
@@ -360,12 +362,12 @@ const mountainPositions: TerrainFeature[] = Array.from({ length: 36 }).map((_, i
   };
 });
 
-// Distant backdrop ridges — far ring. baseR 12..18, r 138..148 →
-// footprint range ~[120, 166]. Wide and low for silhouette. 28 around.
+// Distant backdrop ridges — far ring. baseR 10..14, r 222..232 →
+// footprint range ~[208, 246]. Wide and low for silhouette. 28 around.
 const farRidgePositions: TerrainFeature[] = Array.from({ length: 28 }).map((_, i) => {
   const angle = (i / 28) * Math.PI * 2 + jitter(i, 9) * 0.22;
-  const baseR = 12 + jitter(i, 12) * 6;       // 12..18
-  const r = 138 + jitter(i, 10) * 10;         // 138..148 (rMax+baseRMax = 166)
+  const baseR = 10 + jitter(i, 12) * 4;       // 10..14
+  const r = 222 + jitter(i, 10) * 10;         // 222..232
   const height = 22 + jitter(i, 11) * 14;     // 22..36
   return {
     pos: [Math.cos(angle) * r, 0, Math.sin(angle) * r],
@@ -453,9 +455,11 @@ function Terrain() {
 export default function World() {
   return (
     <group>
-      {/* Dark emerald ground */}
+      {/* Dark emerald ground — expanded to 500×500 so there's room for the
+          terrain ring outside ALL city decor (ocean at x~129, landmarks at
+          radial ~170, etc.). */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[340, 340]} />
+        <planeGeometry args={[500, 500]} />
         <meshStandardMaterial color="#042f1f" roughness={0.4} metalness={0.5} />
       </mesh>
 
