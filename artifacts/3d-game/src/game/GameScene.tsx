@@ -519,6 +519,70 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 8,
     emoji: "🏛️",
   },
+  {
+    // BotSoccer Stadium — kiosk sign at south entrance of the soccer plaza
+    // (-27, 0, -55). Mirrors the BotStadium kiosk pattern: tiny sign cube
+    // that triggers the dialog; the field + stands + lights are rendered
+    // by CityDistricts.SoccerStadium. Stadium center is x=-27 (block
+    // interior, clear of x=-36 and x=-18 road bands ±1.1u); kiosk sits
+    // just south of the south stand at z=-48.
+    id: "botsoccer",
+    label: "BotSoccer Stadium",
+    position: [-27, 1.5, -48],
+    color: "#22c55e",
+    roofColor: "#ffffff",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "⚽",
+  },
+  {
+    // BotHoops Arena — kiosk sign at south entrance of the basketball
+    // arena at (27, 0, 27). Claims the previously-FREE SE middle-ring
+    // corner. Clearance: 7u to littlebots (12,27), 2.9u to z=18 road
+    // band, 2.9u to z=36 road band.
+    id: "botbasketball",
+    label: "BotHoops Arena",
+    position: [27, 1.5, 20.5],
+    color: "#f97316",
+    roofColor: "#7c2d12",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🏀",
+  },
+  {
+    // BotGallery — full building in the Art District at (-50, 0, 27),
+    // far west, clear of z=18 and z=36 road bands (±1.1u each, both
+    // 5.5u+ away). Surrounding sculpture garden + mural walls rendered
+    // by CityDistricts.ArtDistrict. White modern facade w/ gold roof
+    // accent matches museum-row siblings (bothistory, eduhistory).
+    id: "botgallery",
+    label: "BotGallery",
+    position: [-50, 2.5, 27],
+    color: "#f1f5f9",
+    roofColor: "#fbbf24",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🎨",
+  },
+  {
+    // BotFashion District — kiosk sign at south entrance of the runway
+    // plaza at (-27, 0, 45). Plaza center x=-27 sits in the block
+    // interior between x=-36 and x=-18 road bands. South of BotShops
+    // (-27, 27) by 18u; north of BotKids (-6, 55) by 13u. Clears z=36
+    // road band by 2.4u.
+    id: "botfashion",
+    label: "BotFashion District",
+    position: [-27, 1.5, 39.5],
+    color: "#ec4899",
+    roofColor: "#f9a8d4",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "👗",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;

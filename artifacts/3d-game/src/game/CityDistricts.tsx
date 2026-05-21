@@ -1990,6 +1990,484 @@ function Zoo() {
   );
 }
 
+// ===== Soccer Stadium @ (-27, 0, -55) ================================
+// Pitch 12x7 + grandstands on long sides + corner floodlight pylons +
+// jumbotron. Center moved to x=-27 (block interior) so envelope clears
+// both x=-36 and x=-18 road bands (±1.1u). South stand south edge at
+// world z=-49.5; botsoccer kiosk at z=-48 sits just south with 0.6u gap.
+function SoccerStadium() {
+  const jumboRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    if (jumboRef.current) {
+      const mat = jumboRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(s.clock.elapsedTime * 4) * 0.5;
+    }
+  });
+  return (
+    <group position={[-27, 0, -55]}>
+      {/* Pitch — green grass rectangle (12 wide x 7 deep) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
+        <planeGeometry args={[12, 7]} />
+        <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.4} />
+      </mesh>
+      {/* Center circle */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+        <ringGeometry args={[0.9, 1.0, 24]} />
+        <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      {/* Halfway line */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.055, 0]}>
+        <planeGeometry args={[0.1, 7]} />
+        <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1} toneMapped={false} />
+      </mesh>
+      {/* Goals — chunky white box frames at both ends */}
+      {[-6, 6].map((gx) => (
+        <group key={`goal-${gx}`} position={[gx, 0, 0]}>
+          {/* Posts */}
+          {[-1.2, 1.2].map((pz) => (
+            <mesh key={`post-${pz}`} position={[0, 0.8, pz]} castShadow>
+              <cylinderGeometry args={[0.08, 0.08, 1.6, 6]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+          ))}
+          {/* Crossbar */}
+          <mesh position={[0, 1.6, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.08, 2.4, 6]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          {/* Net — translucent plane behind goal, tilted back */}
+          <mesh
+            position={[gx > 0 ? 0.5 : -0.5, 0.8, 0]}
+            rotation={[0, gx > 0 ? -0.35 : 0.35, 0]}
+          >
+            <planeGeometry args={[2.4, 1.6]} />
+            <meshStandardMaterial color="#e5e7eb" transparent opacity={0.35} side={THREE.DoubleSide} />
+          </mesh>
+        </group>
+      ))}
+      {/* Grandstands — boxes on N and S sidelines, width 13 (env x[-33.5..-20.5]) */}
+      {[-1, 1].map((dir) => (
+        <group key={`stand-${dir}`} position={[0, 0, dir * 4.5]}>
+          {/* Lower tier */}
+          <mesh position={[0, 0.6, 0]} castShadow>
+            <boxGeometry args={[13, 1.2, 1.2]} />
+            <meshStandardMaterial color="#1e293b" emissive="#3b82f6" emissiveIntensity={0.35} />
+          </mesh>
+          {/* Upper tier (set back) */}
+          <mesh position={[0, 1.8, dir * 0.4]} castShadow>
+            <boxGeometry args={[13, 1.2, 1.0]} />
+            <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.55} />
+          </mesh>
+          {/* Roof canopy */}
+          <mesh position={[0, 2.8, dir * 0.45]} castShadow>
+            <boxGeometry args={[13.4, 0.18, 1.4]} />
+            <meshStandardMaterial color="#0b1220" metalness={0.5} />
+          </mesh>
+        </group>
+      ))}
+      {/* Floodlight pylons at 4 corners (env x[-33.5..-20.5]) */}
+      {[[-6.5, -5.5], [6.5, -5.5], [-6.5, 5.5], [6.5, 5.5]].map(([x, z], i) => (
+        <group key={`fl-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 4.5, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.2, 9, 8]} />
+            <meshStandardMaterial color="#0b1220" metalness={0.8} />
+          </mesh>
+          <mesh position={[0, 9.3, 0]}>
+            <boxGeometry args={[1.1, 0.5, 0.4]} />
+            <meshStandardMaterial
+              color="#fef3c7"
+              emissive="#fde047"
+              emissiveIntensity={2.6}
+              toneMapped={false}
+            />
+          </mesh>
+        </group>
+      ))}
+      {/* Jumbotron suspended at the north end */}
+      <mesh position={[0, 5.5, -6.2]} castShadow>
+        <boxGeometry args={[3.4, 2, 0.4]} />
+        <meshStandardMaterial color="#0b1220" />
+      </mesh>
+      <mesh ref={jumboRef} position={[0, 5.5, -5.98]}>
+        <planeGeometry args={[3.1, 1.7]} />
+        <meshStandardMaterial
+          color="#22c55e"
+          emissive="#22c55e"
+          emissiveIntensity={1.6}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Stadium name sign over the south entrance (toward the kiosk at z=-48) */}
+      <Text
+        position={[0, 4.6, 6.2]}
+        fontSize={0.5}
+        color="#bbf7d0"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#15803d"
+      >
+        ⚽ BOTSOCCER STADIUM
+      </Text>
+    </group>
+  );
+}
+
+// ===== Basketball Arena @ (27, 0, 27) ================================
+// Domed indoor arena: tapered cylinder shell + glowing emissive dome cap +
+// glass entrance + a small outdoor practice half-court tucked beside the
+// south entrance so players can SEE basketball even though the arena
+// interior is implicit. Footprint dome radius 5 → envelope ~10x10 plus
+// the half-court strip extending ~3u south.
+function BasketballArena() {
+  const domeRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    if (domeRef.current) {
+      const mat = domeRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 0.5 + Math.sin(s.clock.elapsedTime * 1.4) * 0.18;
+    }
+  });
+  return (
+    <group position={[27, 0, 27]}>
+      {/* Cylindrical arena wall */}
+      <mesh position={[0, 2, 0]} castShadow>
+        <cylinderGeometry args={[5, 5.3, 4, 28]} />
+        <meshStandardMaterial color="#7c2d12" emissive="#f97316" emissiveIntensity={0.35} metalness={0.4} roughness={0.55} />
+      </mesh>
+      {/* Glowing geodesic-feel dome (half-sphere) */}
+      <mesh ref={domeRef} position={[0, 4, 0]} castShadow>
+        <sphereGeometry args={[5, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial
+          color="#f97316"
+          emissive="#fb923c"
+          emissiveIntensity={0.55}
+          metalness={0.7}
+          roughness={0.3}
+        />
+      </mesh>
+      {/* Dome seam rings — three thin emissive bands for that arena look */}
+      {[1.4, 2.7, 3.8].map((y, i) => (
+        <mesh key={`band-${i}`} position={[0, 4 + y, 0]}>
+          <torusGeometry args={[Math.sqrt(Math.max(0.01, 25 - y * y)), 0.06, 8, 32]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+      ))}
+      {/* Glass entrance facing south (toward the kiosk at z=20.5) */}
+      <mesh position={[0, 1.4, 5.05]}>
+        <boxGeometry args={[2.4, 2.8, 0.15]} />
+        <meshStandardMaterial
+          color="#0ea5e9"
+          emissive="#22d3ee"
+          emissiveIntensity={1.2}
+          metalness={0.5}
+          roughness={0.2}
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+      {/* Top finial — basketball-orange sphere with a thin seam ring */}
+      <mesh position={[0, 9.2, 0]}>
+        <sphereGeometry args={[0.45, 16, 12]} />
+        <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={1.1} toneMapped={false} />
+      </mesh>
+      {/* Outdoor half-court tucked SW of the arena entrance */}
+      <group position={[-5, 0, 5.5]}>
+        {/* Court surface */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
+          <planeGeometry args={[4.5, 3.2]} />
+          <meshStandardMaterial color="#b45309" emissive="#f97316" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Free-throw line */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, -0.4]}>
+          <planeGeometry args={[2, 0.06]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1} toneMapped={false} />
+        </mesh>
+        {/* Hoop pole + backboard + rim */}
+        <group position={[0, 0, -1.4]}>
+          <mesh position={[0, 1.5, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.1, 3, 6]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.8} />
+          </mesh>
+          <mesh position={[0, 2.9, 0.18]} castShadow>
+            <boxGeometry args={[1.2, 0.8, 0.06]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.6} />
+          </mesh>
+          <mesh position={[0, 2.55, 0.45]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.2, 0.03, 6, 16]} />
+            <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        </group>
+        {/* Basketball on the court */}
+        <mesh position={[0.5, 0.25, 0.6]} castShadow>
+          <sphereGeometry args={[0.22, 14, 10]} />
+          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.5} roughness={0.6} />
+        </mesh>
+      </group>
+      {/* Arena name sign over the south entrance */}
+      <Text
+        position={[0, 5.8, 5.2]}
+        fontSize={0.5}
+        color="#fed7aa"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#7c2d12"
+      >
+        🏀 BOTHOOPS ARENA
+      </Text>
+    </group>
+  );
+}
+
+// ===== Art District @ around (-50, 0, 27) ============================
+// Surrounds the BotGallery building (rendered by BUILDING_DEFS) with a
+// sculpture garden + mural walls + painters' easels. The gallery itself
+// occupies x[-52.5..-47.5], z[25..29]; decor sits in a ring around it
+// from x[-58..-42], z[20..34], clear of z=18 road (5.5u south) and
+// z=36 road (1.7u north of the district sign).
+function ArtDistrict() {
+  const torusRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    if (torusRef.current) torusRef.current.rotation.y = s.clock.elapsedTime * 0.3;
+  });
+  return (
+    <group position={[-50, 0, 27]}>
+      {/* Polished marble plaza floor around the gallery */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
+        <planeGeometry args={[14, 12]} />
+        <meshStandardMaterial color="#1e1b4b" emissive="#c084fc" emissiveIntensity={0.2} metalness={0.3} roughness={0.4} />
+      </mesh>
+      {/* SCULPTURE 1 — abstract spinning torus on a pedestal (SW) */}
+      <group position={[-5, 0, 4]}>
+        <mesh position={[0, 0.6, 0]} castShadow>
+          <boxGeometry args={[1.2, 1.2, 1.2]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.4} />
+        </mesh>
+        <mesh ref={torusRef} position={[0, 1.8, 0]} rotation={[Math.PI / 3, 0, 0]} castShadow>
+          <torusKnotGeometry args={[0.45, 0.14, 64, 12]} />
+          <meshStandardMaterial color="#f59e0b" emissive="#fbbf24" emissiveIntensity={0.7} metalness={0.85} roughness={0.2} />
+        </mesh>
+      </group>
+      {/* SCULPTURE 2 — giant red cube balanced on a corner (SE) */}
+      <group position={[5, 0, 4]}>
+        <mesh position={[0, 0.4, 0]} castShadow>
+          <cylinderGeometry args={[0.7, 0.85, 0.8, 12]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[0, 1.7, 0]} rotation={[0.6, 0.6, 0]} castShadow>
+          <boxGeometry args={[1.2, 1.2, 1.2]} />
+          <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.45} metalness={0.4} />
+        </mesh>
+      </group>
+      {/* SCULPTURE 3 — blue sphere on a tall plinth (NW) */}
+      <group position={[-5, 0, -4]}>
+        <mesh position={[0, 1, 0]} castShadow>
+          <boxGeometry args={[0.6, 2, 0.6]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        <mesh position={[0, 2.6, 0]} castShadow>
+          <sphereGeometry args={[0.55, 24, 18]} />
+          <meshStandardMaterial color="#0ea5e9" emissive="#22d3ee" emissiveIntensity={0.55} metalness={0.7} roughness={0.25} />
+        </mesh>
+      </group>
+      {/* MURAL WALL — large painted wall behind the gallery (north) */}
+      <group position={[0, 0, -5.5]}>
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <boxGeometry args={[10, 3, 0.3]} />
+          <meshStandardMaterial color="#fef3c7" />
+        </mesh>
+        {/* Mural splashes */}
+        {[
+          { x: -3, c: "#ec4899" },
+          { x: -1, c: "#22d3ee" },
+          { x: 1, c: "#a855f7" },
+          { x: 3, c: "#f97316" },
+        ].map(({ x, c }, i) => (
+          <mesh key={`splash-${i}`} position={[x, 1.5, 0.16]}>
+            <circleGeometry args={[0.7, 18]} />
+            <meshStandardMaterial color={c} emissive={c} emissiveIntensity={0.7} toneMapped={false} />
+          </mesh>
+        ))}
+      </group>
+      {/* PAINTER'S EASEL — small art-class touch near the entrance */}
+      <group position={[5, 0, -4]} rotation={[0, -0.4, 0]}>
+        {/* Tripod legs */}
+        {[-0.25, 0.25].map((lx, i) => (
+          <mesh key={`leg-${i}`} position={[lx, 0.7, 0.1]} rotation={[0, 0, lx > 0 ? -0.15 : 0.15]} castShadow>
+            <cylinderGeometry args={[0.04, 0.04, 1.5, 6]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+        ))}
+        <mesh position={[0, 0.7, -0.15]} rotation={[0.15, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.04, 0.04, 1.5, 6]} />
+          <meshStandardMaterial color="#78350f" />
+        </mesh>
+        {/* Canvas */}
+        <mesh position={[0, 1.2, 0.12]} castShadow>
+          <boxGeometry args={[0.9, 1.1, 0.06]} />
+          <meshStandardMaterial color="#fef9c3" />
+        </mesh>
+        <mesh position={[0, 1.2, 0.155]}>
+          <planeGeometry args={[0.7, 0.9]} />
+          <meshStandardMaterial color="#7c3aed" emissive="#a855f7" emissiveIntensity={0.4} toneMapped={false} />
+        </mesh>
+      </group>
+      {/* District sign — south side, facing the world */}
+      <Text
+        position={[0, 4.2, 6.2]}
+        fontSize={0.5}
+        color="#fde047"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#7c3aed"
+      >
+        🎨 ART DISTRICT
+      </Text>
+    </group>
+  );
+}
+
+// ===== Fashion District @ (-27, 0, 45) ================================
+// Runway plaza south of BotShops (-27, 27). Long lit catwalk down the
+// middle + mannequins on platforms + boutique kiosks framing the
+// runway + a glowing "FASHION" sign overhead. Plaza footprint 12x10
+// centered at (-27, 45) → x[-33..-21], clear of x=-36 road (3u west)
+// and x=-18 road (1.9u east). botfashion kiosk is the south-entrance
+// trigger at (-27, 39.5).
+function FashionMannequin({ x, z, color }: { x: number; z: number; color: string }) {
+  return (
+    <group position={[x, 0, z]}>
+      {/* Platform */}
+      <mesh position={[0, 0.15, 0]} castShadow>
+        <cylinderGeometry args={[0.5, 0.55, 0.3, 16]} />
+        <meshStandardMaterial color="#0f172a" emissive="#f9a8d4" emissiveIntensity={0.4} metalness={0.5} />
+      </mesh>
+      {/* Torso */}
+      <mesh position={[0, 1.1, 0]} castShadow>
+        <cylinderGeometry args={[0.3, 0.22, 1.4, 14]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.45} />
+      </mesh>
+      {/* Neck */}
+      <mesh position={[0, 1.95, 0]} castShadow>
+        <cylinderGeometry args={[0.1, 0.12, 0.2, 8]} />
+        <meshStandardMaterial color="#fafaf9" />
+      </mesh>
+      {/* Head — featureless mannequin sphere */}
+      <mesh position={[0, 2.2, 0]} castShadow>
+        <sphereGeometry args={[0.2, 18, 14]} />
+        <meshStandardMaterial color="#fafaf9" metalness={0.3} roughness={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+function FashionDistrict() {
+  const signRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    if (signRef.current) {
+      const mat = signRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(s.clock.elapsedTime * 3) * 0.4;
+    }
+  });
+  return (
+    <group position={[-27, 0, 45]}>
+      {/* Plaza floor — dark with magenta glow (12 wide x 10 deep) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
+        <planeGeometry args={[12, 10]} />
+        <meshStandardMaterial color="#1f1233" emissive="#ec4899" emissiveIntensity={0.18} />
+      </mesh>
+      {/* Lit runway — long emissive strip running N-S down the middle */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+        <planeGeometry args={[2, 8]} />
+        <meshStandardMaterial color="#fce7f3" emissive="#f9a8d4" emissiveIntensity={1.1} toneMapped={false} />
+      </mesh>
+      {/* Runway edge lights — small glowing studs lining each side */}
+      {[-4, -2.5, -1, 0.5, 2, 3.5].map((z, i) => (
+        <group key={`lights-${i}`}>
+          <mesh position={[-1.05, 0.1, z]}>
+            <sphereGeometry args={[0.08, 8, 6]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.8} toneMapped={false} />
+          </mesh>
+          <mesh position={[1.05, 0.1, z]}>
+            <sphereGeometry args={[0.08, 8, 6]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.8} toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+      {/* Mannequins down the catwalk — alternating sides, alternating colors */}
+      <FashionMannequin x={-1.5} z={-2.5} color="#ec4899" />
+      <FashionMannequin x={1.5} z={-1} color="#7c3aed" />
+      <FashionMannequin x={-1.5} z={0.5} color="#f97316" />
+      <FashionMannequin x={1.5} z={2} color="#22d3ee" />
+      {/* Boutique kiosks framing the runway (E and W sides) */}
+      {[[-5, -2.5, "#ec4899", "💄"], [5, -2.5, "#a855f7", "👠"], [-5, 2.5, "#0ea5e9", "👜"], [5, 2.5, "#f97316", "🧢"]].map(([x, z, c, em], i) => (
+        <group key={`booth-${i}`} position={[x as number, 0, z as number]}>
+          <mesh position={[0, 1.1, 0]} castShadow>
+            <boxGeometry args={[2, 2.2, 1.6]} />
+            <meshStandardMaterial color="#0f172a" emissive={c as string} emissiveIntensity={0.45} metalness={0.4} />
+          </mesh>
+          {/* Roof awning */}
+          <mesh position={[0, 2.35, 0]} castShadow>
+            <boxGeometry args={[2.3, 0.18, 1.9]} />
+            <meshStandardMaterial color={c as string} emissive={c as string} emissiveIntensity={0.9} />
+          </mesh>
+          {/* Window */}
+          <mesh position={[0, 1.3, 0.81]}>
+            <planeGeometry args={[1.4, 0.9]} />
+            <meshStandardMaterial color={c as string} emissive={c as string} emissiveIntensity={1.6} toneMapped={false} />
+          </mesh>
+          <Text
+            position={[0, 1.3, 0.815]}
+            fontSize={0.55}
+            color="#ffffff"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.04}
+            outlineColor={c as string}
+          >
+            {em as string}
+          </Text>
+        </group>
+      ))}
+      {/* Big glowing "FASHION" arch sign over the south entrance */}
+      <mesh position={[0, 4.4, 4.6]} castShadow>
+        <boxGeometry args={[7.5, 1.1, 0.25]} />
+        <meshStandardMaterial color="#0b1220" />
+      </mesh>
+      <mesh ref={signRef} position={[0, 4.4, 4.73]}>
+        <planeGeometry args={[7.2, 0.9]} />
+        <meshStandardMaterial
+          color="#f9a8d4"
+          emissive="#ec4899"
+          emissiveIntensity={1.6}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <Text
+        position={[0, 4.4, 4.74]}
+        fontSize={0.55}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#831843"
+      >
+        👗 FASHION DISTRICT
+      </Text>
+      {/* Sign support posts */}
+      {[-3.4, 3.4].map((x, i) => (
+        <mesh key={`post-${i}`} position={[x, 2.2, 4.6]} castShadow>
+          <cylinderGeometry args={[0.12, 0.14, 4.4, 8]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 export default function CityDistricts() {
   return (
     <group>
@@ -2006,6 +2484,10 @@ export default function CityDistricts() {
       <Mine />
       <Zoo />
       <GamingHQCrown />
+      <SoccerStadium />
+      <BasketballArena />
+      <ArtDistrict />
+      <FashionDistrict />
     </group>
   );
 }

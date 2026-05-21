@@ -36,6 +36,10 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   eduhistory: { id: "edu-pass", code: "EDU", label: "Education History Museum pass", icon: "📚", line: "—" },
   finhistory: { id: "fin-pass", code: "FIN", label: "Finance History Museum pass", icon: "💰", line: "—" },
   botrocket: { id: "launch-pass", code: "🚀", label: "BotRocket launch ticket", icon: "🚀", line: "—" },
+  botsoccer: { id: "jock-tax", code: "Jock Tax", label: "Multi-state athlete return", icon: "⚽", line: "Sch CR" },
+  botbasketball: { id: "1099nil", code: "1099-NEC", label: "NIL endorsement income", icon: "🏀", line: "Sch C" },
+  botgallery: { id: "art-8283", code: "8283", label: "Noncash charitable contributions", icon: "🎨", line: "11" },
+  botfashion: { id: "cogs", code: "COGS", label: "Inventory & cost of goods sold", icon: "👗", line: "Sch C" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -111,6 +115,10 @@ export default function DialogModal() {
     casino: "botcasino",
     mine: "botmine",
     zoo: "botzoo",
+    soccer: "botsoccer",
+    basketball: "botbasketball",
+    gallery: "botgallery",
+    fashion: "botfashion",
   };
 
   const handleAction = () => {
@@ -286,6 +294,10 @@ const ACTION_LABELS: Record<string, string> = {
   casino: "Cash Out 🎰",
   mine: "Haul the Ore ⛏️",
   zoo: "Visit the Animals 🦒",
+  soccer: "Kickoff! ⚽",
+  basketball: "Tip-off! 🏀",
+  gallery: "View the Exhibit 🎨",
+  fashion: "Runway Walk 👗",
 };
 
 function actionButtonLabel(action: string, income: number): string {

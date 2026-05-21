@@ -47,6 +47,10 @@ export interface DialogContent {
     | "port"
     | "casino"
     | "mine"
+    | "soccer"
+    | "basketball"
+    | "gallery"
+    | "fashion"
     | "zoo";
   amount?: number;
 }
