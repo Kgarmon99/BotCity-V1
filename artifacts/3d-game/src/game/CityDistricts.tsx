@@ -4563,20 +4563,21 @@ function Mine() {
   );
 }
 
-// ===== BotZoo & Park @ (-22.5, 0, 87) ==================================
-// Expanded MEGA wildlife park along the SW-south edge. Zoo gate kiosk at
-// (-22.5, 2.5, 87). Park lawn + pens fan WEST and NORTH from the gate
-// into the band between airport R3 (north) and the world south edge.
-//   world envelope: x ∈ [-40, -16], z ∈ [81, 92]
-//   → local x ∈ [-17.5, +6.5], local z ∈ [-6, +5] (origin at -22.5, 87)
-// Clearances (HALF=98 world):
-//   • Airport R3 (x[-27.5,-22.5], z[40..80]) → 1u south gap from lawn
-//   • Airport parking lot (x[-57,-43], z[85,91]) → 3u east gap from lawn
-//   • BotKids (-9, 82.5), x_min=-12 → 4u east gap from lawn x_max=-16
-//   • World south edge z=98 → 6u south buffer beyond lawn z_max=92
-// New attractions added in the western expansion: lion enclosure, zebra
-// paddock, penguin pool, walk-in aviary, picnic area, park benches,
-// info kiosk, plus extended conservation tree cluster.
+// ===== BotZoo & Park @ (-28, 0, 92) scale 1.7× =========================
+// MEGA wildlife park expanded 2.89× by area. Whole zoo wrapped in a
+// (-28, 0, 92) translation group with scale=1.7. All inner local coords
+// preserved (gate arch local z=1.6, lawn local x[-17.5,+6.5] z[-6,+5],
+// conservation tree cluster, etc.) — each just expands 1.7× outward
+// from the new local origin.
+//   new world envelope: x ∈ [-57.75, -16.95], z ∈ [81.8, 100.5]
+//   gate arch new world center: (-28, 94.72)
+// Clearances:
+//   • New airport east edge x=-63.75 → 6u gap to zoo west x=-57.75
+//   • BotKids x_min=-12 → 4.95u east gap to zoo east x=-16.95
+//   • Inner ring road z=120 (north edge 118.7) → 18.2u south buffer
+//     beyond zoo south z=100.5
+// Kiosk relocated to world (-28, 2.5, 95) so the player can still walk
+// up to the gate from the city center (just south of the new arch).
 function Zoo() {
   const giraffeRef = useRef<THREE.Group>(null!);
   const monkeyRef = useRef<THREE.Mesh>(null!);
@@ -4609,9 +4610,11 @@ function Zoo() {
     }
   });
   return (
-    <group position={[-22.5, 0, 87]}>
+    <group position={[-28, 0, 92]} scale={1.7}>
       {/* ── Park lawn — enlarged 24×11 (was 13×10), shifted west to
-            cover the new pens. Local x[-17.5..+6.5], z[-6..+5]. */}
+            cover the new pens. Local x[-17.5..+6.5], z[-6..+5].
+            Under the outer scale=1.7 wrapper, this becomes a 40.8×18.7
+            world-space lawn — a true mega park. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5.5, 0.02, -0.5]} receiveShadow>
         <planeGeometry args={[24, 11]} />
         <meshStandardMaterial color="#166534" emissive="#22c55e" emissiveIntensity={0.18} />

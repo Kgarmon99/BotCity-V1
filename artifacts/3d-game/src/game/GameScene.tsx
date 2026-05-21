@@ -506,10 +506,15 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botzoo",
     label: "BotZoo & Park",
-    // S edge near the BotKids family district. Footprint x[-18..-12] z[56..60].
-    // BotKids at (-6, 55) is 10u east — reads as an adjacent attraction.
-    // Player bound ±64 → south edge at 60 leaves 4u for the entrance arch.
-    position: [-22.5, 2.5, 87],
+    // Zoo expanded 2.89× by area (scale 1.7× wrapper around new local
+    // origin (-28, 0, 92) in CityDistricts.Zoo). New world envelope:
+    // x[-57.75, -16.95] × z[81.8, 100.5]. Gate arch now at world
+    // (-28, 94.72). Kiosk placed at world (-28, 2.5, 95) — just south
+    // of the new arch so the player walks past the gate to interact.
+    // Clearances: 6u west gap to new airport east x=-63.75; 4.95u east
+    // gap to BotKids x_min=-12; 18u south buffer to inner ring road
+    // z=120 north edge 118.7.
+    position: [-28, 2.5, 95],
     color: "#15803d",
     roofColor: "#fde047",
     width: 6,

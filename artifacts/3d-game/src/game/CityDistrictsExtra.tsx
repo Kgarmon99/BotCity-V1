@@ -1002,11 +1002,19 @@ function NationalPark() {
     }
   });
   // Local origin (-92, 0, -78). Decor extends mostly NW (negative x,
-  // negative z) to fill the empty SW corner. Significantly expanded:
-  // pine floor 24×32 → 38×46 (~2.3×), additional mountains and trees,
-  // larger lake. World footprint: x[-118,-80] × z[-114,-68].
+  // negative z) to fill the empty SW corner. Expanded TWICE: pine floor
+  // first grew 24×32 → 38×46 (~2.3×), now wrapped in scale=1.5 for a
+  // total ~5.2× area over the original. The visitor-center kiosk lives
+  // at the LOCAL ORIGIN, so under uniform scale-from-origin it stays
+  // anchored at world (-92, 3, -78); only the decor expands outward.
+  // New world envelope: x[-139.25, -74] × z[-132, -63] (~65×69 of
+  // mountain/forest/lake territory). Clearances:
+  //   • Outer ring road x=-150 inner edge -148.7 → 9.45u west gap
+  //   • Foundations quarter west lot (-21, -91) → 49u east gap
+  //   • Player bound north z=-160 → 28u north buffer beyond z=-132
+  //   • Park crosses inner ring road x=-120 (already did at 1× scale)
   return (
-    <group position={[-92, 0, -78]}>
+    <group position={[-92, 0, -78]} scale={1.5}>
       {/* Pine-forest floor — dark green meadow tinting the corner */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-7, 0.018, -13]}>
         <planeGeometry args={[38, 46]} />
