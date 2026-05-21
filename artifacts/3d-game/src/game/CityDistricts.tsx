@@ -2531,6 +2531,269 @@ export default function CityDistricts() {
       <BasketballArena />
       <ArtDistrict />
       <FashionDistrict />
+      <HospitalDistrict />
+    </group>
+  );
+}
+
+// ===== Hospital District @ (7.5, 0, -40.5) ===========================
+// Wraps the BotHospital kiosk building (x[5..10] z[-42.5..-38.5]) with a
+// proper bot-repair facility: large H-marked helipad with a rescue chopper
+// to the north, a parked ambulance to the east, four solar charging /
+// repair pods to the south, and a recovery garden with planters. Stays
+// inside the block bounded by road bands z=-54 (north outer ring) and
+// z=-27 (secondary), and by neighbors botdealer (x=-13.5, west, edge
+// x=-11) and botcityhall (x=19.5, east, footprint ~x[17..22]).
+function HospitalDistrict() {
+  const rotorRef = useRef<THREE.Group>(null!);
+  const beaconRef = useRef<THREE.Mesh>(null!);
+  const padRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const podRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    if (rotorRef.current) rotorRef.current.rotation.y = t * 14;
+    if (beaconRef.current) {
+      const mat = beaconRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(t * 4) * 1.1;
+    }
+    if (padRef.current) {
+      padRef.current.emissiveIntensity = 0.5 + Math.sin(t * 1.5) * 0.25;
+    }
+    podRefs.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.6 + Math.sin(t * 2 + i * 1.1) * 0.4;
+    });
+  });
+  return (
+    <group position={[7.5, 0, -40.5]}>
+      {/* ── Helipad (north of hospital, world (7.5, -47.5)) ─────────── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -7]} receiveShadow>
+        <circleGeometry args={[3.2, 28]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.9} />
+      </mesh>
+      {/* Outer painted ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, -7]}>
+        <ringGeometry args={[2.7, 3.05, 32]} />
+        <meshStandardMaterial
+          ref={padRef}
+          color="#fde047"
+          emissive="#facc15"
+          emissiveIntensity={0.6}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Painted "H" mark — three bars (two verticals + crossbar) */}
+      {[-0.65, 0.65].map((bx) => (
+        <mesh
+          key={`hbar-${bx}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[bx, 0.06, -7]}
+        >
+          <planeGeometry args={[0.35, 2]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.8} toneMapped={false} />
+        </mesh>
+      ))}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, -7]}>
+        <planeGeometry args={[1.6, 0.35]} />
+        <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.8} toneMapped={false} />
+      </mesh>
+      {/* Rescue helicopter parked on the pad */}
+      <group position={[0, 1.05, -7]}>
+        {/* Fuselage — capsule via stretched sphere */}
+        <mesh position={[0, 0, 0]} scale={[0.9, 0.55, 1.6]} castShadow>
+          <sphereGeometry args={[1, 16, 12]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Cockpit dome */}
+        <mesh position={[0, 0.05, 0.95]} scale={[0.55, 0.45, 0.7]}>
+          <sphereGeometry args={[1, 14, 10]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.6} roughness={0.2} emissive="#22d3ee" emissiveIntensity={0.35} />
+        </mesh>
+        {/* Tail boom */}
+        <mesh position={[0, 0.05, -1.7]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.15, 0.08, 1.4, 8]} />
+          <meshStandardMaterial color="#ef4444" />
+        </mesh>
+        {/* Tail rotor */}
+        <mesh position={[0.18, 0.05, -2.35]} rotation={[0, 0, Math.PI / 2]}>
+          <boxGeometry args={[0.6, 0.05, 0.08]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        {/* Red cross on side */}
+        <mesh position={[0.85, 0.05, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[0.55, 0.55]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.5} side={THREE.DoubleSide} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.86, 0.05, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[0.35, 0.1]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.2} side={THREE.DoubleSide} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.86, 0.05, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[0.1, 0.35]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.2} side={THREE.DoubleSide} toneMapped={false} />
+        </mesh>
+        {/* Skids */}
+        {[-0.55, 0.55].map((sx) => (
+          <mesh key={`skid-${sx}`} position={[sx, -0.55, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 1.8, 6]} />
+            <meshStandardMaterial color="#475569" metalness={0.6} />
+          </mesh>
+        ))}
+        {/* Main rotor mast + spinning blades */}
+        <mesh position={[0, 0.55, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 0.2, 6]} />
+          <meshStandardMaterial color="#475569" metalness={0.7} />
+        </mesh>
+        <group ref={rotorRef} position={[0, 0.72, 0]}>
+          <mesh>
+            <boxGeometry args={[3.6, 0.05, 0.15]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh rotation={[0, Math.PI / 2, 0]}>
+            <boxGeometry args={[3.6, 0.05, 0.15]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+        </group>
+        {/* Beacon on tail */}
+        <mesh ref={beaconRef} position={[0, 0.3, -2.3]}>
+          <sphereGeometry args={[0.09, 8, 8]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={2} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ── Ambulance parked east of building (world (12.25, -40.5)) ──
+          Local x=4.75 keeps driveway right edge at world x≈14.5, leaving
+          a ~2.5u clearance to botcityhall west edge at x=17. */}
+      <group position={[4.75, 0, 0]}>
+        {/* Driveway slab */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+          <planeGeometry args={[4.5, 3]} />
+          <meshStandardMaterial color="#334155" roughness={0.9} />
+        </mesh>
+        {/* Body — boxy van */}
+        <mesh position={[0, 0.65, 0]} castShadow>
+          <boxGeometry args={[1.5, 1.1, 2.6]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.05} />
+        </mesh>
+        {/* Cab */}
+        <mesh position={[0, 0.6, 1.3]} castShadow>
+          <boxGeometry args={[1.45, 0.95, 0.9]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        {/* Windshield */}
+        <mesh position={[0, 0.9, 1.78]}>
+          <boxGeometry args={[1.3, 0.5, 0.05]} />
+          <meshStandardMaterial color="#0f172a" emissive="#22d3ee" emissiveIntensity={0.4} metalness={0.5} />
+        </mesh>
+        {/* Red cross on side */}
+        <mesh position={[0.76, 0.7, -0.2]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[0.55, 0.12]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.1} toneMapped={false} side={THREE.DoubleSide} />
+        </mesh>
+        <mesh position={[0.76, 0.7, -0.2]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[0.12, 0.55]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.1} toneMapped={false} side={THREE.DoubleSide} />
+        </mesh>
+        {/* Red & blue light bar on roof */}
+        <mesh position={[-0.25, 1.28, 1.0]}>
+          <boxGeometry args={[0.35, 0.12, 0.18]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.6} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.25, 1.28, 1.0]}>
+          <boxGeometry args={[0.35, 0.12, 0.18]} />
+          <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={1.6} toneMapped={false} />
+        </mesh>
+        {/* Wheels */}
+        {[[-0.78, -0.9], [0.78, -0.9], [-0.78, 0.9], [0.78, 0.9]].map(([wx, wz], i) => (
+          <mesh key={`wheel-${i}`} position={[wx, 0.18, wz]} rotation={[0, 0, Math.PI / 2]} castShadow>
+            <cylinderGeometry args={[0.22, 0.22, 0.12, 10]} />
+            <meshStandardMaterial color="#0f172a" />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ── Repair / charging pods (south of building, world z=-35.5) ─ */}
+      {[-3.5, -1.2, 1.2, 3.5].map((px, i) => (
+        <group key={`pod-${i}`} position={[px, 0, 5]}>
+          {/* Pod base */}
+          <mesh position={[0, 0.15, 0]} castShadow>
+            <cylinderGeometry args={[0.55, 0.7, 0.3, 12]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.5} />
+          </mesh>
+          {/* Glass capsule */}
+          <mesh position={[0, 0.95, 0]} castShadow>
+            <cylinderGeometry args={[0.45, 0.45, 1.3, 14, 1, true]} />
+            <meshStandardMaterial
+              ref={(m) => { podRefs.current[i] = m; }}
+              color="#22d3ee"
+              emissive="#22d3ee"
+              emissiveIntensity={0.8}
+              transparent
+              opacity={0.35}
+              side={THREE.DoubleSide}
+              toneMapped={false}
+            />
+          </mesh>
+          {/* Charge ring at top */}
+          <mesh position={[0, 1.62, 0]}>
+            <torusGeometry args={[0.45, 0.04, 6, 16]} />
+            <meshStandardMaterial color="#a7f3d0" emissive="#22c55e" emissiveIntensity={1.2} toneMapped={false} />
+          </mesh>
+          {/* Cap */}
+          <mesh position={[0, 1.7, 0]} castShadow>
+            <cylinderGeometry args={[0.5, 0.5, 0.12, 12]} />
+            <meshStandardMaterial color="#475569" metalness={0.7} />
+          </mesh>
+        </group>
+      ))}
+      {/* Repair-bay sign */}
+      <mesh position={[0, 1.7, 4.0]} castShadow>
+        <boxGeometry args={[3.4, 0.5, 0.1]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      <Text
+        position={[0, 1.7, 4.06]}
+        fontSize={0.3}
+        color="#22d3ee"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#0c4a6e"
+      >
+        🔧 REPAIR BAY
+      </Text>
+
+      {/* ── Recovery garden — green planters flanking the helipad ──── */}
+      {[[-4.5, -7], [4.5, -7], [-4.5, -4.5], [4.5, -4.5]].map(([gx, gz], i) => (
+        <group key={`planter-${i}`} position={[gx, 0, gz]}>
+          <mesh position={[0, 0.2, 0]} castShadow>
+            <boxGeometry args={[1.2, 0.4, 1.2]} />
+            <meshStandardMaterial color="#475569" />
+          </mesh>
+          {/* Foliage */}
+          <mesh position={[0, 0.7, 0]} castShadow>
+            <sphereGeometry args={[0.55, 10, 8]} />
+            <meshStandardMaterial color="#22c55e" emissive="#16a34a" emissiveIntensity={0.25} />
+          </mesh>
+          <mesh position={[0.25, 0.55, 0.25]}>
+            <sphereGeometry args={[0.3, 8, 6]} />
+            <meshStandardMaterial color="#86efac" emissive="#22c55e" emissiveIntensity={0.4} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── Big district sign over the south entrance ──────────────── */}
+      <Text
+        position={[0, 6.5, 2.3]}
+        fontSize={0.55}
+        color="#fecaca"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.05}
+        outlineColor="#7f1d1d"
+      >
+        🏥 BOTHOSPITAL · REPAIR
+      </Text>
     </group>
   );
 }
