@@ -142,12 +142,72 @@ const BUILDING_SECTIONS: BuildingSection[] = [
   // ── New outer-ring quarters (reserved for Task #2 content packs) ──
   // These render with an empty item list until kiosks are added. The
   // section header shows a "coming soon" hint instead of a 0/0 count.
-  { title: "Foundations",            emoji: "🧠", items: [] },
-  { title: "Borrowing & Credit",     emoji: "💳", items: [] },
-  { title: "Investing",              emoji: "📈", items: [] },
-  { title: "Life Events",            emoji: "💍", items: [] },
-  { title: "Consumer & Behavioral",  emoji: "🛒", items: [] },
-  { title: "Macro & Money",          emoji: "🌐", items: [] },
+  {
+    title: "Foundations",
+    emoji: "🧠",
+    items: [
+      { id: "botmint",         emoji: "💵", label: "BotMint" },
+      { id: "botbudget",       emoji: "📒", label: "BotBudget Cafe" },
+      { id: "botsavings",      emoji: "🐷", label: "BotSavings Plaza" },
+      { id: "botcreditbureau", emoji: "📇", label: "BotCredit Bureau" },
+      { id: "botbehavioral",   emoji: "🧠", label: "BotBehavioral Lab" },
+    ],
+  },
+  {
+    title: "Borrowing & Credit",
+    emoji: "💳",
+    items: [
+      { id: "botmortgage",   emoji: "🏘️", label: "BotMortgage Bank" },
+      { id: "botstudentaid", emoji: "🎓", label: "BotStudentAid" },
+      { id: "botautoloans",  emoji: "🚙", label: "BotAuto Loans" },
+      { id: "botpayday",     emoji: "⏱️", label: "BotPayday & Pawn" },
+      { id: "botbankruptcy", emoji: "⚖️", label: "BotBankruptcy Court" },
+    ],
+  },
+  {
+    title: "Investing",
+    emoji: "📈",
+    items: [
+      { id: "botindex",       emoji: "📊", label: "BotIndex Funds" },
+      { id: "botreit",        emoji: "🏢", label: "BotREIT Tower" },
+      { id: "botcommodities", emoji: "🌾", label: "BotCommodities Pit" },
+      { id: "botventure",     emoji: "🚀", label: "BotVenture Capital" },
+      { id: "botbonds",       emoji: "🧾", label: "BotBonds Desk" },
+    ],
+  },
+  {
+    title: "Life Events",
+    emoji: "💍",
+    items: [
+      { id: "botchapel",     emoji: "💒", label: "BotChapel" },
+      { id: "botmaternity",  emoji: "👶", label: "BotMaternity Ward" },
+      { id: "botestate",     emoji: "⚰️", label: "BotEstate Office" },
+      { id: "bothealthplan", emoji: "🩺", label: "BotHealthPlan Clinic" },
+      { id: "botdivorce",    emoji: "💔", label: "BotDivorce Mediation" },
+    ],
+  },
+  {
+    title: "Consumer & Behavioral",
+    emoji: "🛒",
+    items: [
+      { id: "botconsumer", emoji: "🛡️", label: "BotConsumer Protection" },
+      { id: "botads",      emoji: "📺", label: "BotAds & Marketing" },
+      { id: "botthrift",   emoji: "♻️", label: "BotThrift & Resale" },
+      { id: "botgiving",   emoji: "🎁", label: "BotGiving Foundation" },
+      { id: "botfintech",  emoji: "📱", label: "BotFinTech Hub" },
+    ],
+  },
+  {
+    title: "Macro & Money",
+    emoji: "🌐",
+    items: [
+      { id: "botecon",      emoji: "🧪", label: "BotEcon Lab" },
+      { id: "botforex",     emoji: "💱", label: "BotForex Exchange" },
+      { id: "bottrade",     emoji: "🌐", label: "BotTrade Hall" },
+      { id: "botinflation", emoji: "🎈", label: "BotInflation Park" },
+      { id: "botpolicy",    emoji: "🏛️", label: "BotPolicyHall" },
+    ],
+  },
 ];
 
 const BUILDINGS: BuildingItem[] = BUILDING_SECTIONS.flatMap((s) => s.items);
