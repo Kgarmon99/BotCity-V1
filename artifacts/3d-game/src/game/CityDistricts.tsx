@@ -636,6 +636,19 @@ function RocketStation() {
   const flameRef = useRef<THREE.Mesh>(null!);
   const smokeRef = useRef<THREE.Mesh>(null!);
   const lightRef = useRef<THREE.PointLight>(null!);
+  // Expansion refs
+  const trackingDishRefs = useRef<Array<THREE.Group | null>>([]);
+  const satDishRefs = useRef<Array<THREE.Group | null>>([]);
+  const centrifugeRef = useRef<THREE.Group>(null!);
+  const mcRadarRef = useRef<THREE.Group>(null!);
+  const mcBeaconRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const warningLightRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  const fuelRingRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  const countdownRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const solarPanelRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  const droneRef = useRef<THREE.Group>(null!);
+  const droneLightRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const heavyGantryLightRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
 
   const CYCLE = 28; // seconds — full loop
   const IGNITE_AT = 18;
@@ -645,6 +658,7 @@ function RocketStation() {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime % CYCLE;
+    const T = state.clock.elapsedTime;
     let y = 0;
     let flameScale = 0;
     let smokeScale = 0;
@@ -670,8 +684,6 @@ function RocketStation() {
       lightIntensity = 10;
     }
     if (rocketRef.current) rocketRef.current.position.y = y;
-    // Rocket roar tracks flame intensity — silent on idle, ramps with
-    // ignition, full roar during ascent, then fades on reset.
     sound.setRocket(Math.min(1, flameScale));
     if (flameRef.current) {
       flameRef.current.scale.set(flameScale, flameScale * 2, flameScale);
@@ -684,6 +696,58 @@ function RocketStation() {
       mat.opacity = Math.min(0.7, smokeScale * 0.3);
     }
     if (lightRef.current) lightRef.current.intensity = lightIntensity;
+    // ── Expansion animations ──────────────────────────────────────────
+    // Big tracking dishes — each rotates at its own rate with a slow tilt
+    trackingDishRefs.current.forEach((g, i) => {
+      if (!g) return;
+      g.rotation.y = Math.sin(T * (0.15 + i * 0.07)) * 1.2;
+      // Children order: [0]=pillar, [1]=tilt mount group, [2]=base plinth
+      const tiltMount = g.children[1] as THREE.Object3D | undefined;
+      if (tiltMount) tiltMount.rotation.x = -0.6 + Math.sin(T * (0.3 + i * 0.1)) * 0.25;
+    });
+    // Satellite comms array — synchronized slow sweep
+    satDishRefs.current.forEach((g, i) => {
+      if (!g) return;
+      g.rotation.y = Math.sin(T * 0.4 + i * 0.4) * 0.8;
+    });
+    // Centrifuge — steady spin
+    if (centrifugeRef.current) centrifugeRef.current.rotation.y = T * 1.3;
+    // Mission Control radar — slow continuous sweep
+    if (mcRadarRef.current) mcRadarRef.current.rotation.y = T * 0.5;
+    // Mission Control beacon — pulse
+    if (mcBeaconRef.current) mcBeaconRef.current.emissiveIntensity = 1.2 + Math.sin(T * 3) * 0.9;
+    // Perimeter warning lights — staggered blink
+    warningLightRefs.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.3 + (Math.sin(T * 2 + i * 1.3) > 0 ? 1.5 : 0);
+    });
+    // Fuel tank glow rings — slow breathe
+    fuelRingRefs.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.7 + Math.sin(T * 1.1 + i * 0.5) * 0.5;
+    });
+    // Countdown display — heartbeat
+    if (countdownRef.current) {
+      const inIgnition = t >= IGNITE_AT;
+      countdownRef.current.emissiveIntensity = inIgnition
+        ? 2.2 + Math.sin(T * 8) * 0.8
+        : 1.0 + Math.sin(T * 1.4) * 0.3;
+    }
+    // Solar panels — subtle shimmer
+    solarPanelRefs.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.6 + Math.sin(T * 0.8 + i * 0.6) * 0.3;
+    });
+    // Drone — small lazy orbit in empty NW quadrant, away from launch core,
+    // gantries, VAB, sat array, centrifuge, and solar field.
+    if (droneRef.current) {
+      droneRef.current.position.x = -8 + Math.cos(T * 0.5) * 3;
+      droneRef.current.position.z = -12 + Math.sin(T * 0.5) * 3;
+      droneRef.current.position.y = 6 + Math.sin(T * 1.5) * 0.4;
+      droneRef.current.rotation.y = T * 0.5 + Math.PI / 2;
+    }
+    if (droneLightRef.current) droneLightRef.current.emissiveIntensity = 1.0 + Math.sin(T * 5) * 0.8;
+    // Heavy-lift gantry lights — chase pattern
+    heavyGantryLightRefs.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.5 + Math.max(0, Math.sin(T * 2 - i * 0.5)) * 1.5;
+    });
   });
 
   return (
@@ -837,6 +901,806 @@ function RocketStation() {
       >
         — Launches every 28 seconds —
       </Text>
+
+      {/* ════════════════════════════════════════════════════════════════
+          MAJOR EXPANSION — full spaceport campus
+          Anchored at world (75, 0, -75), well outside the ±64 player bound,
+          so this is pure distant spectacle. Local envelope ~ x[-25, 22],
+          z[-22, 30]. Main pad fills local x[-6,6], z[-6,6].
+          ═══════════════════════════════════════════════════════════════ */}
+
+      {/* ── DARK TARMAC ground covering the whole spaceport ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-1, 0.01, 4]} receiveShadow>
+        <planeGeometry args={[46, 50]} />
+        <meshStandardMaterial color="#1f2937" roughness={0.95} />
+      </mesh>
+      {/* Launch-direction painted arrow strip */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 12]}>
+        <planeGeometry args={[1.0, 10]} />
+        <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.5} toneMapped={false} />
+      </mesh>
+
+      {/* ──────────── VAB (Vehicle Assembly Building) — south ─────────── */}
+      <group position={[0, 0, 22]}>
+        {/* Main hangar body — huge */}
+        <mesh position={[0, 9, 0]} castShadow>
+          <boxGeometry args={[14, 18, 14]} />
+          <meshStandardMaterial color="#e5e7eb" roughness={0.7} />
+        </mesh>
+        {/* Iconic vertical stripes (5) */}
+        {[-5, -2.5, 0, 2.5, 5].map((x) => (
+          <mesh key={`vab-s-${x}`} position={[x, 9, 7.01]}>
+            <boxGeometry args={[0.8, 15, 0.02]} />
+            <meshStandardMaterial color="#0b1220" emissive="#0f172a" emissiveIntensity={0.2} />
+          </mesh>
+        ))}
+        {/* Huge VAB doors (north face — facing the pads) */}
+        <mesh position={[0, 6, -7.01]}>
+          <boxGeometry args={[8, 12, 0.05]} />
+          <meshStandardMaterial color="#475569" emissive="#22d3ee" emissiveIntensity={0.15} metalness={0.4} />
+        </mesh>
+        {/* Door panel divisions */}
+        {[-2.6, 0, 2.6].map((dx) => (
+          <mesh key={`vd-${dx}`} position={[dx, 6, -7.02]}>
+            <boxGeometry args={[0.06, 12, 0.02]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+        ))}
+        {/* Roof top trim */}
+        <mesh position={[0, 18.2, 0]}>
+          <boxGeometry args={[14.5, 0.4, 14.5]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#f59e0b" emissiveIntensity={0.5} />
+        </mesh>
+        {/* BIG BOTROCKET logo on west face */}
+        <mesh position={[-7.01, 12, 0]} rotation={[0, -Math.PI / 2, 0]}>
+          <planeGeometry args={[10, 4]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <Text
+          position={[-7.02, 13, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          fontSize={1.6}
+          color="#f97316"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.1}
+          outlineColor="#0b1220"
+        >
+          🚀 BOTROCKET
+        </Text>
+        <Text
+          position={[-7.02, 11, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          fontSize={0.65}
+          color="#fbbf24"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.05}
+          outlineColor="#0b1220"
+        >
+          VEHICLE ASSEMBLY
+        </Text>
+        {/* American-flag-style square on north top-right */}
+        <mesh position={[5, 15, -7.01]}>
+          <planeGeometry args={[2.4, 1.6]} />
+          <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Roof beacons */}
+        {[[-6, 6], [6, 6], [-6, -6], [6, -6]].map(([bx, bz], i) => (
+          <mesh key={`vab-bcn-${i}`} position={[bx, 18.5, bz]}>
+            <sphereGeometry args={[0.18, 8, 8]} />
+            <meshStandardMaterial
+              ref={(m) => { warningLightRefs.current[i] = m; }}
+              color="#ef4444"
+              emissive="#ef4444"
+              emissiveIntensity={1.5}
+              toneMapped={false}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ──────────── MISSION CONTROL TOWER — SW ──────────── */}
+      <group position={[-15, 0, 8]}>
+        {/* Wide base / building */}
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <boxGeometry args={[6, 3, 5]} />
+          <meshStandardMaterial color="#f3f4f6" roughness={0.7} />
+        </mesh>
+        {/* Window strips */}
+        {[1.0, 2.0].map((wy, i) => (
+          <mesh key={`mc-w-${i}`} position={[0, wy, 2.51]}>
+            <boxGeometry args={[5.6, 0.4, 0.02]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.9} transparent opacity={0.85} toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Tower shaft */}
+        <mesh position={[2, 5.5, 0]} castShadow>
+          <boxGeometry args={[2.5, 8, 2.5]} />
+          <meshStandardMaterial color="#0f172a" emissive="#22d3ee" emissiveIntensity={0.2} metalness={0.4} />
+        </mesh>
+        {/* Tower windows wrap */}
+        {[5, 6, 7, 8].map((wy) => (
+          <mesh key={`mc-tw-${wy}`} position={[2, wy, 1.26]}>
+            <boxGeometry args={[2.1, 0.35, 0.02]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.85} toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Glass-box control room on top */}
+        <mesh position={[2, 9.9, 0]} castShadow>
+          <boxGeometry args={[3.2, 1.4, 3.2]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.6} transparent opacity={0.65} toneMapped={false} />
+        </mesh>
+        {/* Antenna spire */}
+        <mesh position={[2, 12, 0]}>
+          <cylinderGeometry args={[0.08, 0.12, 3, 6]} />
+          <meshStandardMaterial color="#475569" metalness={0.8} />
+        </mesh>
+        {/* Pulsing beacon at the top */}
+        <mesh position={[2, 13.7, 0]}>
+          <sphereGeometry args={[0.2, 10, 10]} />
+          <meshStandardMaterial ref={mcBeaconRef} color="#ef4444" emissive="#ef4444" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+        {/* Roof radar dish — slowly rotating */}
+        <group ref={mcRadarRef} position={[-1, 11.2, 0]}>
+          <mesh rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[1.0, 0.05, 0.15, 24, 1, true]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#22d3ee" emissiveIntensity={0.3} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[0.2, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <coneGeometry args={[0.08, 0.4, 8]} />
+            <meshStandardMaterial color="#94a3b8" />
+          </mesh>
+        </group>
+        {/* Signage */}
+        <mesh position={[0, 3.3, 2.51]}>
+          <boxGeometry args={[4.4, 0.5, 0.04]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <Text
+          position={[0, 3.3, 2.54]}
+          fontSize={0.32}
+          color="#f97316"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#0b1220"
+        >
+          MISSION CONTROL
+        </Text>
+      </group>
+
+      {/* ──────────── SECONDARY HEAVY-LIFT PAD — east ──────────── */}
+      <group position={[15, 0, 5]}>
+        {/* Concrete pad */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
+          <planeGeometry args={[8, 8]} />
+          <meshStandardMaterial color="#3f3f46" roughness={0.9} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+          <ringGeometry args={[1.3, 2.3, 32]} />
+          <meshStandardMaterial color="#18181b" emissive="#3b82f6" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Heavy-lift gantry — taller and wider than primary */}
+        {[
+          [1.6, 1.6], [-1.6, 1.6], [1.6, -1.6], [-1.6, -1.6],
+        ].map(([gx, gz], i) => (
+          <mesh key={`hgleg-${i}`} position={[gx, 8, gz]} castShadow>
+            <boxGeometry args={[0.2, 16, 0.2]} />
+            <meshStandardMaterial color="#475569" emissive="#22d3ee" emissiveIntensity={0.25} metalness={0.7} />
+          </mesh>
+        ))}
+        {/* Cross bracing */}
+        {[2, 5, 8, 11, 14].map((cy, ci) => (
+          <group key={`hgb-${ci}`} position={[0, cy, 0]}>
+            <mesh position={[0, 0, 1.6]}>
+              <boxGeometry args={[3.2, 0.12, 0.12]} />
+              <meshStandardMaterial color="#0f172a" />
+            </mesh>
+            <mesh position={[0, 0, -1.6]}>
+              <boxGeometry args={[3.2, 0.12, 0.12]} />
+              <meshStandardMaterial color="#0f172a" />
+            </mesh>
+            <mesh position={[1.6, 0, 0]}>
+              <boxGeometry args={[0.12, 0.12, 3.2]} />
+              <meshStandardMaterial color="#0f172a" />
+            </mesh>
+            <mesh position={[-1.6, 0, 0]}>
+              <boxGeometry args={[0.12, 0.12, 3.2]} />
+              <meshStandardMaterial color="#0f172a" />
+            </mesh>
+            {/* Chasing light on the front bracing */}
+            <mesh position={[0, 0, 1.66]}>
+              <sphereGeometry args={[0.1, 8, 8]} />
+              <meshStandardMaterial
+                ref={(m) => { heavyGantryLightRefs.current[ci] = m; }}
+                color="#22d3ee"
+                emissive="#22d3ee"
+                emissiveIntensity={1.0}
+                toneMapped={false}
+              />
+            </mesh>
+          </group>
+        ))}
+        {/* Service arm */}
+        <mesh position={[0.9, 9, 0]}>
+          <boxGeometry args={[1.8, 0.15, 0.5]} />
+          <meshStandardMaterial color="#92400e" />
+        </mesh>
+        {/* Heavy-lift rocket — idle, blue-and-black scheme */}
+        <group position={[0, 0, 0]}>
+          {/* Booster cluster — 3 booster cylinders strapped to a core */}
+          {[[1.1, 0], [-0.55, 0.95], [-0.55, -0.95]].map(([bx, bz], i) => (
+            <mesh key={`hr-b-${i}`} position={[bx, 6, bz]} castShadow>
+              <cylinderGeometry args={[0.55, 0.6, 12, 18]} />
+              <meshStandardMaterial color="#0f172a" emissive="#1e3a8a" emissiveIntensity={0.4} />
+            </mesh>
+          ))}
+          {/* Core stage */}
+          <mesh position={[0, 7.5, 0]} castShadow>
+            <cylinderGeometry args={[0.9, 1.0, 15, 22]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.5} metalness={0.4} />
+          </mesh>
+          {/* Black band */}
+          <mesh position={[0, 11, 0]}>
+            <cylinderGeometry args={[0.95, 0.95, 0.4, 22]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+          {/* Blue stripe */}
+          <mesh position={[0, 5, 0]}>
+            <cylinderGeometry args={[1.02, 1.05, 0.6, 22]} />
+            <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.7} toneMapped={false} />
+          </mesh>
+          {/* Nose cone */}
+          <mesh position={[0, 16, 0]} castShadow>
+            <coneGeometry args={[0.9, 3.0, 22]} />
+            <meshStandardMaterial color="#1e3a8a" emissive="#3b82f6" emissiveIntensity={0.55} metalness={0.5} />
+          </mesh>
+          {/* Booster engine bells */}
+          {[[1.1, 0], [-0.55, 0.95], [-0.55, -0.95]].map(([bx, bz], i) => (
+            <mesh key={`hr-be-${i}`} position={[bx, -0.35, bz]} castShadow>
+              <cylinderGeometry args={[0.35, 0.55, 0.6, 12]} />
+              <meshStandardMaterial color="#27272a" metalness={0.85} />
+            </mesh>
+          ))}
+          {/* Core engine cluster */}
+          <mesh position={[0, -0.35, 0]} castShadow>
+            <cylinderGeometry args={[0.65, 0.95, 0.7, 18]} />
+            <meshStandardMaterial color="#27272a" metalness={0.85} />
+          </mesh>
+        </group>
+        {/* Pad signage post */}
+        <mesh position={[0, 0.4, -3.6]}>
+          <boxGeometry args={[2.6, 0.6, 0.1]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <Text
+          position={[0, 0.4, -3.55]}
+          fontSize={0.28}
+          color="#3b82f6"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.022}
+          outlineColor="#0b1220"
+        >
+          PAD 39B · HEAVY-LIFT
+        </Text>
+      </group>
+
+      {/* ──────────── BIG TRACKING DISHES (3) — west ──────────── */}
+      {[[-20, -10, 1.0], [-22, -3, 1.2], [-18, 4, 0.9]].map(([dx, dz, ds], i) => (
+        <group key={`td-${i}`} ref={(g) => { trackingDishRefs.current[i] = g; }} position={[dx, 0, dz]}>
+          {/* Pillar */}
+          <mesh position={[0, 1.5, 0]} castShadow>
+            <cylinderGeometry args={[0.4, 0.55, 3, 10]} />
+            <meshStandardMaterial color="#475569" metalness={0.5} />
+          </mesh>
+          {/* Tilt mount (group.children[0] — useFrame tilts this) */}
+          <group position={[0, 3.0, 0]}>
+            <mesh position={[0, 0.5, 0]}>
+              <cylinderGeometry args={[0.18, 0.18, 0.6, 8]} />
+              <meshStandardMaterial color="#1f2937" />
+            </mesh>
+            {/* Parabolic dish */}
+            <mesh position={[0, 1.0, 0]} scale={[ds, 1, ds]}>
+              <sphereGeometry args={[2.2, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2.6]} />
+              <meshStandardMaterial color="#f8fafc" emissive="#22d3ee" emissiveIntensity={0.4} side={THREE.DoubleSide} metalness={0.3} />
+            </mesh>
+            {/* Feed horn */}
+            <mesh position={[0, 1.7, 0]}>
+              <coneGeometry args={[0.18, 0.55, 10]} />
+              <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.0} toneMapped={false} />
+            </mesh>
+            {/* Tripod feed support arms */}
+            {[0, 1, 2].map((j) => (
+              <mesh
+                key={`th-${j}`}
+                position={[Math.cos((j * 2 * Math.PI) / 3) * 0.9, 1.0, Math.sin((j * 2 * Math.PI) / 3) * 0.9]}
+                rotation={[0, 0, 0]}
+              >
+                <cylinderGeometry args={[0.03, 0.03, 1.2, 6]} />
+                <meshStandardMaterial color="#94a3b8" />
+              </mesh>
+            ))}
+          </group>
+          {/* Base plinth */}
+          <mesh position={[0, 0.1, 0]}>
+            <cylinderGeometry args={[1.2, 1.2, 0.2, 14]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ──────────── SATELLITE COMM ARRAY (5 small dishes) — NE ──────────── */}
+      {[-4, -2, 0, 2, 4].map((sx, i) => (
+        <group key={`sa-${i}`} ref={(g) => { satDishRefs.current[i] = g; }} position={[15 + sx, 0, -12]}>
+          <mesh position={[0, 1, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.18, 2.0, 8]} />
+            <meshStandardMaterial color="#475569" metalness={0.5} />
+          </mesh>
+          <mesh position={[0, 2.1, 0.15]} rotation={[-0.4, 0, 0]}>
+            <sphereGeometry args={[0.5, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2.6]} />
+            <meshStandardMaterial color="#e5e7eb" emissive="#22d3ee" emissiveIntensity={0.35} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[0, 2.3, 0.4]}>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ──────────── FUEL TANK FARM (4 silver spheres) — SE ──────────── */}
+      {[[16, 16], [20, 16], [16, 20], [20, 20]].map(([fx, fz], i) => (
+        <group key={`ft-${i}`} position={[fx, 0, fz]}>
+          {/* Sphere */}
+          <mesh position={[0, 2.2, 0]} castShadow>
+            <sphereGeometry args={[1.6, 20, 16]} />
+            <meshStandardMaterial color="#e5e7eb" metalness={0.85} roughness={0.25} />
+          </mesh>
+          {/* Glow ring around equator */}
+          <mesh position={[0, 2.2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[1.62, 0.06, 6, 24]} />
+            <meshStandardMaterial
+              ref={(m) => { fuelRingRefs.current[i] = m; }}
+              color="#22d3ee"
+              emissive="#22d3ee"
+              emissiveIntensity={0.9}
+              toneMapped={false}
+            />
+          </mesh>
+          {/* Tripod supports */}
+          {[0, 1, 2, 3].map((j) => (
+            <mesh
+              key={`fts-${j}`}
+              position={[Math.cos((j * Math.PI) / 2) * 1.3, 0.6, Math.sin((j * Math.PI) / 2) * 1.3]}
+              rotation={[0, 0, 0]}
+            >
+              <cylinderGeometry args={[0.1, 0.15, 1.2, 6]} />
+              <meshStandardMaterial color="#475569" metalness={0.6} />
+            </mesh>
+          ))}
+          {/* "LOX" / "LH2" placards */}
+          <Text
+            position={[0, 2.2, 1.65]}
+            fontSize={0.32}
+            color="#0c4a6e"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.02}
+            outlineColor="#f0f9ff"
+          >
+            {i % 2 === 0 ? "LOX" : "LH₂"}
+          </Text>
+        </group>
+      ))}
+
+      {/* ──────────── SPACE SHUTTLE on CRAWLER TRANSPORTER — between MC and VAB ──────────── */}
+      {/* z=11 keeps the shuttle (depth ~5) clear of the VAB north face at z=15 */}
+      <group position={[-3, 0, 11]}>
+        {/* Crawler chassis */}
+        <mesh position={[0, 0.4, 0]} castShadow>
+          <boxGeometry args={[5, 0.8, 3.4]} />
+          <meshStandardMaterial color="#1f2937" metalness={0.6} roughness={0.5} />
+        </mesh>
+        {/* Yellow safety stripes on crawler */}
+        {[-2.3, 2.3].map((cx, i) => (
+          <mesh key={`cs-${i}`} position={[cx, 0.4, 0]}>
+            <boxGeometry args={[0.06, 0.85, 3.5]} />
+            <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.6} />
+          </mesh>
+        ))}
+        {/* Crawler tracks */}
+        {[[-1.4, 0], [1.4, 0]].map(([tx, tz], i) => (
+          <mesh key={`ct-${i}`} position={[0, 0.18, tz + (i === 0 ? -1.6 : 1.6)]}>
+            <boxGeometry args={[5.4, 0.36, 0.7]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+        ))}
+        {/* Mobile launcher platform */}
+        <mesh position={[0, 1.0, 0]}>
+          <boxGeometry args={[4.4, 0.4, 2.8]} />
+          <meshStandardMaterial color="#374151" metalness={0.5} />
+        </mesh>
+        {/* Shuttle external tank (orange) */}
+        <mesh position={[0, 4, 0]} castShadow>
+          <cylinderGeometry args={[0.85, 0.95, 5.5, 18]} />
+          <meshStandardMaterial color="#c2410c" emissive="#ea580c" emissiveIntensity={0.35} />
+        </mesh>
+        <mesh position={[0, 7.2, 0]} castShadow>
+          <coneGeometry args={[0.85, 1.4, 18]} />
+          <meshStandardMaterial color="#c2410c" emissive="#ea580c" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Solid rocket boosters strapped to the tank */}
+        {[-1.5, 1.5].map((sx, i) => (
+          <group key={`srb-${i}`}>
+            <mesh position={[sx, 3.8, 0]} castShadow>
+              <cylinderGeometry args={[0.35, 0.4, 5.0, 14]} />
+              <meshStandardMaterial color="#f8fafc" emissive="#e2e8f0" emissiveIntensity={0.2} />
+            </mesh>
+            <mesh position={[sx, 6.45, 0]} castShadow>
+              <coneGeometry args={[0.35, 0.6, 14]} />
+              <meshStandardMaterial color="#0b1220" />
+            </mesh>
+          </group>
+        ))}
+        {/* Shuttle orbiter — white, attached to side of tank */}
+        <group position={[0, 4.2, 1.6]} rotation={[0, 0, 0]}>
+          {/* Fuselage */}
+          <mesh position={[0, 0, 0]} scale={[0.7, 0.7, 1.9]} castShadow>
+            <sphereGeometry args={[1, 14, 10]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+          </mesh>
+          {/* Cockpit window strip */}
+          <mesh position={[0, 0.25, 1.55]}>
+            <boxGeometry args={[1.0, 0.2, 0.04]} />
+            <meshStandardMaterial color="#0b1220" emissive="#22d3ee" emissiveIntensity={0.65} />
+          </mesh>
+          {/* Tail fin */}
+          <mesh position={[0, 0.85, -1.4]} castShadow>
+            <boxGeometry args={[0.08, 1.0, 0.9]} />
+            <meshStandardMaterial color="#f1f5f9" />
+          </mesh>
+          {/* Delta wings */}
+          <mesh position={[0, -0.3, -0.3]} rotation={[0, 0, 0]} castShadow>
+            <boxGeometry args={[3.2, 0.12, 1.4]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+          {/* Three main engine bells */}
+          {[-0.3, 0, 0.3].map((ex, i) => (
+            <mesh key={`shu-e-${i}`} position={[ex, 0, -1.7]}>
+              <cylinderGeometry args={[0.16, 0.22, 0.4, 10]} />
+              <meshStandardMaterial color="#27272a" metalness={0.85} />
+            </mesh>
+          ))}
+        </group>
+        {/* Crawler sign */}
+        <mesh position={[0, 0.05, -2.3]}>
+          <boxGeometry args={[3.6, 0.1, 0.5]} />
+          <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.5} />
+        </mesh>
+        <Text
+          position={[0, 0.06, -2.06]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.22}
+          color="#0b1220"
+          anchorX="center"
+          anchorY="middle"
+        >
+          CRAWLERWAY · KEEP CLEAR
+        </Text>
+      </group>
+
+      {/* ──────────── CENTRIFUGE — astronaut training rig (NW corner) ──────────── */}
+      <group position={[-15, 0, -18]}>
+        {/* Circular foundation */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
+          <circleGeometry args={[4.5, 28]} />
+          <meshStandardMaterial color="#3f3f46" roughness={0.85} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <ringGeometry args={[4.0, 4.4, 28]} />
+          <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.5} toneMapped={false} />
+        </mesh>
+        {/* Central hub */}
+        <mesh position={[0, 1.0, 0]} castShadow>
+          <cylinderGeometry args={[0.9, 1.1, 2.0, 14]} />
+          <meshStandardMaterial color="#475569" metalness={0.7} />
+        </mesh>
+        {/* Rotating arm + capsule */}
+        <group ref={centrifugeRef} position={[0, 2.0, 0]}>
+          {/* Arm */}
+          <mesh position={[1.7, 0, 0]} castShadow>
+            <boxGeometry args={[3.4, 0.3, 0.4]} />
+            <meshStandardMaterial color="#94a3b8" metalness={0.6} />
+          </mesh>
+          {/* Counter-arm */}
+          <mesh position={[-1.4, 0, 0]} castShadow>
+            <boxGeometry args={[2.8, 0.3, 0.4]} />
+            <meshStandardMaterial color="#94a3b8" metalness={0.6} />
+          </mesh>
+          {/* Capsule (training pod) */}
+          <group position={[3.2, 0, 0]} rotation={[0, 0, 0.3]}>
+            <mesh castShadow>
+              <sphereGeometry args={[0.55, 14, 10]} />
+              <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.5} />
+            </mesh>
+            <mesh position={[0, 0, 0.5]}>
+              <circleGeometry args={[0.25, 16]} />
+              <meshStandardMaterial color="#0b1220" emissive="#22d3ee" emissiveIntensity={0.8} />
+            </mesh>
+          </group>
+          {/* Counterweight on opposite end */}
+          <mesh position={[-2.6, 0, 0]} castShadow>
+            <boxGeometry args={[0.6, 0.6, 0.6]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+        </group>
+        {/* Sign */}
+        <Text
+          position={[0, 0.4, 4.8]}
+          fontSize={0.32}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.024}
+          outlineColor="#0b1220"
+        >
+          G-FORCE TRAINING
+        </Text>
+      </group>
+
+      {/* ──────────── ASTRONAUT BOT STATUE (north entrance) ──────────── */}
+      <group position={[0, 0, -11]}>
+        {/* Plinth */}
+        <mesh position={[0, 0.45, 0]} castShadow>
+          <boxGeometry args={[1.6, 0.9, 1.6]} />
+          <meshStandardMaterial color="#44403c" roughness={0.6} />
+        </mesh>
+        {/* Suit body */}
+        <mesh position={[0, 1.85, 0]} castShadow>
+          <boxGeometry args={[0.9, 1.4, 0.65]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#fef9c3" emissiveIntensity={0.18} />
+        </mesh>
+        {/* Helmet (gold visor) */}
+        <mesh position={[0, 2.85, 0]} castShadow>
+          <sphereGeometry args={[0.42, 14, 12]} />
+          <meshStandardMaterial color="#f8fafc" metalness={0.6} roughness={0.3} />
+        </mesh>
+        {/* Visor */}
+        <mesh position={[0, 2.85, 0.22]} rotation={[0, 0, 0]}>
+          <sphereGeometry args={[0.32, 14, 12, 0, Math.PI, Math.PI / 4, Math.PI / 2]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#facc15" emissiveIntensity={0.7} metalness={0.85} roughness={0.15} />
+        </mesh>
+        {/* Backpack */}
+        <mesh position={[0, 1.85, -0.45]} castShadow>
+          <boxGeometry args={[0.7, 1.0, 0.25]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.5} />
+        </mesh>
+        {/* Arms */}
+        {[-0.55, 0.55].map((ax, i) => (
+          <mesh key={`as-${i}`} position={[ax, 1.85, 0]} castShadow>
+            <cylinderGeometry args={[0.16, 0.16, 1.3, 10]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        ))}
+        {/* Legs */}
+        {[-0.22, 0.22].map((lx, i) => (
+          <mesh key={`al-${i}`} position={[lx, 1.0, 0]} castShadow>
+            <cylinderGeometry args={[0.18, 0.2, 0.8, 10]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        ))}
+        {/* Flag pole + flag */}
+        <mesh position={[0.7, 2.6, 0.3]}>
+          <cylinderGeometry args={[0.04, 0.04, 2.2, 6]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <mesh position={[1.1, 3.3, 0.3]} rotation={[0, 0, 0]}>
+          <planeGeometry args={[0.8, 0.5]} />
+          <meshStandardMaterial color="#dc2626" emissive="#ef4444" emissiveIntensity={0.7} side={THREE.DoubleSide} />
+        </mesh>
+        <Text
+          position={[1.1, 3.3, 0.32]}
+          fontSize={0.13}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+        >
+          🚀 BOT
+        </Text>
+        {/* Plaque */}
+        <Text
+          position={[0, 0.5, 0.82]}
+          fontSize={0.13}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.01}
+          outlineColor="#0b1220"
+        >
+          FIRST BOT ON MARS
+        </Text>
+      </group>
+
+      {/* ──────────── COUNTDOWN CLOCK (south of pad, visible from main avenue) ──────────── */}
+      <group position={[-5, 0, 11]}>
+        {/* Post */}
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <boxGeometry args={[0.18, 2.2, 0.18]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        {/* Display panel */}
+        <mesh position={[0, 2.8, 0]}>
+          <boxGeometry args={[3.5, 1.4, 0.2]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        {/* LED frame */}
+        <mesh position={[0, 2.8, 0.11]}>
+          <boxGeometry args={[3.3, 1.2, 0.04]} />
+          <meshStandardMaterial
+            ref={countdownRef}
+            color="#22d3ee"
+            emissive="#22d3ee"
+            emissiveIntensity={1.4}
+            toneMapped={false}
+          />
+        </mesh>
+        <Text
+          position={[0, 3.05, 0.14]}
+          fontSize={0.22}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.012}
+          outlineColor="#0b1220"
+        >
+          ⌚ NEXT LAUNCH
+        </Text>
+        <Text
+          position={[0, 2.55, 0.14]}
+          fontSize={0.42}
+          color="#0b1220"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.022}
+          outlineColor="#22d3ee"
+        >
+          T - 00:28
+        </Text>
+      </group>
+
+      {/* ──────────── SOLAR PANEL FIELD (NE) ──────────── */}
+      <group position={[12, 0, -18]}>
+        {[
+          [-3, -1.5], [0, -1.5], [3, -1.5],
+          [-3, 1.5], [0, 1.5], [3, 1.5],
+        ].map(([px, pz], i) => (
+          <group key={`sp-${i}`} position={[px, 0, pz]}>
+            {/* Post */}
+            <mesh position={[0, 0.6, 0]} castShadow>
+              <cylinderGeometry args={[0.06, 0.08, 1.2, 6]} />
+              <meshStandardMaterial color="#475569" metalness={0.6} />
+            </mesh>
+            {/* Panel (tilted) */}
+            <mesh position={[0, 1.2, 0]} rotation={[-0.5, 0, 0]} castShadow>
+              <boxGeometry args={[2.2, 0.06, 1.4]} />
+              <meshStandardMaterial
+                ref={(m) => { solarPanelRefs.current[i] = m; }}
+                color="#1e3a8a"
+                emissive="#3b82f6"
+                emissiveIntensity={0.65}
+                metalness={0.6}
+                roughness={0.3}
+              />
+            </mesh>
+            {/* Grid lines */}
+            {[-0.7, 0, 0.7].map((gx, gi) => (
+              <mesh key={`spg-${gi}`} position={[gx, 1.21, 0]} rotation={[-0.5, 0, 0]}>
+                <boxGeometry args={[0.04, 0.07, 1.42]} />
+                <meshStandardMaterial color="#0b1220" />
+              </mesh>
+            ))}
+          </group>
+        ))}
+        {/* Field sign */}
+        <Text
+          position={[0, 0.4, -3.5]}
+          fontSize={0.28}
+          color="#3b82f6"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.022}
+          outlineColor="#0b1220"
+        >
+          ☀ SOLAR FARM
+        </Text>
+      </group>
+
+      {/* ──────────── DRONE — small surveillance drone orbiting ──────────── */}
+      <group ref={droneRef} position={[4, 6, 5]}>
+        {/* Body */}
+        <mesh position={[0, 0, 0]} castShadow>
+          <boxGeometry args={[0.35, 0.15, 0.35]} />
+          <meshStandardMaterial color="#0b1220" emissive="#22d3ee" emissiveIntensity={0.3} />
+        </mesh>
+        {/* Rotor arms */}
+        {[[0.3, 0.3], [-0.3, 0.3], [0.3, -0.3], [-0.3, -0.3]].map(([rx, rz], i) => (
+          <group key={`dr-${i}`} position={[rx, 0.08, rz]}>
+            <mesh>
+              <cylinderGeometry args={[0.02, 0.02, 0.06, 6]} />
+              <meshStandardMaterial color="#475569" />
+            </mesh>
+            <mesh rotation={[0, 0, 0]}>
+              <boxGeometry args={[0.4, 0.01, 0.05]} />
+              <meshStandardMaterial color="#1e293b" />
+            </mesh>
+            <mesh rotation={[0, Math.PI / 2, 0]}>
+              <boxGeometry args={[0.4, 0.01, 0.05]} />
+              <meshStandardMaterial color="#1e293b" />
+            </mesh>
+          </group>
+        ))}
+        {/* Blinking underbelly light */}
+        <mesh position={[0, -0.1, 0]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial
+            ref={droneLightRef}
+            color="#ef4444"
+            emissive="#ef4444"
+            emissiveIntensity={1.4}
+            toneMapped={false}
+          />
+        </mesh>
+      </group>
+
+      {/* ──────────── PERIMETER WARNING LIGHT POLES ──────────── */}
+      {[[-22, -20], [22, -20], [-22, 28], [22, 28]].map(([wx, wz], i) => (
+        <group key={`wl-${i}`} position={[wx, 0, wz]}>
+          <mesh position={[0, 2, 0]} castShadow>
+            <cylinderGeometry args={[0.1, 0.12, 4, 6]} />
+            <meshStandardMaterial color="#1f2937" metalness={0.5} />
+          </mesh>
+          {/* Beacon dome */}
+          <mesh position={[0, 4.2, 0]}>
+            <sphereGeometry args={[0.28, 12, 12]} />
+            <meshStandardMaterial
+              ref={(m) => { warningLightRefs.current[4 + i] = m; }}
+              color="#ef4444"
+              emissive="#ef4444"
+              emissiveIntensity={1.4}
+              toneMapped={false}
+            />
+          </mesh>
+          {/* Light shroud */}
+          <mesh position={[0, 4.2, 0]}>
+            <cylinderGeometry args={[0.32, 0.32, 0.1, 12, 1, true]} />
+            <meshStandardMaterial color="#0b1220" side={THREE.DoubleSide} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ──────────── DECORATIVE GROUND DECALS — concentric guidance rings ──────────── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
+        <ringGeometry args={[10, 10.3, 64]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.4} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
+        <ringGeometry args={[15, 15.3, 64]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.25} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* ──────────── ROAD MARKINGS — crawlerway from VAB to main pad ──────────── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.018, 13]}>
+        <planeGeometry args={[5, 14]} />
+        <meshStandardMaterial color="#27272a" emissive="#525252" emissiveIntensity={0.15} />
+      </mesh>
+      {/* Dashed center line */}
+      {[8, 11, 14, 17, 20].map((cz, i) => (
+        <mesh key={`crl-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, cz]}>
+          <planeGeometry args={[0.2, 1.2]} />
+          <meshStandardMaterial color="#fde047" emissive="#facc15" emissiveIntensity={0.6} toneMapped={false} />
+        </mesh>
+      ))}
     </group>
   );
 }
