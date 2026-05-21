@@ -793,7 +793,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   { id: "botdivorce",     label: "BotDivorce Mediation", position: [-111, 1.5, 135], color: "#5b21b6", roofColor: "#fda4af", width: 1.8, depth: 1.8, height: 3, emoji: "💔" },
   // ── Consumer & Behavioral 🛒 (green #34d399), strip z=-103 ──
   { id: "botconsumer",    label: "BotConsumer Protection",position: [-95, 1.5, -103], color: "#34d399", roofColor: "#1e293b", width: 1.8, depth: 1.8, height: 3, emoji: "🛡️" },
-  { id: "botads",         label: "BotAds & Marketing",    position: [-67, 1.5, -103], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" }, // moved from -40 (inside Golf Course fairway)
+  { id: "botads",         label: "BotAds & Marketing",    position: [-67, 1.5, -93], color: "#10b981", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "📺" }, // lifted north of expanded Golf Course (z=-97 north edge); off-strip but clear of Park, Golf, BotGolf clubhouse
   { id: "botthrift",      label: "BotThrift & Resale",    position: [-13, 1.5, -103], color: "#059669", roofColor: "#fde68a", width: 1.8, depth: 1.8, height: 3, emoji: "♻️" },
   { id: "botgiving",      label: "BotGiving Foundation",  position: [40,  1.5, -103], color: "#047857", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🎁" },
   { id: "botfintech",     label: "BotFinTech Hub",        position: [95,  1.5, -103], color: "#065f46", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📱" },
