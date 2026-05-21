@@ -994,6 +994,352 @@ function PineTree({ x, z, scale = 1 }: { x: number; z: number; scale?: number })
   );
 }
 
+function Waterfall({ pos }: { pos: [number, number, number] }) {
+  // Cascading water sheet from a mountain face down into a small pool at
+  // its base. `pos` is the BASE pool center (x, 0, z); the water sheet
+  // hangs above it. Two animated emissive planes (outer sheet + brighter
+  // inner core) + a stone-rimmed pool + puffing mist clouds.
+  const sheetRef = useRef<THREE.MeshStandardMaterial>(null);
+  const mistRef = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    if (sheetRef.current) {
+      sheetRef.current.emissiveIntensity = 0.6 + Math.sin(t * 3.5) * 0.2;
+    }
+    if (mistRef.current) {
+      mistRef.current.scale.y = 1 + Math.sin(t * 1.7) * 0.18;
+    }
+  });
+  return (
+    <group position={pos}>
+      {/* Outer cascade sheet — angled slightly back into the mountain */}
+      <mesh position={[0, 4.5, -0.4]} rotation={[0.18, 0, 0]}>
+        <planeGeometry args={[2.2, 9]} />
+        <meshStandardMaterial
+          ref={sheetRef}
+          color="#22d3ee"
+          emissive="#0ea5e9"
+          emissiveIntensity={0.6}
+          transparent
+          opacity={0.78}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Inner brighter core stream */}
+      <mesh position={[0, 4.5, -0.32]} rotation={[0.18, 0, 0]}>
+        <planeGeometry args={[1.0, 9]} />
+        <meshStandardMaterial
+          color="#f0f9ff"
+          emissive="#67e8f9"
+          emissiveIntensity={1.0}
+          transparent
+          opacity={0.65}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Pool at base */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+        <circleGeometry args={[1.8, 28]} />
+        <meshStandardMaterial
+          color="#0c4a6e"
+          emissive="#22d3ee"
+          emissiveIntensity={0.4}
+          metalness={0.4}
+          roughness={0.25}
+        />
+      </mesh>
+      {/* Stone rim around the pool */}
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+        const a = (i / 8) * Math.PI * 2;
+        return (
+          <mesh
+            key={`stone-${i}`}
+            position={[Math.cos(a) * 1.9, 0.15, Math.sin(a) * 1.9]}
+            castShadow
+          >
+            <sphereGeometry args={[0.3, 8, 6]} />
+            <meshStandardMaterial color="#52525b" roughness={0.95} />
+          </mesh>
+        );
+      })}
+      {/* Mist puffs at the base */}
+      <group ref={mistRef} position={[0, 0.4, 0]}>
+        {[
+          [-0.6, 0.3],
+          [0.6, 0.3],
+          [0, -0.6],
+          [-0.35, 0.7],
+          [0.4, -0.45],
+        ].map(([dx, dz], i) => (
+          <mesh key={`mist-${i}`} position={[dx, 0.2 + (i % 2) * 0.18, dz]}>
+            <sphereGeometry args={[0.32, 10, 8]} />
+            <meshStandardMaterial
+              color="#f0f9ff"
+              emissive="#bae6fd"
+              emissiveIntensity={0.5}
+              transparent
+              opacity={0.45}
+              toneMapped={false}
+            />
+          </mesh>
+        ))}
+      </group>
+      {/* Cyan glow lighting the area at night */}
+      <pointLight color="#22d3ee" intensity={1.0} distance={9} position={[0, 1, 0]} />
+    </group>
+  );
+}
+
+function Deer({ pos, phase = 0 }: { pos: [number, number]; phase?: number }) {
+  // Grazing deer — head dips down on a slow cycle.
+  const headRef = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    const t = s.clock.elapsedTime + phase;
+    if (headRef.current) {
+      const cyc = (t * 0.25) % 1;
+      const down = cyc < 0.45 ? Math.sin((cyc * Math.PI) / 0.45) : 0;
+      headRef.current.rotation.x = down * 0.9;
+      headRef.current.position.y = 0.85 - down * 0.25;
+    }
+  });
+  // Deterministic heading from position so each deer faces a different way.
+  const rotY = (pos[0] * 0.7 + pos[1] * 1.3) % (Math.PI * 2);
+  return (
+    <group position={[pos[0], 0, pos[1]]} rotation={[0, rotY, 0]}>
+      {/* Body */}
+      <mesh position={[0, 0.6, 0]} castShadow>
+        <boxGeometry args={[0.4, 0.45, 0.85]} />
+        <meshStandardMaterial color="#a16207" roughness={0.9} />
+      </mesh>
+      {/* White tail */}
+      <mesh position={[0, 0.7, -0.5]}>
+        <sphereGeometry args={[0.08, 8, 6]} />
+        <meshStandardMaterial color="#f5f5f4" roughness={0.9} />
+      </mesh>
+      {/* Four legs */}
+      {[
+        [-0.14, 0.35],
+        [0.14, 0.35],
+        [-0.14, -0.3],
+        [0.14, -0.3],
+      ].map(([dx, dz], i) => (
+        <mesh key={`leg-${i}`} position={[dx, 0.2, dz]} castShadow>
+          <cylinderGeometry args={[0.05, 0.05, 0.42, 6]} />
+          <meshStandardMaterial color="#78350f" roughness={0.95} />
+        </mesh>
+      ))}
+      {/* Head pivot — dips on graze */}
+      <group ref={headRef} position={[0, 0.85, 0.45]}>
+        <mesh position={[0, 0, -0.05]} rotation={[0.5, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.12, 0.4, 8]} />
+          <meshStandardMaterial color="#a16207" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.2, 0.18]} castShadow>
+          <boxGeometry args={[0.18, 0.18, 0.3]} />
+          <meshStandardMaterial color="#a16207" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.15, 0.38]}>
+          <boxGeometry args={[0.12, 0.1, 0.12]} />
+          <meshStandardMaterial color="#451a03" roughness={0.95} />
+        </mesh>
+        {/* Antlers */}
+        <mesh position={[-0.07, 0.34, 0.12]} rotation={[-0.4, 0, -0.3]}>
+          <cylinderGeometry args={[0.015, 0.025, 0.25, 5]} />
+          <meshStandardMaterial color="#78350f" roughness={1} />
+        </mesh>
+        <mesh position={[0.07, 0.34, 0.12]} rotation={[-0.4, 0, 0.3]}>
+          <cylinderGeometry args={[0.015, 0.025, 0.25, 5]} />
+          <meshStandardMaterial color="#78350f" roughness={1} />
+        </mesh>
+        {/* Ears */}
+        <mesh position={[-0.1, 0.3, 0.1]} rotation={[0, 0, -0.3]}>
+          <coneGeometry args={[0.05, 0.12, 6]} />
+          <meshStandardMaterial color="#78350f" />
+        </mesh>
+        <mesh position={[0.1, 0.3, 0.1]} rotation={[0, 0, 0.3]}>
+          <coneGeometry args={[0.05, 0.12, 6]} />
+          <meshStandardMaterial color="#78350f" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function Bear({ pos, rotY = 0 }: { pos: [number, number]; rotY?: number }) {
+  // Black bear — slow breathing bob, fixed orientation.
+  const ref = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    if (ref.current) {
+      ref.current.position.y = Math.sin(s.clock.elapsedTime * 0.8 + pos[0]) * 0.04;
+    }
+  });
+  return (
+    <group ref={ref} position={[pos[0], 0, pos[1]]} rotation={[0, rotY, 0]}>
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <boxGeometry args={[0.55, 0.55, 1.05]} />
+        <meshStandardMaterial color="#1c1917" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.88, 0.25]} castShadow>
+        <sphereGeometry args={[0.28, 12, 10]} />
+        <meshStandardMaterial color="#0c0a09" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.85, 0.55]} castShadow>
+        <boxGeometry args={[0.36, 0.32, 0.36]} />
+        <meshStandardMaterial color="#1c1917" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.78, 0.78]}>
+        <boxGeometry args={[0.22, 0.18, 0.16]} />
+        <meshStandardMaterial color="#44403c" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.78, 0.87]}>
+        <sphereGeometry args={[0.045, 8, 6]} />
+        <meshStandardMaterial color="#0c0a09" />
+      </mesh>
+      <mesh position={[-0.13, 1.02, 0.5]}>
+        <sphereGeometry args={[0.07, 8, 6]} />
+        <meshStandardMaterial color="#1c1917" />
+      </mesh>
+      <mesh position={[0.13, 1.02, 0.5]}>
+        <sphereGeometry args={[0.07, 8, 6]} />
+        <meshStandardMaterial color="#1c1917" />
+      </mesh>
+      {[
+        [-0.2, 0.4],
+        [0.2, 0.4],
+        [-0.2, -0.4],
+        [0.2, -0.4],
+      ].map(([dx, dz], i) => (
+        <mesh key={`bleg-${i}`} position={[dx, 0.22, dz]} castShadow>
+          <cylinderGeometry args={[0.1, 0.11, 0.46, 8]} />
+          <meshStandardMaterial color="#1c1917" roughness={0.95} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function ParkBridge({ pos, rotY = 0 }: { pos: [number, number]; rotY?: number }) {
+  // Small wooden plank bridge over the stream.
+  return (
+    <group position={[pos[0], 0, pos[1]]} rotation={[0, rotY, 0]}>
+      {[-0.6, -0.3, 0, 0.3, 0.6].map((dz, i) => (
+        <mesh key={`plank-${i}`} position={[0, 0.2, dz]} castShadow>
+          <boxGeometry args={[1.6, 0.08, 0.22]} />
+          <meshStandardMaterial color="#78350f" roughness={0.9} />
+        </mesh>
+      ))}
+      <mesh position={[-0.75, 0.45, 0]}>
+        <boxGeometry args={[0.06, 0.4, 1.5]} />
+        <meshStandardMaterial color="#451a03" roughness={0.9} />
+      </mesh>
+      <mesh position={[0.75, 0.45, 0]}>
+        <boxGeometry args={[0.06, 0.4, 1.5]} />
+        <meshStandardMaterial color="#451a03" roughness={0.9} />
+      </mesh>
+      {[
+        [-0.75, -0.7],
+        [0.75, -0.7],
+        [-0.75, 0.7],
+        [0.75, 0.7],
+      ].map(([dx, dz], i) => (
+        <mesh key={`bpost-${i}`} position={[dx, 0.35, dz]} castShadow>
+          <boxGeometry args={[0.1, 0.5, 0.1]} />
+          <meshStandardMaterial color="#451a03" roughness={0.9} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function TrailMarker({ pos, label }: { pos: [number, number]; label: string }) {
+  return (
+    <group position={[pos[0], 0, pos[1]]}>
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.07, 1.1, 6]} />
+        <meshStandardMaterial color="#78350f" roughness={0.9} />
+      </mesh>
+      <mesh position={[0.22, 0.95, 0]} rotation={[0, 0, -0.1]}>
+        <boxGeometry args={[0.6, 0.26, 0.04]} />
+        <meshStandardMaterial color="#92400e" roughness={0.9} />
+      </mesh>
+      <Text
+        position={[0.22, 0.95, 0.025]}
+        fontSize={0.11}
+        color="#fde68a"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.014}
+        outlineColor="#0b1220"
+      >
+        {label}
+      </Text>
+    </group>
+  );
+}
+
+function LogStump({ pos }: { pos: [number, number] }) {
+  return (
+    <group position={[pos[0], 0, pos[1]]}>
+      <mesh position={[0, 0.18, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.25, 0.36, 10]} />
+        <meshStandardMaterial color="#78350f" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.37, 0]}>
+        <cylinderGeometry args={[0.22, 0.22, 0.02, 10]} />
+        <meshStandardMaterial color="#fde68a" roughness={0.85} />
+      </mesh>
+    </group>
+  );
+}
+
+function Stream({ pts }: { pts: Array<[number, number]> }) {
+  // Animated stream rendered as N oriented plane segments tracing a path.
+  // All segments share a synced emissive pulse via a ref array.
+  const refs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  useFrame((s) => {
+    const e = 0.35 + Math.sin(s.clock.elapsedTime * 1.4) * 0.15;
+    for (const m of refs.current) {
+      if (m) m.emissiveIntensity = e;
+    }
+  });
+  return (
+    <>
+      {pts.slice(0, -1).map((p, i) => {
+        const q = pts[i + 1];
+        const cx = (p[0] + q[0]) / 2;
+        const cz = (p[1] + q[1]) / 2;
+        const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+        const ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
+        return (
+          <mesh
+            key={`stream-${i}`}
+            rotation={[-Math.PI / 2, 0, -ang]}
+            position={[cx, 0.038, cz]}
+            receiveShadow
+          >
+            <planeGeometry args={[len + 0.15, 0.75]} />
+            <meshStandardMaterial
+              ref={(m) => {
+                refs.current[i] = m;
+              }}
+              color="#0e7490"
+              emissive="#22d3ee"
+              emissiveIntensity={0.35}
+              metalness={0.4}
+              roughness={0.3}
+              transparent
+              opacity={0.92}
+              toneMapped={false}
+            />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}
+
 function NationalPark() {
   const lakeRef = useRef<THREE.MeshStandardMaterial>(null!);
   useFrame((s) => {
@@ -1116,6 +1462,67 @@ function NationalPark() {
         </mesh>
         <pointLight color="#fb923c" intensity={1.2} distance={6} position={[0, 0.5, 0]} />
       </group>
+      {/* ─── Waterfall on the south face of the central mountain ───
+          Mountain at (0, 7.5, -25) has radius 6, so its south face front
+          sits near z=-19. Place the waterfall pool centered there. */}
+      <Waterfall pos={[0, 0, -19]} />
+
+      {/* ─── Stream from the waterfall pool curving NW to the alpine pond ───
+          5 oriented plank segments tracing a gentle S-curve from (0, -19)
+          to the alpine pond at (-18, -10). All segments pulse together. */}
+      <Stream
+        pts={[
+          [-1.2, -18.6],
+          [-4.5, -17.2],
+          [-8, -15.6],
+          [-11.5, -13.6],
+          [-14.5, -11.8],
+          [-17, -10.5],
+        ]}
+      />
+
+      {/* Wooden footbridge over the stream */}
+      <ParkBridge pos={[-6.2, -16.4]} rotY={-0.46} />
+
+      {/* ─── Extended hiking trail — branch heading NE toward the waterfall ───
+          Existing trail ends near (-1.5, -17). Add planks curving east to
+          the waterfall pool stones. */}
+      {[
+        [-1.0, -18.0],
+        [-0.3, -18.7],
+        [0.5, -19.5],
+        [1.6, -19.6],
+        [2.6, -19.0],
+      ].map(([x, z], i) => (
+        <mesh
+          key={`trail-ext-${i}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[x, 0.05, z]}
+        >
+          <planeGeometry args={[1.2, 1.6]} />
+          <meshStandardMaterial color="#92400e" roughness={1} />
+        </mesh>
+      ))}
+
+      {/* Trail markers along the path */}
+      <TrailMarker pos={[-4.5, -3.5]} label="TRAIL" />
+      <TrailMarker pos={[-2.5, -12]} label="0.5 mi" />
+      <TrailMarker pos={[1.8, -19.2]} label="FALLS" />
+
+      {/* Wildlife — three grazing deer scattered across the meadow */}
+      <Deer pos={[-3, -8]} phase={0} />
+      <Deer pos={[-15, -5]} phase={1.7} />
+      <Deer pos={[3.5, -13]} phase={3.2} />
+
+      {/* Black bears — one near the alpine pond, one east of the lake */}
+      <Bear pos={[-22, -16]} rotY={0.6} />
+      <Bear pos={[10.5, -10]} rotY={-1.4} />
+
+      {/* Log stump seats arranged around the campfire at (5, -2) */}
+      <LogStump pos={[3.9, -3.0]} />
+      <LogStump pos={[6.4, -2.7]} />
+      <LogStump pos={[5.0, -0.5]} />
+
       {/* Park entrance sign — wooden plank above the visitor center */}
       <group position={[0, 3.5, 2.5]}>
         <mesh position={[0, 0, -0.05]}>
