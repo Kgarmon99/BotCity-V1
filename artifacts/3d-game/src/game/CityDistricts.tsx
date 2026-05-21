@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { MoneyBotModel } from "./MoneyBotModel";
 import { sound } from "./sound";
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1156,18 +1155,12 @@ function Farm() {
 // → local x ∈ [-3.5, +3.5], local z ∈ [-3.5, +3.5]
 function MoneyBotTowers() {
   const ringRef = useRef<THREE.Group>(null!);
-  const logoRef = useRef<THREE.Group>(null!);
   const bridgeRef = useRef<THREE.Mesh>(null!);
 
   useFrame((s) => {
     const t = s.clock.elapsedTime;
     // Slow horizontal ring spin around tower crown
     if (ringRef.current) ringRef.current.rotation.y = t * 0.4;
-    // Holo logo bobs gently and spins to stay legible from every side
-    if (logoRef.current) {
-      logoRef.current.position.y = 15 + Math.sin(t * 1.2) * 0.3;
-      logoRef.current.rotation.y = t * 0.7;
-    }
     // Bridge underside pulses like a data stream
     if (bridgeRef.current) {
       const mat = bridgeRef.current.material as THREE.MeshStandardMaterial;
@@ -1293,27 +1286,6 @@ function MoneyBotTowers() {
             <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={2} toneMapped={false} />
           </mesh>
         ))}
-      </group>
-
-      {/* ── Official MoneyBot statue atop the towers ───────────────── */}
-      {/* The logoRef group bobs and slowly rotates (handled in useFrame
-          above). Inside: a glowing emerald pedestal disk and the real
-          MoneyBot character GLB scaled up, playing the "UpPoint" anim
-          like a HQ mascot pointing skyward. */}
-      <group ref={logoRef} position={[0, 15, 0]}>
-        {/* Glowing pedestal halo under the statue's feet */}
-        <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
-          <ringGeometry args={[1.4, 1.8, 36]} />
-          <meshStandardMaterial
-            color="#22c55e"
-            emissive="#22c55e"
-            emissiveIntensity={2.2}
-            side={THREE.DoubleSide}
-            toneMapped={false}
-          />
-        </mesh>
-        {/* The actual MoneyBot character — pointing up like a HQ mascot */}
-        <MoneyBotModel scale={2.4} animation="UpPoint" />
       </group>
 
       {/* ── MONEYBOT TOWERS sign band above the main entrance ──────── */}
