@@ -4123,6 +4123,15 @@ function HospitalDistrict() {
   const beaconRef = useRef<THREE.Mesh>(null!);
   const padRef = useRef<THREE.MeshStandardMaterial>(null!);
   const podRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  // Expansion refs
+  const mriRingRef = useRef<THREE.Mesh>(null!);
+  const crossMonumentRef = useRef<THREE.Group>(null!);
+  const crossMonumentMatRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const researchBeaconRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const dishRef = useRef<THREE.Group>(null!);
+  const surgeryCrossRef = useRef<THREE.Group>(null!);
+  const ivBagRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
+  const wheelchairRef = useRef<THREE.Group>(null!);
   useFrame((s) => {
     const t = s.clock.elapsedTime;
     if (rotorRef.current) rotorRef.current.rotation.y = t * 14;
@@ -4136,6 +4145,27 @@ function HospitalDistrict() {
     podRefs.current.forEach((m, i) => {
       if (m) m.emissiveIntensity = 0.6 + Math.sin(t * 2 + i * 1.1) * 0.4;
     });
+    // MRI ring rotates around its bore axis
+    if (mriRingRef.current) mriRingRef.current.rotation.z = t * 2.0;
+    // Red-cross monument slowly rotates and pulses
+    if (crossMonumentRef.current) crossMonumentRef.current.rotation.y = t * 0.6;
+    if (crossMonumentMatRef.current) {
+      crossMonumentMatRef.current.emissiveIntensity = 1.4 + Math.sin(t * 2.5) * 0.6;
+    }
+    // Research tower antenna beacon pulses
+    if (researchBeaconRef.current) {
+      researchBeaconRef.current.emissiveIntensity = 1.0 + Math.sin(t * 3.5) * 0.9;
+    }
+    // Satellite dish slow scan
+    if (dishRef.current) dishRef.current.rotation.y = Math.sin(t * 0.5) * 0.7;
+    // Surgery wing rooftop cross gently rotates
+    if (surgeryCrossRef.current) surgeryCrossRef.current.rotation.y = t * 0.8;
+    // IV bag pulse
+    ivBagRefs.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.5 + Math.sin(t * 1.6 + i * 0.7) * 0.3;
+    });
+    // Wheelchair bot subtle bob
+    if (wheelchairRef.current) wheelchairRef.current.position.y = Math.sin(t * 1.2) * 0.03;
   });
   return (
     <group position={[7.5, 0, -40.5]}>
@@ -4337,8 +4367,9 @@ function HospitalDistrict() {
         🔧 REPAIR BAY
       </Text>
 
-      {/* ── Recovery garden — green planters flanking the helipad ──── */}
-      {[[-4.5, -7], [4.5, -7], [-4.5, -4.5], [4.5, -4.5]].map(([gx, gz], i) => (
+      {/* ── Recovery garden — small planters in the strip between kiosk
+            and helipad (originals relocated to clear new wings/tower/MRI) ── */}
+      {[[-1.2, -3.2], [1.2, -3.2]].map(([gx, gz], i) => (
         <group key={`planter-${i}`} position={[gx, 0, gz]}>
           <mesh position={[0, 0.2, 0]} castShadow>
             <boxGeometry args={[1.2, 0.4, 1.2]} />
@@ -4368,6 +4399,563 @@ function HospitalDistrict() {
       >
         🏥 BOTHOSPITAL · REPAIR
       </Text>
+
+      {/* ════════════════════════════════════════════════════════════════
+          MAJOR EXPANSION — full medical campus
+          Local envelope: x[-9, 9], z[-11, 11]. Bounded by botdealer east
+          (world x=-11 → local x=-18.5), botcityhall west (world x=17 →
+          local x=9.5), road bands at z=-27 (local z=13.5) and z=-54
+          (local z=-13.5). Hospital kiosk fills x[-2.5,2.5], z[-2,2].
+          ═══════════════════════════════════════════════════════════════ */}
+
+      {/* ── WEST WING — Diagnostics Building (local x[-7, -3.5], z[-4.5, -0.5]) ── */}
+      <group position={[-5.25, 0, -2.5]}>
+        {/* Base platform */}
+        <mesh position={[0, 0.1, 0]} receiveShadow>
+          <boxGeometry args={[3.6, 0.2, 4.2]} />
+          <meshStandardMaterial color="#e7e5e4" roughness={0.7} />
+        </mesh>
+        {/* Main building */}
+        <mesh position={[0, 1.7, 0]} castShadow>
+          <boxGeometry args={[3.2, 3.2, 3.8]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#22d3ee" emissiveIntensity={0.12} />
+        </mesh>
+        {/* Glass strip windows (east face) */}
+        <mesh position={[1.61, 1.8, 0]}>
+          <boxGeometry args={[0.02, 0.6, 3.0]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.7} transparent opacity={0.7} />
+        </mesh>
+        <mesh position={[1.61, 2.6, 0]}>
+          <boxGeometry args={[0.02, 0.4, 3.0]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.7} transparent opacity={0.7} />
+        </mesh>
+        {/* Dome (X-ray / imaging dome) */}
+        <mesh position={[0, 3.5, 0]} castShadow>
+          <sphereGeometry args={[1.0, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#cbd5e1" emissive="#22d3ee" emissiveIntensity={0.35} metalness={0.5} />
+        </mesh>
+        {/* Dome ring accent */}
+        <mesh position={[0, 3.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.05, 0.05, 6, 24]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+        {/* Door */}
+        <mesh position={[1.61, 0.6, 0]}>
+          <boxGeometry args={[0.02, 1.0, 0.8]} />
+          <meshStandardMaterial color="#0c4a6e" />
+        </mesh>
+        {/* Signage */}
+        <Text
+          position={[1.62, 2.0, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          fontSize={0.22}
+          color="#0c4a6e"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.014}
+          outlineColor="#f0f9ff"
+        >
+          DIAGNOSTICS
+        </Text>
+      </group>
+
+      {/* ── EAST WING — Surgery Building (local x[5.6, 8.4], z[-6.6, -2.4]) ── */}
+      <group position={[7.0, 0, -4.5]}>
+        {/* Base */}
+        <mesh position={[0, 0.1, 0]} receiveShadow>
+          <boxGeometry args={[2.8, 0.2, 4.2]} />
+          <meshStandardMaterial color="#e7e5e4" roughness={0.7} />
+        </mesh>
+        {/* Main body */}
+        <mesh position={[0, 1.9, 0]} castShadow>
+          <boxGeometry args={[2.4, 3.6, 3.8]} />
+          <meshStandardMaterial color="#fef2f2" emissive="#ef4444" emissiveIntensity={0.15} />
+        </mesh>
+        {/* Sterile-glass windows (west face, toward main hospital) */}
+        {[-1.0, 0, 1.0].map((wz, i) => (
+          <mesh key={`sw-${i}`} position={[-1.21, 2.2, wz]}>
+            <boxGeometry args={[0.02, 0.8, 0.6]} />
+            <meshStandardMaterial color="#fef9c3" emissive="#fde047" emissiveIntensity={0.85} transparent opacity={0.8} />
+          </mesh>
+        ))}
+        {/* Stepped upper floor */}
+        <mesh position={[0, 4.1, 0]} castShadow>
+          <boxGeometry args={[2.0, 0.8, 2.6]} />
+          <meshStandardMaterial color="#fecaca" emissive="#ef4444" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Rooftop rotating red cross monument */}
+        <group ref={surgeryCrossRef} position={[0, 5.0, 0]}>
+          <mesh>
+            <boxGeometry args={[0.18, 0.9, 0.18]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.5} toneMapped={false} />
+          </mesh>
+          <mesh>
+            <boxGeometry args={[0.9, 0.18, 0.18]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.5} toneMapped={false} />
+          </mesh>
+        </group>
+        {/* Surgery sign (west face) */}
+        <Text
+          position={[-1.22, 2.6, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          fontSize={0.22}
+          color="#7f1d1d"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.014}
+          outlineColor="#fef2f2"
+        >
+          SURGERY
+        </Text>
+      </group>
+
+      {/* ── PHARMACY annex (south plaza, local (-6.5, 0, 4)) ── */}
+      <group position={[-6.5, 0, 4]}>
+        {/* Base */}
+        <mesh position={[0, 0.1, 0]} receiveShadow>
+          <boxGeometry args={[2.6, 0.2, 2.2]} />
+          <meshStandardMaterial color="#e7e5e4" roughness={0.7} />
+        </mesh>
+        {/* Body */}
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <boxGeometry args={[2.2, 1.9, 1.8]} />
+          <meshStandardMaterial color="#fef9c3" emissive="#22c55e" emissiveIntensity={0.18} />
+        </mesh>
+        {/* Striped awning */}
+        <mesh position={[0, 2.2, 0.95]} rotation={[0.3, 0, 0]} castShadow>
+          <boxGeometry args={[2.0, 0.06, 0.8]} />
+          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.4} />
+        </mesh>
+        {/* RX sign on roof */}
+        <mesh position={[0, 2.4, 0]}>
+          <boxGeometry args={[1.4, 0.5, 0.1]} />
+          <meshStandardMaterial color="#16a34a" emissive="#22c55e" emissiveIntensity={0.5} />
+        </mesh>
+        <Text
+          position={[0, 2.4, 0.06]}
+          fontSize={0.32}
+          color="#fef9c3"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#14532d"
+        >
+          ℞ PHARMACY
+        </Text>
+        {/* Window panes on south face */}
+        {[-0.6, 0.6].map((wx, i) => (
+          <mesh key={`pw-${i}`} position={[wx, 1.2, 0.91]}>
+            <boxGeometry args={[0.7, 0.7, 0.02]} />
+            <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.55} transparent opacity={0.7} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ── RESEARCH TOWER (NW corner, local (-6, 0, -9)) ── */}
+      <group position={[-6, 0, -9]}>
+        {/* Base */}
+        <mesh position={[0, 0.1, 0]} receiveShadow>
+          <boxGeometry args={[3.0, 0.2, 3.0]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.7} />
+        </mesh>
+        {/* Main tower */}
+        <mesh position={[0, 3.0, 0]} castShadow>
+          <boxGeometry args={[2.4, 6.0, 2.4]} />
+          <meshStandardMaterial color="#0f172a" emissive="#22d3ee" emissiveIntensity={0.2} metalness={0.4} />
+        </mesh>
+        {/* Glass stripe windows (multi-floor) */}
+        {[1.2, 2.4, 3.6, 4.8].map((y, i) => (
+          <mesh key={`rt-w-${i}`} position={[0, y, 1.21]}>
+            <boxGeometry args={[2.0, 0.4, 0.02]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.9} transparent opacity={0.8} />
+          </mesh>
+        ))}
+        {/* Upper crown */}
+        <mesh position={[0, 6.4, 0]} castShadow>
+          <boxGeometry args={[2.8, 0.4, 2.8]} />
+          <meshStandardMaterial color="#475569" emissive="#22d3ee" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Antenna pole */}
+        <mesh position={[0, 7.4, 0]}>
+          <cylinderGeometry args={[0.06, 0.08, 1.6, 6]} />
+          <meshStandardMaterial color="#475569" metalness={0.85} />
+        </mesh>
+        {/* Pulsing beacon */}
+        <mesh position={[0, 8.3, 0]}>
+          <sphereGeometry args={[0.15, 10, 10]} />
+          <meshStandardMaterial
+            ref={researchBeaconRef}
+            color="#ef4444"
+            emissive="#ef4444"
+            emissiveIntensity={1.4}
+            toneMapped={false}
+          />
+        </mesh>
+        {/* Satellite dish on side, scanning */}
+        <group ref={dishRef} position={[1.4, 5.8, 0]}>
+          <mesh position={[0.25, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+            <cylinderGeometry args={[0.45, 0.05, 0.1, 18, 1, true]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#22d3ee" emissiveIntensity={0.35} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[0.4, 0, 0]}>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.2} toneMapped={false} />
+          </mesh>
+        </group>
+        {/* Tower signage */}
+        <Text
+          position={[0, 5.2, 1.22]}
+          fontSize={0.18}
+          color="#22d3ee"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.012}
+          outlineColor="#0c4a6e"
+        >
+          MED RESEARCH
+        </Text>
+      </group>
+
+      {/* ── MRI ANNEX (NE corner, local (6, 0, -8.5)) ── */}
+      <group position={[6, 0, -8.5]}>
+        {/* Base */}
+        <mesh position={[0, 0.1, 0]} receiveShadow>
+          <boxGeometry args={[3.6, 0.2, 3.2]} />
+          <meshStandardMaterial color="#e7e5e4" roughness={0.7} />
+        </mesh>
+        {/* Main building (low and wide) */}
+        <mesh position={[0, 1.1, 0]} castShadow>
+          <boxGeometry args={[3.2, 2.0, 2.8]} />
+          <meshStandardMaterial color="#e0e7ff" emissive="#818cf8" emissiveIntensity={0.18} />
+        </mesh>
+        {/* Glass roof */}
+        <mesh position={[0, 2.25, 0]} castShadow>
+          <boxGeometry args={[3.0, 0.3, 2.6]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.55} transparent opacity={0.7} />
+        </mesh>
+        {/* MRI bore visible through "window" — the rotating ring */}
+        <group position={[0, 1.1, 1.42]}>
+          {/* Bore frame */}
+          <mesh>
+            <torusGeometry args={[0.55, 0.18, 8, 24]} />
+            <meshStandardMaterial color="#cbd5e1" metalness={0.6} roughness={0.3} />
+          </mesh>
+          {/* Inner rotating ring */}
+          <mesh ref={mriRingRef}>
+            <torusGeometry args={[0.4, 0.06, 6, 24]} />
+            <meshStandardMaterial color="#818cf8" emissive="#a78bfa" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+          {/* Patient bed */}
+          <mesh position={[0, -0.4, 0.4]} rotation={[Math.PI / 2, 0, 0]}>
+            <boxGeometry args={[1.2, 0.6, 0.15]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        </group>
+        {/* Signage */}
+        <Text
+          position={[0, 2.0, 1.41]}
+          fontSize={0.18}
+          color="#3730a3"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.012}
+          outlineColor="#e0e7ff"
+        >
+          MRI / SCANNER
+        </Text>
+      </group>
+
+      {/* ── GLASS ENTRANCE CANOPY over hospital south face ── */}
+      <group position={[0, 0, 3.0]}>
+        {/* Support pillars */}
+        {[-1.8, 1.8].map((px, i) => (
+          <mesh key={`canp-${i}`} position={[px, 1.4, 0]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 2.8, 8]} />
+            <meshStandardMaterial color="#475569" metalness={0.7} />
+          </mesh>
+        ))}
+        {/* Glass canopy */}
+        <mesh position={[0, 2.8, 0]} rotation={[0.1, 0, 0]} castShadow>
+          <boxGeometry args={[4.2, 0.12, 1.6]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.55} transparent opacity={0.55} />
+        </mesh>
+        {/* Canopy ridge accent */}
+        <mesh position={[0, 2.9, 0]}>
+          <boxGeometry args={[4.3, 0.04, 0.06]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.1} toneMapped={false} />
+        </mesh>
+        {/* Reception sign */}
+        <mesh position={[0, 2.2, 0.78]}>
+          <boxGeometry args={[2.4, 0.4, 0.05]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <Text
+          position={[0, 2.2, 0.81]}
+          fontSize={0.22}
+          color="#fecaca"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.014}
+          outlineColor="#7f1d1d"
+        >
+          EMERGENCY ENTRANCE
+        </Text>
+      </group>
+
+      {/* ── RECEPTION PLAZA stone floor in front of canopy ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 4.5]} receiveShadow>
+        <planeGeometry args={[8, 3]} />
+        <meshStandardMaterial color="#e7e5e4" emissive="#fde047" emissiveIntensity={0.08} />
+      </mesh>
+      {/* Plaza border accent strip (red) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 3.05]}>
+        <planeGeometry args={[8, 0.18]} />
+        <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.9} toneMapped={false} />
+      </mesh>
+
+      {/* ── ROTATING GLOWING RED-CROSS MONUMENT in plaza center ── */}
+      <group position={[0, 0, 7.5]}>
+        {/* Plinth */}
+        <mesh position={[0, 0.45, 0]} castShadow>
+          <cylinderGeometry args={[0.6, 0.75, 0.9, 12]} />
+          <meshStandardMaterial color="#1c1917" metalness={0.5} roughness={0.4} />
+        </mesh>
+        {/* Plinth band */}
+        <mesh position={[0, 0.9, 0]}>
+          <torusGeometry args={[0.65, 0.04, 6, 24]} />
+          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.0} toneMapped={false} />
+        </mesh>
+        {/* Rotating cross */}
+        <group ref={crossMonumentRef} position={[0, 2.0, 0]}>
+          <mesh>
+            <boxGeometry args={[0.4, 1.8, 0.4]} />
+            <meshStandardMaterial
+              ref={crossMonumentMatRef}
+              color="#ef4444"
+              emissive="#ef4444"
+              emissiveIntensity={1.6}
+              toneMapped={false}
+            />
+          </mesh>
+          <mesh>
+            <boxGeometry args={[1.6, 0.4, 0.4]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.6} toneMapped={false} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ── PATIENT BOT in WHEELCHAIR (south of cross monument, east side) ── */}
+      <group ref={wheelchairRef} position={[2.8, 0, 9]} rotation={[0, -0.6, 0]}>
+        {/* Wheelchair frame */}
+        <mesh position={[0, 0.45, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.1, 0.55]} />
+          <meshStandardMaterial color="#475569" metalness={0.6} />
+        </mesh>
+        {/* Wheels (big rear, small front) */}
+        {[[-0.35, -0.15], [0.35, -0.15]].map(([wx, wz], i) => (
+          <mesh key={`wcw-${i}`} position={[wx, 0.35, wz]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.32, 0.32, 0.05, 14]} />
+            <meshStandardMaterial color="#0f172a" />
+          </mesh>
+        ))}
+        {[[-0.28, 0.25], [0.28, 0.25]].map(([wx, wz], i) => (
+          <mesh key={`wcfw-${i}`} position={[wx, 0.15, wz]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.12, 0.12, 0.05, 10]} />
+            <meshStandardMaterial color="#0f172a" />
+          </mesh>
+        ))}
+        {/* Backrest */}
+        <mesh position={[0, 0.85, -0.25]} castShadow>
+          <boxGeometry args={[0.55, 0.7, 0.08]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {/* Patient bot body */}
+        <mesh position={[0, 0.85, 0]} castShadow>
+          <boxGeometry args={[0.4, 0.55, 0.35]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.4} />
+        </mesh>
+        {/* Head */}
+        <mesh position={[0, 1.25, 0]} castShadow>
+          <boxGeometry args={[0.3, 0.3, 0.3]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.7} />
+        </mesh>
+        {/* Bandage / eye patch */}
+        <mesh position={[0, 1.27, 0.16]}>
+          <boxGeometry args={[0.32, 0.1, 0.02]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.4} />
+        </mesh>
+        {/* IV pole next to chair */}
+        <mesh position={[0.35, 1.0, 0]} castShadow>
+          <cylinderGeometry args={[0.025, 0.025, 2.0, 6]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.7} />
+        </mesh>
+        {/* IV bag */}
+        <mesh position={[0.35, 1.85, 0.05]}>
+          <boxGeometry args={[0.18, 0.22, 0.08]} />
+          <meshStandardMaterial
+            ref={(m) => { ivBagRefs.current[0] = m; }}
+            color="#fbbf24"
+            emissive="#fbbf24"
+            emissiveIntensity={0.6}
+            transparent
+            opacity={0.85}
+            toneMapped={false}
+          />
+        </mesh>
+        {/* IV base */}
+        <mesh position={[0.35, 0.05, 0]}>
+          <cylinderGeometry args={[0.12, 0.12, 0.04, 10]} />
+          <meshStandardMaterial color="#475569" />
+        </mesh>
+      </group>
+
+      {/* ── A second IV stand standalone, south of cross monument (west side) ── */}
+      <group position={[-2.8, 0, 9]}>
+        <mesh position={[0, 1.0, 0]} castShadow>
+          <cylinderGeometry args={[0.025, 0.025, 2.0, 6]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.7} />
+        </mesh>
+        <mesh position={[0, 1.9, 0.08]}>
+          <boxGeometry args={[0.18, 0.22, 0.08]} />
+          <meshStandardMaterial
+            ref={(m) => { ivBagRefs.current[1] = m; }}
+            color="#22d3ee"
+            emissive="#22d3ee"
+            emissiveIntensity={0.6}
+            transparent
+            opacity={0.85}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.12, 0.12, 0.04, 10]} />
+          <meshStandardMaterial color="#475569" />
+        </mesh>
+      </group>
+
+      {/* ── DOCTOR PARKING LOT (NW, between west wing and research tower) ── */}
+      <group position={[-7, 0, -6]}>
+        {/* Parking slab */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
+          <planeGeometry args={[3.6, 2.4]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.95} />
+        </mesh>
+        {/* Painted lane dividers */}
+        {[-1.0, 0, 1.0].map((lx, i) => (
+          <mesh key={`pl-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[lx, 0.05, 0]}>
+            <planeGeometry args={[0.06, 2.0]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.5} toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Parked mini doctor cars (2) */}
+        {[[-0.5, 0.2, "#22d3ee"], [0.5, -0.2, "#a855f7"]].map(([cx, cz, col], i) => (
+          <group key={`docar-${i}`} position={[cx as number, 0, cz as number]}>
+            <mesh position={[0, 0.3, 0]} castShadow>
+              <boxGeometry args={[0.55, 0.35, 0.9]} />
+              <meshStandardMaterial color={col as string} emissive={col as string} emissiveIntensity={0.3} />
+            </mesh>
+            <mesh position={[0, 0.55, -0.05]} castShadow>
+              <boxGeometry args={[0.5, 0.25, 0.5]} />
+              <meshStandardMaterial color="#0f172a" emissive="#22d3ee" emissiveIntensity={0.4} />
+            </mesh>
+            {[[-0.22, -0.3], [0.22, -0.3], [-0.22, 0.3], [0.22, 0.3]].map(([wx, wz], j) => (
+              <mesh key={`dw-${j}`} position={[wx, 0.12, wz]} rotation={[0, 0, Math.PI / 2]}>
+                <cylinderGeometry args={[0.1, 0.1, 0.08, 8]} />
+                <meshStandardMaterial color="#0f172a" />
+              </mesh>
+            ))}
+          </group>
+        ))}
+        {/* Parking sign */}
+        <mesh position={[1.6, 0.5, -1.0]}>
+          <boxGeometry args={[0.05, 1.0, 0.05]} />
+          <meshStandardMaterial color="#1c1917" />
+        </mesh>
+        <mesh position={[1.6, 0.9, -1.0]}>
+          <boxGeometry args={[0.6, 0.28, 0.04]} />
+          <meshStandardMaterial color="#1e40af" emissive="#3b82f6" emissiveIntensity={0.5} />
+        </mesh>
+        <Text
+          position={[1.6, 0.9, -0.97]}
+          fontSize={0.13}
+          color="#fef9c3"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.008}
+          outlineColor="#1e3a8a"
+        >
+          MD ONLY
+        </Text>
+      </group>
+
+      {/* ── HEDGES along the south plaza perimeter ── */}
+      {[[-3.5, 6.2], [-1.2, 6.2], [1.2, 6.2], [3.5, 6.2]].map(([hx, hz], i) => (
+        <group key={`hedge-${i}`} position={[hx, 0, hz]}>
+          <mesh position={[0, 0.35, 0]} castShadow>
+            <boxGeometry args={[1.2, 0.7, 0.5]} />
+            <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.2} roughness={0.85} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── EXTRA LAMP POSTS along plaza edges ── */}
+      {[[-4.5, 5.5], [4.5, 5.5], [-4.5, 8.5], [4.5, 8.5]].map(([lx, lz], i) => (
+        <group key={`hlamp-${i}`} position={[lx, 0, lz]}>
+          <mesh position={[0, 1.1, 0]} castShadow>
+            <cylinderGeometry args={[0.06, 0.06, 2.2, 6]} />
+            <meshStandardMaterial color="#1c1917" />
+          </mesh>
+          {/* Light fixture */}
+          <mesh position={[0, 2.25, 0]}>
+            <sphereGeometry args={[0.16, 12, 10]} />
+            <meshStandardMaterial color="#fef9c3" emissive="#fde047" emissiveIntensity={1.6} toneMapped={false} />
+          </mesh>
+          {/* Red cross banner */}
+          <mesh position={[0.3, 1.6, 0]}>
+            <planeGeometry args={[0.5, 0.7]} />
+            <meshStandardMaterial color="#f8fafc" side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[0.31, 1.6, 0]}>
+            <planeGeometry args={[0.4, 0.12]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.9} side={THREE.DoubleSide} toneMapped={false} />
+          </mesh>
+          <mesh position={[0.31, 1.6, 0]}>
+            <planeGeometry args={[0.12, 0.4]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.9} side={THREE.DoubleSide} toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── DECORATIVE TREES around the campus ── */}
+      {[[-8, -6.5], [-8, 1.5], [8.5, 1.5], [8.5, 5.5], [-8, 5.5]].map(([tx, tz], i) => (
+        <group key={`htree-${i}`} position={[tx, 0, tz]}>
+          <mesh position={[0, 0.6, 0]} castShadow>
+            <cylinderGeometry args={[0.1, 0.14, 1.2, 6]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+          <mesh position={[0, 1.4, 0]} castShadow>
+            <sphereGeometry args={[0.5, 12, 10]} />
+            <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.25} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── CONNECTING WALKWAYS ── */}
+      {/* Hospital ↔ Surgery wing */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[4.5, 0.05, -2]} receiveShadow>
+        <planeGeometry args={[2.4, 1]} />
+        <meshStandardMaterial color="#d6d3d1" emissive="#a8a29e" emissiveIntensity={0.2} />
+      </mesh>
+      {/* Hospital ↔ Diagnostics wing */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-4.5, 0.05, 0]} receiveShadow>
+        <planeGeometry args={[2.4, 1]} />
+        <meshStandardMaterial color="#d6d3d1" emissive="#a8a29e" emissiveIntensity={0.2} />
+      </mesh>
+      {/* Path to research tower (north) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.05, -5.5]} receiveShadow>
+        <planeGeometry args={[1.2, 3]} />
+        <meshStandardMaterial color="#d6d3d1" emissive="#a8a29e" emissiveIntensity={0.2} />
+      </mesh>
     </group>
   );
 }
