@@ -5431,12 +5431,19 @@ function BasketballArena() {
 // from x[-58..-42], z[20..34], clear of z=18 road (5.5u south) and
 // z=36 road (1.7u north of the district sign).
 function ArtDistrict() {
+  // Relocated from world (-75, 40.5) — which became airport-adjacent after
+  // the airport district shifted SW — to (-75, -10), the open NW band
+  // between BotGigs (-82.5, 9) and BotMine & Quarry (-75, -37.5).
+  // 14w×12d plaza footprint x[-82,-68] z[-16,-4]: 22u clear north to
+  // BotGigs south edge (z=6), 14.5u clear south to BotMine's dirt
+  // patch north edge (z=-30.5). Clear of z=0 main road sidewalk
+  // (z[-1.9,1.9]) by 2.1u.
   const torusRef = useRef<THREE.Mesh>(null!);
   useFrame((s) => {
     if (torusRef.current) torusRef.current.rotation.y = s.clock.elapsedTime * 0.3;
   });
   return (
-    <group position={[-75, 0, 40.5]}>
+    <group position={[-75, 0, -10]}>
       {/* Polished marble plaza floor around the gallery */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[14, 12]} />

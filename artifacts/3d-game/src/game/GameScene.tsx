@@ -555,14 +555,16 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "🏀",
   },
   {
-    // BotGallery — full building in the Art District at (-50, 0, 27),
-    // far west, clear of z=18 and z=36 road bands (±1.1u each, both
-    // 5.5u+ away). Surrounding sculpture garden + mural walls rendered
-    // by CityDistricts.ArtDistrict. White modern facade w/ gold roof
-    // accent matches museum-row siblings (bothistory, eduhistory).
+    // BotGallery — full building in the Art District. Relocated from
+    // world (-75, 40.5) to (-75, -10): the open NW band between BotGigs
+    // (-82.5, 9) and BotMine (-75, -37.5). Old spot is now airport-
+    // adjacent after the airport's SW shift. Surrounding sculpture
+    // garden + mural walls rendered by CityDistricts.ArtDistrict (its
+    // <group position> matches this kiosk z). Clear of z=0 main road
+    // sidewalk by 2.1u (kiosk depth 4 → fp z[-12,-8]).
     id: "botgallery",
     label: "BotGallery",
-    position: [-75, 2.5, 40.5],
+    position: [-75, 2.5, -10],
     color: "#f1f5f9",
     roofColor: "#fbbf24",
     width: 5,

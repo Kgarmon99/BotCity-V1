@@ -1396,8 +1396,10 @@ export default function CityExpansion() {
       {/* ─── Airport district (pushed to the far SW outskirts) ───
          Whole district shifted by (-15, 0, +5) so the kiosk lives at
          world (-90, *, 72.5), the terminal at (-65, *, 50), and Runway 2's
-         east end (after its X_MAX shortening below) sits at world x=-40,
-         clearing BotShops (x=-40.5, fp x[-43,-38]) with a 2u gap.
+         east end (after its X_MAX shortening below) sits at world x=-45,
+         clearing BotShops west edge x=-43 by 2u. ArtDistrict, which used
+         to anchor against the airport's north edge at z=40.5, has moved
+         to the NW band at (-75, -10), so the airport corner is empty.
          All inner constants (RUNWAY_Z, RUNWAY2_X_MIN/MAX, RUNWAY3_X, etc.)
          remain local — animation refs (TakeoffPlane, landing plane,
          fuel truck) write to refs inside this group so their coords are
