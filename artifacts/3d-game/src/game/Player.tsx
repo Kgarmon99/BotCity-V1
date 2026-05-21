@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { MoneyBotModel, type MoneyBotAnim } from "./MoneyBotModel";
-import { BotMobile } from "./CityDistricts";
+import { BotMobile, BotVette } from "./CityDistricts";
 import { useGameStore } from "./gameStore";
 import { cameraInput } from "./cameraInput";
 import { touchInput } from "./touchInput";
@@ -26,6 +26,7 @@ interface PlayerProps {
 
 const WALK_SPEED = 9;
 const RIDE_SPEED = 22; // BotMobile boost (~2.4x walking)
+const VETTE_SPEED = 42; // BotVette boost (~4.7x walking) — held with C
 const JETPACK_THRUST = 28; // upward accel when Shift held (m/s²)
 const GRAVITY = 22; // downward accel (m/s²)
 const MAX_ALTITUDE = 55; // ceiling so we don't fly off the skybox
@@ -38,6 +39,8 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false, jet: false });
   const ridingRef = useRef(false);
   const [riding, setRiding] = useState(false);
+  const vetteRef = useRef(false);
+  const [vetteOn, setVetteOn] = useState(false);
   const [jetting, setJetting] = useState(false);
   const [anim, setAnim] = useState<MoneyBotAnim>("Idle");
   // Track the last value pushed to sound.setJetpack so we only call it on
@@ -68,6 +71,13 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
         setRiding(false);
       }
     };
+    const stopVette = () => {
+      if (vetteRef.current) {
+        vetteRef.current = false;
+        setVetteOn(false);
+      }
+      stopRiding();
+    };
 
     const down = (e: KeyboardEvent) => {
       if (isTypingInForm(e.target)) return;
@@ -89,6 +99,17 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
           setRiding(true);
         }
       }
+      if (e.key === "c" || e.key === "C") {
+        // Hold C to swap the BotMobile for a faster BotVette (Corvette-style).
+        if (!vetteRef.current) {
+          vetteRef.current = true;
+          setVetteOn(true);
+        }
+        if (!ridingRef.current) {
+          ridingRef.current = true;
+          setRiding(true);
+        }
+      }
     };
     const up = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp"    || e.key === "w" || e.key === "W") keys.current.forward = false;
@@ -101,6 +122,9 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       if (e.code === "Space" || e.key === " ") {
         stopRiding();
       }
+      if (e.key === "c" || e.key === "C") {
+        stopVette();
+      }
     };
     // If the window loses focus (Alt+Tab, etc) we never get the keyup —
     // clear all held keys so the player doesn't run off / get stuck in the car.
@@ -110,7 +134,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       keys.current.left = false;
       keys.current.right = false;
       keys.current.jet = false;
-      stopRiding();
+      stopVette();
     };
 
     window.addEventListener("keydown", down);
@@ -179,7 +203,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
     // Cap magnitude at 1 so analog joystick + keyboard combo never moves
     // faster than the speed limit.
     if (dir.length() > 1) dir.normalize();
-    const speed = ridingRef.current ? RIDE_SPEED : WALK_SPEED;
+    const speed = vetteRef.current ? VETTE_SPEED : ridingRef.current ? RIDE_SPEED : WALK_SPEED;
     dir.multiplyScalar(speed * delta);
     velocity.current.lerp(dir, 0.3);
 
@@ -277,11 +301,15 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
         <JetpackFlame thrusting={keys.current.jet || touchInput.jetHeld} />
       )}
       {riding ? (
-        // BotMobile's headlights are along its local +X axis. Rotating by
-        // -π/2 around Y maps local +X → local +Z, aligning the car's front
-        // with the player's "forward" convention so it drives nose-first.
+        // BotMobile/BotVette headlights are along local +X. Rotating by -π/2
+        // around Y maps local +X → local +Z, aligning the nose with the
+        // player's "forward" convention so it drives nose-first.
         <group rotation={[0, -Math.PI / 2, 0]}>
-          <BotMobile pos={[0, 0, 0]} color="#dc2626" accent="#fde047" />
+          {vetteOn ? (
+            <BotVette pos={[0, 0, 0]} color="#dc2626" accent="#fde047" />
+          ) : (
+            <BotMobile pos={[0, 0, 0]} color="#dc2626" accent="#fde047" />
+          )}
         </group>
       ) : (
         <MoneyBotModel scale={0.4} animation={anim} />
