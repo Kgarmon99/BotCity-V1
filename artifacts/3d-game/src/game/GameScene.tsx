@@ -483,17 +483,17 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   },
   {
     id: "botmine",
-    label: "Underground BotMine",
-    // Far W edge. Footprint x[-52.5..-47.5] z[-26.5..-23.5]. Player bound
-    // ±64 → west edge at -52.5 leaves 11.5u for the mineshaft entrance
-    // and ore piles. BotGigs at (-55, 6) is 31u south; nothing else
-    // within 60u.
-    position: [-75, 1.5, -37.5],
+    label: "BotMine & Quarry",
+    // Far NW. Expanded into a full mining & quarry complex. Building
+    // footprint now 7×4 h5 → world x[-78.5..-71.5], z[-39.5..-35.5].
+    // Surrounding decor envelope: x[-94..-60], z[-49.5..-29.5] (see
+    // CityDistricts.Mine() for the full breakdown). Player bound ±98.
+    position: [-75, 2.5, -37.5],
     color: "#44403c",
     roofColor: "#a16207",
-    width: 5,
-    depth: 3,
-    height: 3,
+    width: 7,
+    depth: 4,
+    height: 5,
     emoji: "⛏️",
   },
   {

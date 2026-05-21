@@ -3188,15 +3188,30 @@ function Casino() {
   );
 }
 
-// ===== Underground BotMine @ (-50, 0, -25) ==============================
-// Far W edge. Mine building at (-50, 1.5, -25), footprint 5×3 →
-// world x[-52.5..-47.5], z[-26.5..-23.5]. The decorations sit around
-// the building, mostly south where the rail-cart line runs into the
-// open mine pit. Player bound is ±64 so the west prop edge stops at
-// x ≈ -55. Local origin (-50, -25).
+// ===== BotMine & Quarry @ (-75, 0, -37.5) ===============================
+// Significantly expanded mining + quarry complex in the NW quadrant.
+// Building at (-75, 2.5, -37.5), footprint 7×4 h5 → world
+// x[-78.5..-71.5], z[-39.5..-35.5]. Decor envelope sprawls around it:
+//   world x ∈ [-94, -60], z ∈ [-49.5, -29.5]
+//   → local x ∈ [-19, +15], z ∈ [-12, +8]   (origin at -75, -37.5)
+// Clearance checks (HALF=98 world, +z = south convention):
+//   • World west edge x=-98 → 4u buffer beyond west envelope -94
+//   • Road at z=-27 (sec_w=2.2 → band z[-28.1,-25.9]) → ≥1.4u north gap
+//     from south envelope z=-29.5; haul road at z=-31 (3+u clear)
+//   • BotFarm (-60,-61.5) → 32u north gap from envelope z_max=-29.5
+//   • BotGigs (-55, 6) → ~35u clear (different z band entirely)
+//   • BotGolf decor (x[-64,-24], z[-103,-87]) → 57u south gap, clear
+// Highlights of the expansion: terraced quarry pit (3 tiers with rim
+// rocks + parked excavator), animated haul truck along south haul road,
+// crusher tower with rotating rotor + feed conveyor, 3 stockpile silos,
+// water tower, 5 ore stockpiles (gold/copper/lithium/silver/iron),
+// equipment shed, two floodlight poles, safety cones along pit rim.
 function Mine() {
   const cartRef = useRef<THREE.Group>(null!);
   const oreRef = useRef<THREE.Mesh>(null!);
+  const haulTruckRef = useRef<THREE.Group>(null!);
+  const crusherRotorRef = useRef<THREE.Mesh>(null!);
+  const floodlightRef = useRef<THREE.Mesh>(null!);
   useFrame((s) => {
     const t = s.clock.elapsedTime;
     // Cart shuttles back and forth on its rail (E-W).
@@ -3204,118 +3219,429 @@ function Mine() {
       const phase = (Math.sin(t * 0.6) + 1) / 2; // 0..1
       cartRef.current.position.x = -3 + phase * 4.5;
     }
-    // Gold ore glows like it's freshly extracted.
+    // Gold stockpile glows like it's freshly extracted.
     if (oreRef.current) {
       const mat = oreRef.current.material as THREE.MeshStandardMaterial;
       mat.emissiveIntensity = 0.8 + Math.sin(t * 2) * 0.3;
+    }
+    // Haul truck drives slowly along the south haul road.
+    if (haulTruckRef.current) {
+      const phase = (Math.sin(t * 0.25) + 1) / 2;
+      haulTruckRef.current.position.x = -10 + phase * 14;
+      haulTruckRef.current.rotation.y = Math.cos(t * 0.25) > 0 ? 0 : Math.PI;
+    }
+    // Crusher rotor spins overhead.
+    if (crusherRotorRef.current) {
+      crusherRotorRef.current.rotation.y = t * 1.2;
+    }
+    // Floodlight pulses to read as active.
+    if (floodlightRef.current) {
+      const mat = floodlightRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.5 + Math.sin(t * 4) * 0.6;
     }
   });
   return (
     <group position={[-75, 0, -37.5]}>
       {/* ── Dirt patch under the entire district ── */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-0.5, 0.02, 0]}>
-        <planeGeometry args={[10, 8]} />
-        <meshStandardMaterial color="#3f2a1d" emissive="#7c2d12" emissiveIntensity={0.08} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-2, 0.02, -2]}>
+        <planeGeometry args={[30, 18]} />
+        <meshStandardMaterial color="#3f2a1d" emissive="#7c2d12" emissiveIntensity={0.06} />
       </mesh>
 
-      {/* ── Mineshaft entrance — dark arch on the south face of the building */}
-      <group position={[0, 0, 2.2]}>
-        {/* Frame uprights (timber X-frame look) */}
-        <mesh position={[-1.1, 1.2, 0]}>
-          <boxGeometry args={[0.25, 2.4, 0.25]} />
+      {/* ── Haul road — wider dirt track running E-W along the south side ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-2, 0.025, 5]}>
+        <planeGeometry args={[26, 3]} />
+        <meshStandardMaterial color="#57534e" roughness={0.95} />
+      </mesh>
+
+      {/* ── QUARRY PIT — terraced excavated rectangular pit (west side) ── */}
+      <group position={[-13, 0, 0]}>
+        {/* Pit floor (deepest tier) */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.45, 0]}>
+          <planeGeometry args={[8, 7]} />
+          <meshStandardMaterial color="#1f1812" roughness={1} />
+        </mesh>
+        {/* Mid-tier ledge (inner ring) */}
+        {([
+          { p: [0, -1.0, -3.5], s: [10, 0.4, 1] },
+          { p: [0, -1.0, 3.5], s: [10, 0.4, 1] },
+          { p: [-4.5, -1.0, 0], s: [1, 0.4, 7] },
+          { p: [4.5, -1.0, 0], s: [1, 0.4, 7] },
+        ] as { p: [number, number, number]; s: [number, number, number] }[]).map((seg, i) => (
+          <mesh key={`midL-${i}`} position={seg.p}>
+            <boxGeometry args={seg.s} />
+            <meshStandardMaterial color="#44403c" roughness={0.9} />
+          </mesh>
+        ))}
+        {/* Top-tier ledge (outer rim) */}
+        {([
+          { p: [0, -0.3, -4.5], s: [12, 0.6, 1] },
+          { p: [0, -0.3, 4.5], s: [12, 0.6, 1] },
+          { p: [-5.5, -0.3, 0], s: [1, 0.6, 9] },
+          { p: [5.5, -0.3, 0], s: [1, 0.6, 9] },
+        ] as { p: [number, number, number]; s: [number, number, number] }[]).map((seg, i) => (
+          <mesh key={`topL-${i}`} position={seg.p}>
+            <boxGeometry args={seg.s} />
+            <meshStandardMaterial color="#78716c" roughness={0.85} />
+          </mesh>
+        ))}
+        {/* Boulders scattered on the pit floor */}
+        {([
+          [-2, -1.05, -1, 0.5],
+          [1.5, -1.05, 1.5, 0.45],
+          [-1.5, -1.05, 2, 0.4],
+          [2.5, -1.05, -1.5, 0.5],
+          [0.5, -1.05, 0.3, 0.35],
+        ] as [number, number, number, number][]).map(([rx, ry, rz, rs], i) => (
+          <mesh key={`bolder-${i}`} position={[rx, ry + rs, rz]}>
+            <dodecahedronGeometry args={[rs, 0]} />
+            <meshStandardMaterial color="#57534e" roughness={1} />
+          </mesh>
+        ))}
+        {/* Parked excavator on the NE rim of the pit */}
+        <group position={[4, 0, -3.5]}>
+          {/* Tracks */}
+          {[-0.5, 0.5].map((sz, j) => (
+            <mesh key={`tr-${j}`} position={[0, 0.15, sz]}>
+              <boxGeometry args={[1.7, 0.3, 0.25]} />
+              <meshStandardMaterial color="#0f172a" />
+            </mesh>
+          ))}
+          {/* Body */}
+          <mesh position={[0, 0.6, 0]} castShadow>
+            <boxGeometry args={[1.4, 0.6, 0.9]} />
+            <meshStandardMaterial color="#fbbf24" />
+          </mesh>
+          {/* Cab */}
+          <mesh position={[-0.2, 1.15, 0]}>
+            <boxGeometry args={[0.7, 0.5, 0.7]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+          {/* Arm */}
+          <mesh position={[0.9, 1.0, 0]} rotation={[0, 0, -0.45]}>
+            <boxGeometry args={[1.6, 0.18, 0.2]} />
+            <meshStandardMaterial color="#fbbf24" />
+          </mesh>
+          {/* Bucket */}
+          <mesh position={[1.65, 0.45, 0]}>
+            <boxGeometry args={[0.5, 0.45, 0.55]} />
+            <meshStandardMaterial color="#facc15" metalness={0.4} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ── Safety cones lining the south rim of the quarry pit ── */}
+      {[-10, -8, -6, -4, -2, 0, 2].map((cx, i) => (
+        <group key={`cone-${i}`} position={[cx, 0, 6.2]}>
+          <mesh position={[0, 0.2, 0]}>
+            <coneGeometry args={[0.18, 0.4, 8]} />
+            <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.3} />
+          </mesh>
+          <mesh position={[0, 0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.13, 0.02, 6, 12]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── Mineshaft entrance — bigger arch on the south face of the building ── */}
+      <group position={[0, 0, 2.6]}>
+        <mesh position={[-1.4, 1.5, 0]}>
+          <boxGeometry args={[0.3, 3, 0.3]} />
           <meshStandardMaterial color="#451a03" roughness={0.95} />
         </mesh>
-        <mesh position={[1.1, 1.2, 0]}>
-          <boxGeometry args={[0.25, 2.4, 0.25]} />
+        <mesh position={[1.4, 1.5, 0]}>
+          <boxGeometry args={[0.3, 3, 0.3]} />
           <meshStandardMaterial color="#451a03" roughness={0.95} />
         </mesh>
-        {/* Lintel */}
-        <mesh position={[0, 2.5, 0]}>
-          <boxGeometry args={[2.6, 0.3, 0.3]} />
+        <mesh position={[0, 3.1, 0]}>
+          <boxGeometry args={[3.2, 0.35, 0.35]} />
           <meshStandardMaterial color="#451a03" roughness={0.95} />
         </mesh>
-        {/* Black opening — the pit */}
-        <mesh position={[0, 1.2, 0]}>
-          <boxGeometry args={[2, 2.3, 0.05]} />
+        <mesh position={[0, 1.5, 0]}>
+          <boxGeometry args={[2.5, 2.8, 0.06]} />
           <meshStandardMaterial color="#0b0a08" emissive="#000" />
         </mesh>
-        {/* Single warm bulb hanging inside the shaft */}
-        <mesh position={[0, 2.1, 0.1]}>
-          <sphereGeometry args={[0.12, 10, 10]} />
-          <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={2} toneMapped={false} />
+        <mesh position={[0, 2.6, 0.1]}>
+          <sphereGeometry args={[0.14, 10, 10]} />
+          <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={2.2} toneMapped={false} />
         </mesh>
       </group>
 
-      {/* ── Rail track — runs E-W south of the entrance, two parallel rails */}
+      {/* ── Rail track — longer E-W rails south of the entrance ── */}
       {[-0.18, 0.18].map((rz, i) => (
-        <mesh key={`rail-${i}`} position={[-0.5, 0.12, 3.7 + rz]}>
-          <boxGeometry args={[8, 0.06, 0.1]} />
+        <mesh key={`rail-${i}`} position={[0.5, 0.12, 4.5 + rz]}>
+          <boxGeometry args={[12, 0.06, 0.1]} />
           <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.4} />
         </mesh>
       ))}
-      {/* Wooden ties under the rails */}
-      {[-4, -3, -2, -1, 0, 1, 2, 3].map((tx, i) => (
-        <mesh key={`tie-${i}`} position={[-0.5 + tx * 0.5, 0.07, 3.7]}>
-          <boxGeometry args={[0.3, 0.06, 0.6]} />
+      {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((tx, i) => (
+        <mesh key={`tie-${i}`} position={[0.5 + tx * 1.0, 0.07, 4.5]}>
+          <boxGeometry args={[0.4, 0.06, 0.7]} />
           <meshStandardMaterial color="#451a03" />
         </mesh>
       ))}
 
-      {/* ── Mine cart — small wagon riding the rails */}
-      <group ref={cartRef} position={[0, 0.4, 3.7]}>
+      {/* ── Mine cart — animated wagon riding the rails ── */}
+      <group ref={cartRef} position={[0, 0.4, 4.5]}>
         <mesh position={[0, 0.2, 0]}>
           <boxGeometry args={[0.9, 0.4, 0.6]} />
           <meshStandardMaterial color="#78350f" metalness={0.3} roughness={0.7} />
         </mesh>
-        {/* Iron bands */}
         <mesh position={[0, 0.2, 0]}>
           <boxGeometry args={[0.94, 0.42, 0.04]} />
           <meshStandardMaterial color="#0f172a" metalness={0.7} />
         </mesh>
-        {/* Wheels */}
         {[[-0.3, 0.3], [0.3, 0.3], [-0.3, -0.3], [0.3, -0.3]].map(([wx, wz], i) => (
           <mesh key={`wheel-${i}`} position={[wx, 0, wz]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.13, 0.13, 0.08, 10]} />
             <meshStandardMaterial color="#1f2937" metalness={0.6} />
           </mesh>
         ))}
-        {/* Ore lump on top (one chunk of glowing gold) */}
         <mesh position={[0, 0.55, 0]}>
           <dodecahedronGeometry args={[0.18, 0]} />
           <meshStandardMaterial color="#fbbf24" emissive="#fde047" emissiveIntensity={0.7} toneMapped={false} />
         </mesh>
       </group>
 
-      {/* ── Ore pile — pyramid of glowing rocks south-west of the shaft.
-          The lead chunk holds the animated ref; the smaller chunks are
-          static decoration. */}
-      <mesh ref={oreRef} position={[-3.5, 0.3, 2]}>
-        <dodecahedronGeometry args={[0.45, 0]} />
-        <meshStandardMaterial color="#fbbf24" emissive="#fde047" emissiveIntensity={0.8} toneMapped={false} />
-      </mesh>
-      <mesh position={[-3.1, 0.25, 1.7]}>
-        <dodecahedronGeometry args={[0.32, 0]} />
-        <meshStandardMaterial color="#a16207" emissive="#facc15" emissiveIntensity={0.5} toneMapped={false} />
-      </mesh>
-      <mesh position={[-3.8, 0.22, 2.4]}>
-        <dodecahedronGeometry args={[0.28, 0]} />
-        <meshStandardMaterial color="#854d0e" emissive="#fbbf24" emissiveIntensity={0.5} toneMapped={false} />
-      </mesh>
+      {/* ── Big yellow haul truck — animated along the south haul road ── */}
+      <group ref={haulTruckRef} position={[5, 0, 5]}>
+        {/* Chassis */}
+        <mesh position={[0, 0.6, 0]} castShadow>
+          <boxGeometry args={[3.6, 1.0, 1.6]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.3} />
+        </mesh>
+        {/* Cab */}
+        <mesh position={[-1.4, 1.4, 0]} castShadow>
+          <boxGeometry args={[1.0, 0.8, 1.4]} />
+          <meshStandardMaterial color="#facc15" />
+        </mesh>
+        {/* Windshield */}
+        <mesh position={[-1.9, 1.45, 0]}>
+          <boxGeometry args={[0.08, 0.55, 1.0]} />
+          <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Dump bed (tilted) */}
+        <mesh position={[0.5, 1.4, 0]} rotation={[0, 0, -0.06]}>
+          <boxGeometry args={[2.4, 0.9, 1.5]} />
+          <meshStandardMaterial color="#a16207" roughness={0.85} />
+        </mesh>
+        {/* Ore in the bed */}
+        <mesh position={[0.5, 2.0, 0]}>
+          <dodecahedronGeometry args={[0.4, 0]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fde047" emissiveIntensity={0.4} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.95, 1.95, 0.3]}>
+          <dodecahedronGeometry args={[0.3, 0]} />
+          <meshStandardMaterial color="#a16207" />
+        </mesh>
+        {/* Six huge wheels */}
+        {([[-1.3, 0.8], [-1.3, -0.8], [1.0, 0.8], [1.0, -0.8], [1.8, 0.8], [1.8, -0.8]] as [number, number][]).map(([wx, wz], i) => (
+          <mesh key={`hw-${i}`} position={[wx, 0.45, wz]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.45, 0.45, 0.35, 14]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+        ))}
+      </group>
 
-      {/* ── Conveyor belt — short angled ramp from pit toward sorting area */}
-      <group position={[2.8, 0, 1.4]} rotation={[0, -0.4, 0]}>
+      {/* ── Crusher building (industrial tower with rotating intake rotor) ── */}
+      <group position={[9, 0, -4]}>
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <boxGeometry args={[3.5, 3, 3]} />
+          <meshStandardMaterial color="#52525b" metalness={0.4} roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 3.05, 0]}>
+          <boxGeometry args={[3.7, 0.15, 3.2]} />
+          <meshStandardMaterial color="#3f3f46" />
+        </mesh>
+        <mesh position={[0, 4.5, 0]}>
+          <cylinderGeometry args={[0.9, 1.3, 2.5, 10]} />
+          <meshStandardMaterial color="#71717a" metalness={0.5} roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 5.9, 0]}>
+          <cylinderGeometry args={[1.0, 1.0, 0.2, 10]} />
+          <meshStandardMaterial color="#27272a" />
+        </mesh>
+        <mesh ref={crusherRotorRef} position={[0, 6.15, 0]}>
+          <boxGeometry args={[1.8, 0.12, 0.3]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.6} />
+        </mesh>
+        {/* Feed conveyor angling into the crusher from the pit side */}
+        <group position={[-3.4, 0, 1]} rotation={[0, -0.6, 0]}>
+          <mesh position={[0, 1.2, 0]} rotation={[0, 0, 0.32]}>
+            <boxGeometry args={[5, 0.15, 0.9]} />
+            <meshStandardMaterial color="#1f2937" metalness={0.4} />
+          </mesh>
+          {[-2.0, 0, 2.0].map((sx, i) => (
+            <mesh key={`csup-${i}`} position={[sx, 0.4 + sx * 0.16, 0]}>
+              <boxGeometry args={[0.12, 0.8, 0.9]} />
+              <meshStandardMaterial color="#64748b" />
+            </mesh>
+          ))}
+          {([-1.5, -0.4, 0.6, 1.7] as number[]).map((rx, i) => (
+            <mesh key={`crock-${i}`} position={[rx, 1.32 + rx * 0.16, 0]}>
+              <dodecahedronGeometry args={[0.16, 0]} />
+              <meshStandardMaterial color={["#a16207", "#fbbf24", "#a78bfa", "#67e8f9"][i]} />
+            </mesh>
+          ))}
+        </group>
+        <Text
+          position={[0, 2.2, 1.55]}
+          fontSize={0.32}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.03}
+          outlineColor="#0b1220"
+        >
+          ⚙ CRUSHER
+        </Text>
+      </group>
+
+      {/* ── Three stockpile silos (north of the building) ── */}
+      {[-2, 0, 2].map((sx, i) => (
+        <group key={`silo-${i}`} position={[sx, 0, -7.5]}>
+          <mesh position={[0, 2, 0]} castShadow>
+            <cylinderGeometry args={[0.7, 0.7, 4, 12]} />
+            <meshStandardMaterial color="#e7e5e4" metalness={0.3} roughness={0.5} />
+          </mesh>
+          <mesh position={[0, 4.3, 0]}>
+            <coneGeometry args={[0.75, 0.6, 12]} />
+            <meshStandardMaterial color="#a8a29e" metalness={0.4} />
+          </mesh>
+          <mesh position={[0, 2.5, 0]}>
+            <cylinderGeometry args={[0.71, 0.71, 0.15, 12]} />
+            <meshStandardMaterial color="#dc2626" />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── Water tower with spherical tank ── */}
+      <group position={[12, 0, -7]}>
+        {([[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]] as [number, number][]).map(([lx, lz], i) => (
+          <mesh key={`wleg-${i}`} position={[lx, 2, lz]} rotation={[0, 0, lx > 0 ? -0.12 : 0.12]}>
+            <cylinderGeometry args={[0.08, 0.1, 4.2, 6]} />
+            <meshStandardMaterial color="#52525b" metalness={0.5} />
+          </mesh>
+        ))}
+        <mesh position={[0, 2.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.7, 0.04, 6, 16]} />
+          <meshStandardMaterial color="#52525b" />
+        </mesh>
+        <mesh position={[0, 4.6, 0]} castShadow>
+          <sphereGeometry args={[1.2, 16, 12]} />
+          <meshStandardMaterial color="#0ea5e9" metalness={0.3} roughness={0.4} />
+        </mesh>
+        <Text
+          position={[0, 4.6, 1.25]}
+          fontSize={0.35}
+          color="#f8fafc"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.04}
+          outlineColor="#0b1220"
+        >
+          H₂O
+        </Text>
+      </group>
+
+      {/* ── Five ore stockpiles (gold/copper/lithium/silver/iron) ──
+          The gold pile holds the animated `oreRef`; the rest are static. */}
+      {/* All pile bodies (radius 0.55) sit south of the building footprint
+          (building z_max = +2); minimum z chosen is 3.0 → 0.45u south gap. */}
+      {([
+        { x: -3.5, z: 3.0, body: "#fbbf24", emis: "#fde047", glow: true },
+        { x: -1.5, z: 3.4, body: "#a16207", emis: "#facc15", glow: false },
+        { x: -3.5, z: 4.4, body: "#a78bfa", emis: "#c4b5fd", glow: false },
+        { x: -0.5, z: 3.2, body: "#cbd5e1", emis: "#f1f5f9", glow: false },
+        { x: -5.5, z: 3.6, body: "#7c2d12", emis: "#dc2626", glow: false },
+      ] as { x: number; z: number; body: string; emis: string; glow: boolean }[]).map((pile, i) => (
+        <group key={`pile-${i}`} position={[pile.x, 0, pile.z]}>
+          <mesh ref={pile.glow ? oreRef : undefined} position={[0, 0.45, 0]}>
+            <dodecahedronGeometry args={[0.55, 0]} />
+            <meshStandardMaterial
+              color={pile.body}
+              emissive={pile.emis}
+              emissiveIntensity={pile.glow ? 0.8 : 0.3}
+              toneMapped={!pile.glow}
+            />
+          </mesh>
+          <mesh position={[0.4, 0.3, 0.3]}>
+            <dodecahedronGeometry args={[0.35, 0]} />
+            <meshStandardMaterial color={pile.body} emissive={pile.emis} emissiveIntensity={0.25} />
+          </mesh>
+          <mesh position={[-0.4, 0.25, 0.25]}>
+            <dodecahedronGeometry args={[0.3, 0]} />
+            <meshStandardMaterial color={pile.body} emissive={pile.emis} emissiveIntensity={0.25} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── Equipment shed (SW corner) ── */}
+      <group position={[-6, 0, -6]}>
+        <mesh position={[0, 0.9, 0]} castShadow>
+          <boxGeometry args={[3, 1.8, 2.4]} />
+          <meshStandardMaterial color="#7c2d12" roughness={0.85} />
+        </mesh>
+        <mesh position={[0, 2, 0]}>
+          <boxGeometry args={[3.2, 0.2, 2.6]} />
+          <meshStandardMaterial color="#451a03" />
+        </mesh>
+        <mesh position={[0, 0.7, 1.21]}>
+          <boxGeometry args={[0.8, 1.4, 0.05]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        <mesh position={[-1.0, 1.2, 1.21]}>
+          <boxGeometry args={[0.6, 0.4, 0.05]} />
+          <meshStandardMaterial color="#fde68a" emissive="#fde68a" emissiveIntensity={0.4} />
+        </mesh>
+      </group>
+
+      {/* ── West floodlight pole (animated emissive pulse) ── */}
+      <group position={[-9, 0, -3]}>
+        <mesh position={[0, 3, 0]}>
+          <cylinderGeometry args={[0.08, 0.1, 6, 8]} />
+          <meshStandardMaterial color="#52525b" metalness={0.6} />
+        </mesh>
+        <mesh position={[0, 5.8, 0.3]}>
+          <boxGeometry args={[0.8, 0.35, 0.3]} />
+          <meshStandardMaterial color="#27272a" />
+        </mesh>
+        <mesh ref={floodlightRef} position={[0, 5.8, 0.5]}>
+          <boxGeometry args={[0.7, 0.25, 0.05]} />
+          <meshStandardMaterial color="#fde68a" emissive="#fde047" emissiveIntensity={1.8} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ── East floodlight pole (static) ── */}
+      <group position={[11, 0, 4]}>
+        <mesh position={[0, 3, 0]}>
+          <cylinderGeometry args={[0.08, 0.1, 6, 8]} />
+          <meshStandardMaterial color="#52525b" metalness={0.6} />
+        </mesh>
+        <mesh position={[0, 5.8, -0.3]}>
+          <boxGeometry args={[0.8, 0.35, 0.3]} />
+          <meshStandardMaterial color="#27272a" />
+        </mesh>
+        <mesh position={[0, 5.8, -0.5]}>
+          <boxGeometry args={[0.7, 0.25, 0.05]} />
+          <meshStandardMaterial color="#fde68a" emissive="#fde047" emissiveIntensity={1.5} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ── Original short sorting conveyor (kept, shifted east to clear
+          the larger 7×4 building footprint at local x[-3.5, +3.5]) ── */}
+      <group position={[6, 0, 1]} rotation={[0, -0.4, 0]}>
         <mesh position={[0, 0.45, 0]} rotation={[0, 0, 0.18]}>
           <boxGeometry args={[2.5, 0.12, 0.8]} />
           <meshStandardMaterial color="#1f2937" metalness={0.4} roughness={0.6} />
         </mesh>
-        {/* End rollers */}
         {[-1.2, 1.2].map((rx, i) => (
           <mesh key={`roller-${i}`} position={[rx, 0.45 + rx * 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.16, 0.16, 0.85, 12]} />
             <meshStandardMaterial color="#fbbf24" metalness={0.7} />
           </mesh>
         ))}
-        {/* Support legs */}
         <mesh position={[-1.2, 0.1, 0]}>
           <boxGeometry args={[0.1, 0.2, 0.85]} />
           <meshStandardMaterial color="#64748b" />
@@ -3326,28 +3652,39 @@ function Mine() {
         </mesh>
       </group>
 
-      {/* ── Crossed pickaxes sign above the entrance */}
+      {/* ── Big BOTMINE & QUARRY signage above the entrance ── */}
       <Text
-        position={[0, 4.2, 2.2]}
-        fontSize={0.45}
+        position={[0, 5.7, 2.8]}
+        fontSize={0.6}
         color="#fde047"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.04}
+        outlineWidth={0.05}
         outlineColor="#451a03"
       >
-        ⛏️ BOTMINE
+        ⛏️ BOTMINE & QUARRY
       </Text>
       <Text
-        position={[0, 3.75, 2.2]}
-        fontSize={0.2}
+        position={[0, 5.0, 2.8]}
+        fontSize={0.24}
         color="#fef3c7"
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.02}
         outlineColor="#0b1220"
       >
-        Copper · Lithium · Depletion Allowance
+        Gold · Copper · Lithium · Silver · Iron
+      </Text>
+      <Text
+        position={[0, 4.65, 2.8]}
+        fontSize={0.18}
+        color="#facc15"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#0b1220"
+      >
+        Severance Tax · Depletion Allowance
       </Text>
     </group>
   );

@@ -306,122 +306,9 @@ function FarmDetails() {
 }
 
 // ------------------------- Mine -------------------------
-
-function MineCart({
-  position,
-  rotation = 0,
-}: {
-  position: [number, number, number];
-  rotation?: number;
-}) {
-  return (
-    <group position={position} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <boxGeometry args={[1.4, 0.7, 0.9]} />
-        <meshStandardMaterial color="#374151" metalness={0.4} />
-      </mesh>
-      {/* Ore inside (glowing) */}
-      <mesh position={[0, 0.92, 0]}>
-        <sphereGeometry args={[0.35, 10, 8]} />
-        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} />
-      </mesh>
-      <mesh position={[0.32, 0.9, 0.18]}>
-        <sphereGeometry args={[0.25, 8, 6]} />
-        <meshStandardMaterial color="#a78bfa" emissive="#a78bfa" emissiveIntensity={0.4} />
-      </mesh>
-      {/* Wheels */}
-      {[
-        [-0.5, 0.2, 0.5],
-        [0.5, 0.2, 0.5],
-        [-0.5, 0.2, -0.5],
-        [0.5, 0.2, -0.5],
-      ].map((p, i) => (
-        <mesh
-          key={i}
-          position={p as [number, number, number]}
-          rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry args={[0.2, 0.2, 0.06, 12]} />
-          <meshStandardMaterial color="#1e293b" />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function OrePile({
-  position,
-  color,
-}: {
-  position: [number, number, number];
-  color: string;
-}) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.3, 0]} castShadow>
-        <coneGeometry args={[0.7, 0.6, 8]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
-      </mesh>
-      <mesh position={[0.65, 0.2, 0.35]} castShadow>
-        <coneGeometry args={[0.4, 0.4, 8]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
-      </mesh>
-    </group>
-  );
-}
-
-function MineDetails() {
-  // botmine (-50, *, -25). All items east of building (botmine footprint
-  // is x[-52.5..-47.5] z[-27..-23]); decor extends north + east.
-  return (
-    <group>
-      {/* Wooden rail ties */}
-      {[-4, -2, 0, 2, 4].map((dz, i) => (
-        <mesh
-          key={i}
-          position={[-44, 0.05, -25 + dz]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <planeGeometry args={[3.2, 0.18]} />
-          <meshStandardMaterial color="#78350f" />
-        </mesh>
-      ))}
-      {/* Rails */}
-      <mesh
-        position={[-44.5, 0.07, -25]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <planeGeometry args={[0.1, 9]} />
-        <meshStandardMaterial color="#1e293b" metalness={0.7} />
-      </mesh>
-      <mesh
-        position={[-43.5, 0.07, -25]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <planeGeometry args={[0.1, 9]} />
-        <meshStandardMaterial color="#1e293b" metalness={0.7} />
-      </mesh>
-      <MineCart position={[-44, 0, -22]} rotation={0} />
-      <OrePile position={[-45, 0, -29]} color="#fbbf24" />
-      <OrePile position={[-42, 0, -28]} color="#a78bfa" />
-      <OrePile position={[-42, 0, -22]} color="#67e8f9" />
-      {/* Wooden supply crate */}
-      <mesh position={[-41, 0.35, -24]} castShadow>
-        <boxGeometry args={[0.9, 0.7, 0.9]} />
-        <meshStandardMaterial color="#78350f" />
-      </mesh>
-      {/* Pickaxe leaning on crate */}
-      <mesh position={[-41, 0.8, -24.4]} rotation={[Math.PI / 6, 0, Math.PI / 8]}>
-        <cylinderGeometry args={[0.04, 0.04, 1.2, 6]} />
-        <meshStandardMaterial color="#7c2d12" />
-      </mesh>
-      <mesh position={[-41.2, 1.3, -24.6]} rotation={[0, 0, Math.PI / 2]}>
-        <boxGeometry args={[0.5, 0.12, 0.12]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.6} />
-      </mesh>
-    </group>
-  );
-}
+// (Removed) MineCart / OrePile / MineDetails — the mine moved from
+// world (-50,-25) to (-75,-37.5) and the canonical Mine() decor in
+// CityDistricts.tsx now covers the full expanded quarry complex.
 
 // ------------------------- Port -------------------------
 
@@ -566,7 +453,6 @@ export default function DistrictDetails() {
     <group>
       <BeachDetails />
       <FarmDetails />
-      <MineDetails />
       <PortDetails />
     </group>
   );
