@@ -98,9 +98,9 @@ export const QUARTERS: Quarter[] = [
     emoji: "🧠",
     hudTitle: "Foundations",
     color: "#22d3ee",
-    signpost: [-117, 0, -117],
+    signpost: [-104, 0, -104],
     signpostRotY: Math.PI / 4, // faces center (SE)
-    lots: plusLots(-103, -103, "fnd"),
+    lots: plusLots(-90, -90, "fnd"),
   },
   {
     id: "borrowing",
