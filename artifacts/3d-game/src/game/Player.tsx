@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import MoneyBot from "./MoneyBot";
+import { MoneyBotModel, type MoneyBotAnim } from "./MoneyBotModel";
 import { BotMobile } from "./CityDistricts";
 import { useGameStore } from "./gameStore";
 import { cameraInput } from "./cameraInput";
@@ -38,6 +38,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   const ridingRef = useRef(false);
   const [riding, setRiding] = useState(false);
   const [jetting, setJetting] = useState(false);
+  const [anim, setAnim] = useState<MoneyBotAnim>("Idle");
   // Track the last value pushed to sound.setJetpack so we only call it on
   // transitions, not 60x/sec from useFrame. Belt-and-suspenders alongside
   // sound.ts's own idempotency check.
@@ -206,6 +207,19 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       const showJet = jetActive || isAirborne;
       if (showJet !== jetting) setJetting(showJet);
 
+      // Pick MoneyBot animation based on movement / jetpack state.
+      //   • Airborne + going up  → FlyUp
+      //   • Airborne + going down → FlyDown
+      //   • Moving on ground      → TwistJump (closest "active" loop in clip set)
+      //   • Otherwise             → Idle
+      let nextAnim: MoneyBotAnim = "Idle";
+      if (isAirborne) {
+        nextAnim = verticalVel.current >= 0 ? "FlyUp" : "FlyDown";
+      } else if (isMoving.current) {
+        nextAnim = "TwistJump";
+      }
+      if (nextAnim !== anim) setAnim(nextAnim);
+
       const bound = 105;
       groupRef.current.position.x = Math.max(-bound, Math.min(bound, groupRef.current.position.x));
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
@@ -245,7 +259,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
           <BotMobile pos={[0, 0, 0]} color="#dc2626" accent="#fde047" />
         </group>
       ) : (
-        <MoneyBot isMoving={isMoving} />
+        <MoneyBotModel scale={1.2} animation={anim} />
       )}
     </group>
   );
