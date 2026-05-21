@@ -4152,13 +4152,21 @@ function ArtDistrict() {
   );
 }
 
-// ===== Fashion District @ (-27, 0, 45) ================================
-// Runway plaza south of BotShops (-27, 27). Long lit catwalk down the
-// middle + mannequins on platforms + boutique kiosks framing the
-// runway + a glowing "FASHION" sign overhead. Plaza footprint 12x10
-// centered at (-27, 45) → x[-33..-21], clear of x=-36 road (3u west)
-// and x=-18 road (1.9u east). botfashion kiosk is the south-entrance
-// trigger at (-27, 39.5).
+// ===== Fashion District @ (40.5, 0, 64) ===============================
+// Moved out of the SW airport-shadow (was at (-40.5, 67.5), right
+// against R3 and the helipad apron). Fashion now sits inland from the
+// beach — catwalk vibes a short walk west of the sand. Plaza footprint
+// 12x10 centered at (40.5, 64) → x[34.5..46.5], z[59..69]. Clearances
+// against the real road grid (x=0,±27,±54; z=0,±27,±54, SEC_W=2.2):
+//   • x=27 road band x[25.9..28.1] → 6.4u west gap
+//   • x=54 road band x[52.9..55.1] → 6.4u east gap
+//   • z=54 road band z[52.9..55.1] → 3.9u north gap
+//   • BotHoops Arena (40.5, 45), north wall z=52.4 → 6.6u south gap
+//   • Bot Middle School (40, 75), south edge z=73 → 4u south gap
+//   • Bot High School (22, 75), east edge x=24.5 → 10u west gap
+//   • Beach sand strip (x≈56+) → 9.5u east gap
+// botfashion kiosk is the south-entrance trigger at (40.5, 56.5), in
+// the gap between the z=54 road band and plaza's south edge at z=59.
 function FashionMannequin({ x, z, color }: { x: number; z: number; color: string }) {
   return (
     <group position={[x, 0, z]}>
@@ -4195,7 +4203,7 @@ function FashionDistrict() {
     }
   });
   return (
-    <group position={[-40.5, 0, 67.5]}>
+    <group position={[40.5, 0, 64]}>
       {/* Plaza floor — dark with magenta glow (12 wide x 10 deep) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[12, 10]} />

@@ -570,14 +570,15 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     emoji: "🎨",
   },
   {
-    // BotFashion District — kiosk sign at south entrance of the runway
-    // plaza at (-27, 0, 45). Plaza center x=-27 sits in the block
-    // interior between x=-36 and x=-18 road bands. South of BotShops
-    // (-27, 27) by 18u; north of BotKids (-6, 55) by 13u. Clears z=36
-    // road band by 2.4u.
+    // BotFashion District — moved out of the SW airport corner (was at
+    // (-40.5, 59.25), right against R3 and the helipad apron). Now sits
+    // inland from the beach — fashion shopping a short walk west of the
+    // sand. Plaza at (40.5, 64) in CityDistricts.FashionDistrict; kiosk
+    // here is the south-entrance trigger in the gap between the z=54
+    // road band (z_max=55.1) and the plaza's south edge at z=59.
     id: "botfashion",
     label: "BotFashion District",
-    position: [-40.5, 1.5, 59.25],
+    position: [40.5, 1.5, 56.5],
     color: "#ec4899",
     roofColor: "#f9a8d4",
     width: 1.8,
