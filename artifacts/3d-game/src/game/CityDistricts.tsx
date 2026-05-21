@@ -6422,10 +6422,17 @@ function CivicSafetyComplex() {
   const PLAZA_Z = -82;
 
   return (
-    <group>
+    // Civic plaza relocated from (52.5,-82) → (40.5,-47) to flank
+    // BotCityHall (19.5,-45). Wrap translates all absolute world coords
+    // below (PLAZA_X/Z, hardcoded kiosk x=45/60, vehicle x=48.5/56.2,
+    // sign/door z=-79.9..-80) by (-12, +35). Plaza floor also shrunk
+    // 20×14→20×8 below: post-translation z[-51,-43] clears z=-54 sidewalk
+    // (z[-52.5,-51.7], 0.7u gap) and EduHistory floor z[-42.5,-34.5]
+    // (0.5u gap south).
+    <group position={[-12, 0, 35]}>
       {/* ── Shared plaza pavement (asphalt with painted civic crest) ── */}
       <mesh position={[PLAZA_X, 0.02, PLAZA_Z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[20, 14]} />
+        <planeGeometry args={[20, 8]} />
         <meshStandardMaterial color="#1f2937" roughness={0.95} />
       </mesh>
       {/* Painted star/badge in the plaza center (gold) */}
@@ -6441,10 +6448,13 @@ function CivicSafetyComplex() {
       ))}
       {/* Plaza lamp posts at four corners */}
       {[
-        [PLAZA_X - 8, PLAZA_Z - 5],
-        [PLAZA_X + 8, PLAZA_Z - 5],
-        [PLAZA_X - 8, PLAZA_Z + 5],
-        [PLAZA_X + 8, PLAZA_Z + 5],
+        // Lamp z offsets reduced ±5→±3.5 to stay inside the 20×8 plaza
+        // floor (half-depth 4); 0.5u margin from north/south floor edges
+        // keeps lamps clear of the z=-54 sidewalk and EduHistory floor.
+        [PLAZA_X - 8, PLAZA_Z - 3.5],
+        [PLAZA_X + 8, PLAZA_Z - 3.5],
+        [PLAZA_X - 8, PLAZA_Z + 3.5],
+        [PLAZA_X + 8, PLAZA_Z + 3.5],
       ].map(([lx, lz], i) => (
         <group key={`lamp-${i}`} position={[lx, 0, lz]}>
           <mesh position={[0, 1.6, 0]}>

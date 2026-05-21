@@ -629,18 +629,24 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 4,
     emoji: "✏️",
   },
-  // ─── Civic safety complex @ z=-82 ─────────────────────────────────────
-  // BotPolice + BotFire paired in the empty corridor between BotHaus
-  // (9, -82.5, footprint x[6, 12]) and BotRocket (75, -75, footprint
-  // x[73, 77]). Police at (45, -82) → footprint x[42.5, 47.5] z[-84, -80].
-  // Fire at (60, -82) → footprint x[57.5, 62.5] z[-84, -80]. Gap between
-  // kiosks = 10u (shared plaza, see CityDistricts.CivicSafetyComplex).
-  // Clearances: police↔botcasino (52.5,-60) ~19u SE; fire↔botrocket
-  // (75,-75) ~13.5u NE. No road band on z=-82 (rings at ±72/±90).
+  // ─── Civic plaza @ z=-47 ──────────────────────────────────────────────
+  // BotPolice + BotFire form a civic plaza flanking BotCityHall (19.5,-45).
+  // Police at (33,-47) → fp x[30.5,35.5] z[-49,-45]. Fire at (48,-47) →
+  // fp x[45.5,50.5] z[-49,-45]. Gap between kiosks = 10u (shared plaza,
+  // see CityDistricts.CivicSafetyComplex translated by (-12,+35)).
+  // Clearances:
+  //   • cityhall (19.5,-45) fp x[17,22] z[-48,-42]: 8.5u east in x.
+  //   • eduhistory (33,-40.5) fp x[31,35] z[-42.5,-38.5]: 4.5u south of
+  //     police in z (z gap = -45 − (-42.5)). x overlap fine.
+  //   • botcasino (52.5,-60) fp x[50,55] z[-62,-58]: 9u south of fire
+  //     in z; 0.5u x overlap [50,50.5] but no actual collision (z clear).
+  //   • Road z=-54 sidewalk z[-52.5,-51.7]: plaza shrunk 20×14→20×8 so
+  //     its north edge z=-51 sits 0.7u south of the sidewalk; south edge
+  //     z=-43 sits 0.5u north of eduhistory floor (z[-42.5,-34.5]).
   {
     id: "botpolice",
     label: "BotPolice Precinct",
-    position: [45, 2.5, -82],
+    position: [33, 2.5, -47],
     color: "#1e3a8a",
     roofColor: "#94a3b8",
     width: 5,
@@ -651,7 +657,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botfire",
     label: "BotFire Station",
-    position: [60, 2.5, -82],
+    position: [48, 2.5, -47],
     color: "#b91c1c",
     roofColor: "#f8fafc",
     width: 5,
