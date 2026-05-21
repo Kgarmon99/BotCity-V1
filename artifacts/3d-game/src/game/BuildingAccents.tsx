@@ -561,9 +561,409 @@ function BotRetirementAccent() {
   );
 }
 
+// =====================================================================
+// Round 2 — accents for the remaining buildings.
+// =====================================================================
+// Footprint reference:
+//   botdealer    (-9, *, -27)  5x4  h=5   top y=5
+//   bothistory   (-22, *, -27) 5x4  h=5   top y=5
+//   eduhistory   (22, *, -27)  5x4  h=5   top y=5
+//   finhistory   (-22, *, 27)  5x4  h=5   top y=5
+//   bothaus      (6, *, -55)   5x4  h=6   top y=6
+//   botbroker    (55, *, -6)   5x4  h=8   top y=7
+//   botgigs      (-55, *, 6)   5x4  h=6   top y=6
+//   botkids      (-6, *, 55)   5x4  h=5   top y=5.5
+
+// ----- BotDealer: rooftop car display on a turntable. -----
+function BotDealerAccent() {
+  const turntableRef = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    if (turntableRef.current) {
+      turntableRef.current.rotation.y = state.clock.elapsedTime * 0.4;
+    }
+  });
+  return (
+    <group position={[-9, 5, -27]}>
+      {/* Turntable disc */}
+      <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[1.4, 24]} />
+        <meshStandardMaterial color="#0f172a" emissive="#fbbf24" emissiveIntensity={0.2} />
+      </mesh>
+      <group ref={turntableRef} position={[0, 0.1, 0]}>
+        {/* Tiny convertible: body + cabin */}
+        <mesh position={[0, 0.25, 0]} castShadow>
+          <boxGeometry args={[1.3, 0.4, 0.65]} />
+          <meshStandardMaterial color="#dc2626" metalness={0.5} />
+        </mesh>
+        <mesh position={[-0.05, 0.55, 0]} castShadow>
+          <boxGeometry args={[0.55, 0.25, 0.55]} />
+          <meshStandardMaterial color="#67e8f9" transparent opacity={0.7} />
+        </mesh>
+        {/* Wheels */}
+        {[
+          [-0.45, 0.18, 0.36],
+          [0.45, 0.18, 0.36],
+          [-0.45, 0.18, -0.36],
+          [0.45, 0.18, -0.36],
+        ].map((p, i) => (
+          <mesh key={i} position={p as [number, number, number]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.12, 0.12, 0.06, 10]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+        ))}
+      </group>
+      {/* Spotlight pole */}
+      <mesh position={[1.6, 0.9, 0]}>
+        <cylinderGeometry args={[0.05, 0.05, 1.8, 6]} />
+        <meshStandardMaterial color="#1e293b" />
+      </mesh>
+      <mesh position={[1.4, 1.7, 0]}>
+        <sphereGeometry args={[0.15, 10, 8]} />
+        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.0} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+// ----- BotHistory Museum: rooftop book stack + telescope. -----
+function BotHistoryAccent() {
+  return (
+    <group position={[-22, 5, -27]}>
+      {/* Stack of books, each a different color */}
+      {[
+        [0.0, 0.15, "#dc2626"],
+        [0.05, 0.45, "#1e3a8a"],
+        [-0.05, 0.75, "#16a34a"],
+        [0.0, 1.05, "#7c2d12"],
+      ].map(([dx, y, c], i) => (
+        <mesh key={i} position={[dx as number, y as number, -0.6]} castShadow>
+          <boxGeometry args={[1.2, 0.28, 0.85]} />
+          <meshStandardMaterial color={c as string} />
+        </mesh>
+      ))}
+      {/* Open book on top */}
+      <mesh position={[0, 1.3, -0.6]} rotation={[-Math.PI / 12, 0, 0]} castShadow>
+        <boxGeometry args={[1.0, 0.05, 0.7]} />
+        <meshStandardMaterial color="#fef3c7" />
+      </mesh>
+      {/* Telescope on a tripod */}
+      <group position={[1.0, 0, 0.5]}>
+        {[-0.25, 0.25].map((dx) => (
+          <mesh key={dx} position={[dx, 0.4, 0]} rotation={[0, 0, dx > 0 ? -0.2 : 0.2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.9, 6]} />
+            <meshStandardMaterial color="#78716c" />
+          </mesh>
+        ))}
+        <mesh position={[0, 0.9, 0]} rotation={[Math.PI / 4, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.1, 0.14, 0.8, 12]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+// ----- EduHistory Museum: rooftop graduation cap + scroll. -----
+function EduHistoryAccent() {
+  const tasselRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    if (tasselRef.current) {
+      tasselRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 1.2) * 0.25;
+    }
+  });
+  return (
+    <group position={[22, 5, -27]}>
+      {/* Cap base (skullcap) */}
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <cylinderGeometry args={[0.65, 0.65, 0.4, 18]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      {/* Mortarboard (flat top) */}
+      <mesh position={[0, 0.65, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+        <boxGeometry args={[1.6, 0.12, 1.6]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      {/* Tassel anchor button */}
+      <mesh position={[0, 0.72, 0]}>
+        <sphereGeometry args={[0.1, 10, 8]} />
+        <meshStandardMaterial color="#fbbf24" metalness={0.8} />
+      </mesh>
+      {/* Tassel (swings) */}
+      <mesh ref={tasselRef} position={[0.55, 0.72, 0.55]}>
+        <boxGeometry args={[0.08, 0.55, 0.08]} />
+        <meshStandardMaterial color="#fbbf24" />
+      </mesh>
+      {/* Scroll beside the cap */}
+      <mesh position={[-1.2, 0.18, 0.5]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.15, 0.15, 1.1, 12]} />
+        <meshStandardMaterial color="#fef3c7" />
+      </mesh>
+      <mesh position={[-1.2, 0.18, 0.5]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.05, 0.05, 1.2, 8]} />
+        <meshStandardMaterial color="#7c2d12" />
+      </mesh>
+    </group>
+  );
+}
+
+// ----- FinHistory Museum: stacked coins + scales of justice. -----
+function FinHistoryAccent() {
+  const scalesRef = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    if (scalesRef.current) {
+      scalesRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.8) * 0.06;
+    }
+  });
+  return (
+    <group position={[-22, 5, 27]}>
+      {/* Stack of giant coins */}
+      {[0, 0.2, 0.4, 0.6].map((y, i) => (
+        <mesh key={i} position={[-0.8, y + 0.1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.55, 0.55, 0.16, 24]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.85} emissive="#fbbf24" emissiveIntensity={0.15} />
+        </mesh>
+      ))}
+      {/* "$" on top coin */}
+      <mesh position={[-0.8, 0.78, 0]}>
+        <boxGeometry args={[0.08, 0.4, 0.04]} />
+        <meshStandardMaterial color="#78350f" />
+      </mesh>
+      {/* Scales of justice */}
+      <mesh position={[0.8, 0.6, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 1.2, 6]} />
+        <meshStandardMaterial color="#1e293b" metalness={0.7} />
+      </mesh>
+      <group ref={scalesRef} position={[0.8, 1.2, 0]}>
+        <mesh>
+          <boxGeometry args={[1.2, 0.04, 0.04]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        {[-0.55, 0.55].map((x) => (
+          <mesh key={x} position={[x, -0.2, 0]}>
+            <cylinderGeometry args={[0.18, 0.05, 0.15, 14]} />
+            <meshStandardMaterial color="#fbbf24" metalness={0.8} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+// ----- BotHaus: pitched roof, chimney + smoke puff. -----
+function BotHausAccent() {
+  const smokeRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    if (smokeRef.current) {
+      const t = state.clock.elapsedTime;
+      smokeRef.current.position.y = 1.4 + (t * 0.4) % 1.5;
+      smokeRef.current.scale.setScalar(0.4 + ((t * 0.4) % 1.5) * 0.4);
+      const m = smokeRef.current.material as THREE.MeshStandardMaterial;
+      m.opacity = 0.7 - ((t * 0.4) % 1.5) * 0.45;
+    }
+  });
+  return (
+    <group position={[6, 6, -55]}>
+      {/* Pitched roof (gable along E-W) — 5x4 footprint becomes a ridge */}
+      <mesh position={[0, 0.6, 0]} rotation={[0, 0, 0]} castShadow>
+        <boxGeometry args={[5.0, 0.15, 4.0]} />
+        <meshStandardMaterial color="#7c2d12" />
+      </mesh>
+      {/* Left roof slope */}
+      <mesh position={[-1.1, 1.0, 0]} rotation={[0, 0, -Math.PI / 5]} castShadow>
+        <boxGeometry args={[2.6, 0.15, 4.0]} />
+        <meshStandardMaterial color="#7c2d12" />
+      </mesh>
+      <mesh position={[1.1, 1.0, 0]} rotation={[0, 0, Math.PI / 5]} castShadow>
+        <boxGeometry args={[2.6, 0.15, 4.0]} />
+        <meshStandardMaterial color="#7c2d12" />
+      </mesh>
+      {/* Chimney */}
+      <mesh position={[1.6, 1.2, -0.9]} castShadow>
+        <boxGeometry args={[0.55, 1.2, 0.55]} />
+        <meshStandardMaterial color="#9ca3af" />
+      </mesh>
+      <mesh position={[1.6, 1.85, -0.9]}>
+        <boxGeometry args={[0.65, 0.1, 0.65]} />
+        <meshStandardMaterial color="#475569" />
+      </mesh>
+      {/* Rising smoke puff */}
+      <mesh ref={smokeRef} position={[1.6, 1.95, -0.9]}>
+        <sphereGeometry args={[0.3, 10, 8]} />
+        <meshStandardMaterial color="#e5e7eb" transparent opacity={0.6} />
+      </mesh>
+      {/* Roof window (dormer) */}
+      <mesh position={[0, 1.25, 1.5]}>
+        <boxGeometry args={[0.8, 0.5, 0.1]} />
+        <meshStandardMaterial color="#67e8f9" emissive="#67e8f9" emissiveIntensity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+// ----- BotBroker: rooftop stock ticker + antenna array. -----
+function BotBrokerAccent() {
+  const tickerRef = useRef<THREE.Mesh>(null!);
+  const arrowRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (tickerRef.current) {
+      const m = tickerRef.current.material as THREE.MeshStandardMaterial;
+      m.emissiveIntensity = 0.6 + Math.sin(t * 3) * 0.3;
+    }
+    if (arrowRef.current) {
+      arrowRef.current.position.y = 1.4 + Math.sin(t * 1.5) * 0.15;
+    }
+  });
+  return (
+    <group position={[55, 7, -6]}>
+      {/* Wraparound ticker band on the south facade */}
+      <mesh position={[0, 0.3, 1.95]}>
+        <boxGeometry args={[4.6, 0.5, 0.1]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      <mesh ref={tickerRef} position={[0, 0.3, 2.001]}>
+        <boxGeometry args={[4.2, 0.32, 0.02]} />
+        <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.7} toneMapped={false} />
+      </mesh>
+      {/* Floating up-arrow indicator */}
+      <mesh ref={arrowRef} position={[0, 1.4, 0]}>
+        <coneGeometry args={[0.4, 0.8, 4]} />
+        <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1.0} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 0.85, 0]}>
+        <boxGeometry args={[0.3, 0.5, 0.3]} />
+        <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.7} toneMapped={false} />
+      </mesh>
+      {/* Antenna array */}
+      {[-1.5, 1.5].map((x) => (
+        <mesh key={x} position={[x, 0.9, -1]}>
+          <cylinderGeometry args={[0.03, 0.05, 1.8, 6]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+      ))}
+      {/* Crossbar at top of antennas */}
+      <mesh position={[0, 1.7, -1]}>
+        <boxGeometry args={[3.2, 0.06, 0.06]} />
+        <meshStandardMaterial color="#475569" />
+      </mesh>
+    </group>
+  );
+}
+
+// ----- BotGigs: rooftop neon laptop sign. -----
+function BotGigsAccent() {
+  const screenRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    if (screenRef.current) {
+      const m = screenRef.current.material as THREE.MeshStandardMaterial;
+      m.emissiveIntensity = 0.6 + Math.sin(state.clock.elapsedTime * 2.5) * 0.3;
+    }
+  });
+  return (
+    <group position={[-55, 6, 6]}>
+      {/* Laptop base */}
+      <mesh position={[0, 0.1, 0]} castShadow>
+        <boxGeometry args={[1.8, 0.15, 1.2]} />
+        <meshStandardMaterial color="#1e293b" metalness={0.5} />
+      </mesh>
+      {/* Hinged screen */}
+      <mesh position={[0, 0.8, -0.55]} rotation={[-Math.PI / 8, 0, 0]} castShadow>
+        <boxGeometry args={[1.8, 1.4, 0.1]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      {/* Glowing screen content */}
+      <mesh ref={screenRef} position={[0, 0.8, -0.49]} rotation={[-Math.PI / 8, 0, 0]}>
+        <boxGeometry args={[1.6, 1.2, 0.02]} />
+        <meshStandardMaterial color="#a78bfa" emissive="#a78bfa" emissiveIntensity={0.8} toneMapped={false} />
+      </mesh>
+      {/* Coffee mug beside */}
+      <mesh position={[1.2, 0.3, 0.3]} castShadow>
+        <cylinderGeometry args={[0.18, 0.16, 0.4, 14]} />
+        <meshStandardMaterial color="#dc2626" />
+      </mesh>
+      {/* Mug handle */}
+      <mesh position={[1.4, 0.3, 0.3]} rotation={[0, 0, Math.PI / 2]}>
+        <torusGeometry args={[0.1, 0.03, 6, 12]} />
+        <meshStandardMaterial color="#dc2626" />
+      </mesh>
+      {/* Steam */}
+      <mesh position={[1.2, 0.65, 0.3]}>
+        <sphereGeometry args={[0.1, 8, 6]} />
+        <meshStandardMaterial color="#f8fafc" transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+// ----- BotKids: rooftop spiral slide + small play structure. -----
+function BotKidsAccent() {
+  return (
+    <group position={[-6, 5.5, 55]}>
+      {/* Platform */}
+      <mesh position={[-1.0, 0.4, 0]} castShadow>
+        <boxGeometry args={[1.0, 0.15, 1.0]} />
+        <meshStandardMaterial color="#fbbf24" />
+      </mesh>
+      {/* Slide trough */}
+      <mesh position={[0.4, 0.0, 0]} rotation={[0, 0, -Math.PI / 5]} castShadow>
+        <boxGeometry args={[2.4, 0.1, 0.7]} />
+        <meshStandardMaterial color="#f472b6" />
+      </mesh>
+      {/* Slide side rails */}
+      <mesh position={[0.4, 0.18, 0.35]} rotation={[0, 0, -Math.PI / 5]}>
+        <boxGeometry args={[2.4, 0.18, 0.05]} />
+        <meshStandardMaterial color="#ec4899" />
+      </mesh>
+      <mesh position={[0.4, 0.18, -0.35]} rotation={[0, 0, -Math.PI / 5]}>
+        <boxGeometry args={[2.4, 0.18, 0.05]} />
+        <meshStandardMaterial color="#ec4899" />
+      </mesh>
+      {/* Tiny see-saw on the other side */}
+      <mesh position={[-1.6, 0.2, 0]}>
+        <boxGeometry args={[0.18, 0.2, 0.18]} />
+        <meshStandardMaterial color="#dc2626" />
+      </mesh>
+      <mesh position={[-1.6, 0.3, 0]} rotation={[0, 0, Math.PI / 18]} castShadow>
+        <boxGeometry args={[1.6, 0.06, 0.18]} />
+        <meshStandardMaterial color="#22d3ee" />
+      </mesh>
+      {/* Pinwheel */}
+      <BotKidsPinwheel />
+    </group>
+  );
+}
+
+function BotKidsPinwheel() {
+  const ref = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    if (ref.current) ref.current.rotation.z = state.clock.elapsedTime * 2;
+  });
+  return (
+    <group position={[1.7, 0.7, 1.2]}>
+      <mesh>
+        <cylinderGeometry args={[0.025, 0.025, 0.9, 6]} />
+        <meshStandardMaterial color="#78350f" />
+      </mesh>
+      <group ref={ref} position={[0, 0.45, 0]}>
+        {[0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2].map((r, i) => (
+          <mesh key={i} rotation={[0, 0, r]} position={[0, 0, 0]}>
+            <boxGeometry args={[0.45, 0.18, 0.02]} />
+            <meshStandardMaterial
+              color={["#dc2626", "#fbbf24", "#22c55e", "#22d3ee"][i]}
+              emissive={["#dc2626", "#fbbf24", "#22c55e", "#22d3ee"][i]}
+              emissiveIntensity={0.3}
+            />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 export default function BuildingAccents() {
   return (
     <group>
+      {/* Round 1 */}
       <WorkCorpAccent />
       <TaxMartAccent />
       <FirstBankAccent />
@@ -576,6 +976,15 @@ export default function BuildingAccents() {
       <BotCharityAccent />
       <LittleBotsAccent />
       <BotRetirementAccent />
+      {/* Round 2 */}
+      <BotDealerAccent />
+      <BotHistoryAccent />
+      <EduHistoryAccent />
+      <FinHistoryAccent />
+      <BotHausAccent />
+      <BotBrokerAccent />
+      <BotGigsAccent />
+      <BotKidsAccent />
     </group>
   );
 }

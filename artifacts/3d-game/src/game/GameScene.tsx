@@ -25,6 +25,11 @@ import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
 import Streetscape from "./Streetscape";
 import BuildingAccents from "./BuildingAccents";
+import DayNightCycle from "./DayNightCycle";
+import River from "./River";
+import ObservationTower from "./ObservationTower";
+import AmbientLife from "./AmbientLife";
+import DistrictDetails from "./DistrictDetails";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -643,20 +648,9 @@ export default function GameScene() {
           <color attach="background" args={[fogParams.background]} />
           <fog attach="fog" args={[fogParams.color, fogParams.near, fogParams.far]} />
 
-          <ambientLight intensity={0.45} color="#22c55e" />
-          <directionalLight
-            position={[15, 20, 10]}
-            intensity={0.7}
-            color="#86efac"
-            castShadow
-            shadow-mapSize={[2048, 2048]}
-            shadow-camera-far={120}
-            shadow-camera-left={-30}
-            shadow-camera-right={30}
-            shadow-camera-top={30}
-            shadow-camera-bottom={-30}
-          />
-          <hemisphereLight args={["#4ade80", "#16a34a", 0.6]} />
+          {/* Day/night cycle owns ambient, directional, and hemisphere
+              lights so they can be interpolated by sun phase. */}
+          <DayNightCycle />
           <pointLight position={[0, 8, 0]} intensity={2} color="#fbbf24" distance={20} />
 
           <FollowCamera target={playerPos} />
@@ -669,6 +663,10 @@ export default function GameScene() {
           <CityDistricts />
           <Streetscape />
           <BuildingAccents />
+          <DistrictDetails />
+          <River />
+          <ObservationTower />
+          <AmbientLife />
           <CityHallPlaza />
           <Blimp />
           <Statues />
