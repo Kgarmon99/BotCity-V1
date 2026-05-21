@@ -376,20 +376,9 @@ export default function World() {
         <DistantTower key={`tower-${i}`} pos={t.pos} height={t.height} color={t.color} />
       ))}
 
-      {/* Boundary glowing rails — extended to ±65 to wrap the expanded
-          suburbs ring (BotHaus / BotBroker / BotKids / BotGigs). */}
-      {[-65, 65].map((x) => (
-        <mesh key={`fx${x}`} position={[x, 0.5, 0]} castShadow>
-          <boxGeometry args={[0.15, 1, 130]} />
-          <meshStandardMaterial color="#052e16" emissive="#22c55e" emissiveIntensity={1.2} toneMapped={false} />
-        </mesh>
-      ))}
-      {[-65, 65].map((z) => (
-        <mesh key={`fz${z}`} position={[0, 0.5, z]} castShadow>
-          <boxGeometry args={[130, 1, 0.15]} />
-          <meshStandardMaterial color="#052e16" emissive="#4ade80" emissiveIntensity={1.2} toneMapped={false} />
-        </mesh>
-      ))}
+      {/* (Boundary glowing rails removed per user request — the green
+          fence at ±65 was cutting straight through outer districts that
+          have since expanded past it: airport, BotPark, BotMine, etc.) */}
     </group>
   );
 }
