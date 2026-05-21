@@ -997,22 +997,35 @@ function NationalPark() {
     }
   });
   // Local origin (-92, 0, -78). Decor extends mostly NW (negative x,
-  // negative z) to fill the empty SW corner.
+  // negative z) to fill the empty SW corner. Significantly expanded:
+  // pine floor 24×32 → 38×46 (~2.3×), additional mountains and trees,
+  // larger lake. World footprint: x[-118,-80] × z[-114,-68].
   return (
     <group position={[-92, 0, -78]}>
       {/* Pine-forest floor — dark green meadow tinting the corner */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5, 0.018, -10]}>
-        <planeGeometry args={[24, 32]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-7, 0.018, -13]}>
+        <planeGeometry args={[38, 46]} />
         <meshStandardMaterial color="#365314" roughness={1} />
+      </mesh>
+      {/* Outer wildflower meadow ring — slightly lighter green */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-7, 0.012, -13]}>
+        <ringGeometry args={[22, 26, 48]} />
+        <meshStandardMaterial color="#4d7c0f" roughness={1} />
       </mesh>
       {/* Mountains — staggered behind the visitor center */}
       <Mountain position={[-9, 6, -22]} height={12} radius={5} />
       <Mountain position={[0, 7.5, -25]} height={15} radius={6} />
       <Mountain position={[9, 5.5, -23]} height={11} radius={4.5} cap="#e0e7ff" />
       <Mountain position={[-6, 4.5, -16]} height={9} radius={3.5} rock="#52525b" />
-      {/* Lake — emissive blue plane east of the visitor center */}
+      {/* Expanded mountain range — far western and southern peaks */}
+      <Mountain position={[-20, 8, -28]} height={16} radius={6.5} cap="#f1f5f9" />
+      <Mountain position={[-23, 5.5, -18]} height={11} radius={4.5} rock="#475569" />
+      <Mountain position={[-17, 7, -34]} height={14} radius={5.5} />
+      <Mountain position={[6, 6, -32]} height={12} radius={5} cap="#e2e8f0" />
+      <Mountain position={[-25, 4, -8]} height={8} radius={3.5} rock="#52525b" />
+      {/* Lake — emissive blue plane east of the visitor center (enlarged) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[7, 0.04, -6]}>
-        <circleGeometry args={[4, 32]} />
+        <circleGeometry args={[5.5, 32]} />
         <meshStandardMaterial
           ref={lakeRef}
           color="#0e7490"
@@ -1022,11 +1035,30 @@ function NationalPark() {
           roughness={0.2}
         />
       </mesh>
-      {/* Pine forest scattered across the floor */}
+      {/* Second smaller alpine pond — south-west, fed by mountain streams */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-18, 0.04, -10]}>
+        <circleGeometry args={[2.5, 24]} />
+        <meshStandardMaterial
+          color="#0c4a6e"
+          emissive="#38bdf8"
+          emissiveIntensity={0.3}
+          metalness={0.5}
+          roughness={0.2}
+        />
+      </mesh>
+      {/* Pine forest — original 16 trees + 18 added across the expansion */}
       {[
+        // Original spread
         [-12, -3], [-10, -7], [-14, -10], [-8, -12], [-12, -16],
         [-4, -8], [-2, -14], [2, -10], [4, -16], [-16, -6],
         [-6, 2], [-14, 0], [-2, 3], [3, 1], [10, 2], [12, -2],
+        // Western expansion
+        [-22, -4], [-20, -12], [-24, 2], [-19, 4], [-23, -14],
+        [-26, -10], [-21, 6],
+        // Southern expansion
+        [-12, -22], [-6, -20], [2, -22], [-18, -24], [10, -18],
+        [-2, -26], [-14, -28], [8, -26], [4, -30], [-8, -32],
+        [12, 4],
       ].map(([x, z], i) => (
         <PineTree key={`pt-${i}`} x={x} z={z} scale={0.7 + ((i * 13) % 5) / 12} />
       ))}

@@ -98,12 +98,12 @@ export const QUARTERS: Quarter[] = [
     emoji: "🧠",
     hudTitle: "Foundations",
     color: "#22d3ee",
-    signpost: [-85, 0, -110],
+    signpost: [-117, 0, -142],
     signpostRotY: Math.PI / 4, // faces center (SE)
-    // Shifted east of BotNational Park (pine floor x∈[-109,-85], z∈[-104,-72])
-    // and west of Golf Course (x∈[-64,-24], z∈[-103,-87]), so the cluster
-    // threads the narrow corridor between them.
-    lots: plusLots(-75, -90, "fnd"),
+    // Pushed into the outer-ring band (z∈[-120,-150]) clear of the now-
+    // expanded BotNational Park (footprint x∈[-118,-80], z∈[-114,-68]).
+    // Mirrors Life Events at (-103, 135) on the opposite side of the city.
+    lots: plusLots(-103, -135, "fnd"),
   },
   {
     id: "borrowing",

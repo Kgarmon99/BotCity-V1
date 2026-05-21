@@ -767,12 +767,12 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   // Standard kiosk footprint: 1.8×1.8×3, y=1.5 — same as botstadium, etc.
   // Body/roof colors are themed to the quarter signpost color.
   // ════════════════════════════════════════════════════════════════════
-  // ── Foundations 🧠 (cyan #22d3ee), centered (-75, -90) — between Park (x≤-85) and Golf (x≥-64) ──
-  { id: "botmint",        label: "BotMint",              position: [-75, 1.5, -90], color: "#22d3ee", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "💵" },
-  { id: "botbudget",      label: "BotBudget Cafe",       position: [-75, 1.5, -98], color: "#06b6d4", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "📒" },
-  { id: "botsavings",     label: "BotSavings Plaza",     position: [-75, 1.5, -82], color: "#0891b2", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🐷" },
-  { id: "botcreditbureau",label: "BotCredit Bureau",     position: [-67, 1.5, -90], color: "#0e7490", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📇" },
-  { id: "botbehavioral",  label: "BotBehavioral Lab",    position: [-83, 1.5, -90], color: "#155e75", roofColor: "#67e8f9", width: 1.8, depth: 1.8, height: 3, emoji: "🧠" },
+  // ── Foundations 🧠 (cyan #22d3ee), centered (-103, -135) — outer-ring NW band, away from expanded Park ──
+  { id: "botmint",        label: "BotMint",              position: [-103, 1.5, -135], color: "#22d3ee", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "💵" },
+  { id: "botbudget",      label: "BotBudget Cafe",       position: [-103, 1.5, -143], color: "#06b6d4", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "📒" },
+  { id: "botsavings",     label: "BotSavings Plaza",     position: [-103, 1.5, -127], color: "#0891b2", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 3, emoji: "🐷" },
+  { id: "botcreditbureau",label: "BotCredit Bureau",     position: [-95, 1.5, -135], color: "#0e7490", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "📇" },
+  { id: "botbehavioral",  label: "BotBehavioral Lab",    position: [-111, 1.5, -135], color: "#155e75", roofColor: "#67e8f9", width: 1.8, depth: 1.8, height: 3, emoji: "🧠" },
   // ── Borrowing & Credit 💳 (pink #f472b6), centered (103, -103) ──
   { id: "botmortgage",    label: "BotMortgage Bank",     position: [103, 1.5, -103], color: "#f472b6", roofColor: "#fde047", width: 1.8, depth: 1.8, height: 3, emoji: "🏘️" },
   { id: "botstudentaid",  label: "BotStudentAid Office", position: [103, 1.5, -111], color: "#ec4899", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎓" },
