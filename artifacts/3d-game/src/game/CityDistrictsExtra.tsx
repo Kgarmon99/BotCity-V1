@@ -331,110 +331,184 @@ function ElementarySchool() {
 //   botgigs    (-82.5, 9)   — far south
 // =====================================================================
 
-function GolfFlag({ x, z, color = "#dc2626" }: { x: number; z: number; color?: string }) {
-  return (
-    <group position={[x, 0, z]}>
-      <mesh position={[0, 1, 0]}>
-        <cylinderGeometry args={[0.03, 0.03, 2, 8]} />
-        <meshStandardMaterial color="#f8fafc" />
-      </mesh>
-      <mesh position={[0.3, 1.75, 0]}>
-        <planeGeometry args={[0.6, 0.35]} />
-        <meshStandardMaterial color={color} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Cup ring on the ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
-        <ringGeometry args={[0.12, 0.18, 16]} />
-        <meshStandardMaterial color="#0f172a" side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  );
-}
-
-function GolfBall({ x, z }: { x: number; z: number }) {
-  return (
-    <mesh position={[x, 0.08, z]} castShadow>
-      <sphereGeometry args={[0.08, 12, 12]} />
-      <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.2} />
-    </mesh>
-  );
-}
-
 function GolfCourse() {
-  // Clubhouse sits at world (-62, 0, 75) but the course DECOR is anchored
-  // at world (-42, 0, 75) — 20u east of the clubhouse — to stay clear of
-  // the BotPlane airport (botplane building at world x[-80..-70], parked
-  // plane at world (-70.5, 75)). The clubhouse sign group below still
-  // anchors at world (-62, ..). Decor envelope after the shift:
-  //   world x ∈ [-68, -42], z ∈ [55, 92]
+  // Expanded BotGolf Country Club. Anchor world (-42, 0, 75).
+  // Decor envelope: world x[-68..-28], z[57..73] for the main course
+  // (south of the new R2 runway at z[74..80] and clear of R3 at x=-25).
+  // Clubhouse building lives at world (-62, 75); its sign sits over it
+  // via local x=-20. Amenities fan out across the strip:
+  //   • 18 numbered holes scattered across a 40×16 fairway
+  //   • Members pool with deck, diving board, lounge chairs, umbrella
+  //   • Tennis court with net, lines, fence posts, bouncing ball
+  //   • Driving range, sand bunkers, water hazard pond
+  //   • Patio with umbrellas + animated golfer figure
   // Conflict check:
-  //   • botplane x[-80..-70] → 2u west of course west edge. clear.
-  //   • botfashion (-40.5, 59.25) 1.8×1.8 → kiosk x[-41.4..-39.6],
-  //     z[58.35..60.15]. Course max x=-42 → 0.6u gap. acceptable.
-  //   • botgallery (-75, 40.5) → far south. clear.
+  //   • R2 z[74..80] x[-75..-15] → 1u north of decor north edge z=73. clear.
+  //   • R3 x[-27.5..-22.5] z[40..80] → 0.5u east of east edge x=-28. clear.
+  //   • botfashion (-40.5, 59.25) 1.8×1.8 → world z[58.35..60.15],
+  //     x[-41.4..-39.6]. Decor wraps around it (kiosk sits in fairway).
+  //   • botzoo (-22.5, 87), botgallery (-75, 40.5) → far. clear.
   const ballRefs = useRef<Array<THREE.Mesh | null>>([]);
+  const golferRef = useRef<THREE.Group>(null!);
+  const tennisBallRef = useRef<THREE.Mesh>(null!);
+  const poolMatRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const flagRefs = useRef<Array<THREE.Group | null>>([]);
+
   useFrame((s) => {
     const t = s.clock.elapsedTime;
     ballRefs.current.forEach((m, i) => {
-      if (m) {
-        // Balls bob slightly as if just struck
-        m.position.y = 0.08 + Math.abs(Math.sin(t * 1.3 + i)) * 0.05;
-      }
+      if (m) m.position.y = 0.08 + Math.abs(Math.sin(t * 1.3 + i)) * 0.05;
+    });
+    if (golferRef.current) {
+      golferRef.current.rotation.y = Math.sin(t * 0.8) * 0.5;
+    }
+    if (tennisBallRef.current) {
+      tennisBallRef.current.position.y = 0.15 + Math.abs(Math.sin(t * 3)) * 1.0;
+      tennisBallRef.current.position.x = Math.sin(t * 0.6) * 4.5;
+    }
+    if (poolMatRef.current) {
+      poolMatRef.current.emissiveIntensity = 0.3 + Math.sin(t * 1.2) * 0.12;
+    }
+    flagRefs.current.forEach((g, i) => {
+      if (g) g.rotation.y = Math.sin(t * 0.7 + i * 0.4) * 0.3;
     });
   });
+
+  // 18 holes scattered across the main fairway.
+  // Local fairway envelope: x[-26..14], z[-18..-2].
+  const holes: Array<{ x: number; z: number; color: string; n: number }> = [
+    { n: 1, x: -22, z: -16, color: "#dc2626" },
+    { n: 2, x: -16, z: -14.5, color: "#3b82f6" },
+    { n: 3, x: -10, z: -16, color: "#fde047" },
+    { n: 4, x: -4, z: -14.5, color: "#dc2626" },
+    { n: 5, x: 3, z: -16, color: "#3b82f6" },
+    { n: 6, x: 10, z: -15, color: "#fde047" },
+    { n: 7, x: 12, z: -10, color: "#dc2626" },
+    { n: 8, x: 6, z: -9, color: "#3b82f6" },
+    { n: 9, x: 0, z: -10, color: "#fde047" },
+    { n: 10, x: -6, z: -9, color: "#dc2626" },
+    { n: 11, x: -12, z: -10, color: "#3b82f6" },
+    { n: 12, x: -18, z: -9, color: "#fde047" },
+    { n: 13, x: -24, z: -10, color: "#dc2626" },
+    { n: 14, x: -22, z: -5, color: "#3b82f6" },
+    { n: 15, x: -14, z: -4, color: "#fde047" },
+    { n: 16, x: -6, z: -5, color: "#dc2626" },
+    { n: 17, x: 4, z: -4, color: "#3b82f6" },
+    { n: 18, x: 12, z: -5.5, color: "#fde047" },
+  ];
+
   return (
     <group position={[-42, 0, 75]}>
-      {/* Main fairway — long green lawn east of the clubhouse */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-13, 0.02, -2]}>
-        <planeGeometry args={[26, 16]} />
+      {/* ─── Main fairway (40×16) ─── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.02, -10]} receiveShadow>
+        <planeGeometry args={[40, 16]} />
         <meshStandardMaterial color="#16a34a" roughness={0.95} />
       </mesh>
-      {/* Darker rough strip on the south edge */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-13, 0.024, 7]}>
-        <planeGeometry args={[26, 4]} />
-        <meshStandardMaterial color="#15803d" roughness={1} />
+      {/* Darker rough strips */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.024, -2.5]}>
+        <planeGeometry args={[40, 1]} />
+        <meshStandardMaterial color="#15803d" />
       </mesh>
-      {/* Driving range — striped tee mat north of fairway */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3, 0.03, -11]}>
-        <planeGeometry args={[8, 2]} />
-        <meshStandardMaterial color="#166534" />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.024, -17.5]}>
+        <planeGeometry args={[40, 1]} />
+        <meshStandardMaterial color="#15803d" />
       </mesh>
-      {/* Tee mat divider stripes */}
-      {[-6, -4, -2, 0].map((x) => (
+
+      {/* ─── Cart path — winding tan ribbon across the fairway ─── */}
+      {[-24, -20, -16, -12, -8, -4, 0, 4, 8, 12].map((x, i) => (
         <mesh
-          key={`tee-${x}`}
+          key={`cp-${i}`}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[x, 0.035, -11]}
+          position={[x, 0.028, -7 + Math.sin(i * 0.7) * 1.5]}
         >
-          <planeGeometry args={[0.06, 2]} />
-          <meshStandardMaterial color="#fde047" />
+          <planeGeometry args={[4, 1.2]} />
+          <meshStandardMaterial color="#d4a373" roughness={1} />
         </mesh>
       ))}
-      {/* Driving-range distance markers (yardage signs) */}
-      {[100, 150, 200].map((yd, i) => {
-        const x = -3 - i * 6;
-        return (
-          <group key={`dm-${yd}`} position={[x, 0, -16]}>
-            <mesh position={[0, 0.5, 0]}>
-              <boxGeometry args={[1, 1, 0.1]} />
-              <meshStandardMaterial color="#fde047" />
+
+      {/* ─── 18 holes — green discs + numbered flags + cups ─── */}
+      {holes.map((h, i) => (
+        <group key={`h-${h.n}`}>
+          {/* Putting green */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[h.x, 0.03, h.z]}>
+            <circleGeometry args={[1.4, 20]} />
+            <meshStandardMaterial color="#15803d" roughness={1} />
+          </mesh>
+          {/* Flag pole + waving flag */}
+          <group
+            ref={(g) => { flagRefs.current[i] = g; }}
+            position={[h.x, 0, h.z]}
+          >
+            <mesh position={[0, 1, 0]}>
+              <cylinderGeometry args={[0.03, 0.03, 2, 8]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+            <mesh position={[0.3, 1.75, 0]}>
+              <planeGeometry args={[0.6, 0.35]} />
+              <meshStandardMaterial color={h.color} side={THREE.DoubleSide} />
             </mesh>
             <Text
-              position={[0, 0.5, 0.06]}
-              fontSize={0.35}
+              position={[0.32, 1.75, 0.01]}
+              fontSize={0.22}
               color="#0b1220"
               anchorX="center"
               anchorY="middle"
             >
-              {`${yd}y`}
+              {String(h.n)}
             </Text>
+            {/* Cup ring on the ground */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.045, 0]}>
+              <ringGeometry args={[0.12, 0.18, 16]} />
+              <meshStandardMaterial color="#0f172a" side={THREE.DoubleSide} />
+            </mesh>
           </group>
-        );
-      })}
-      {/* A scattering of practice balls on the tee mat */}
+        </group>
+      ))}
+
+      {/* ─── Sand bunkers scattered across the course ─── */}
       {[
-        [-7, -10.5], [-6, -10.8], [-5, -10.6], [-4, -10.7], [-3, -10.5],
-        [-2, -10.8], [-1, -10.6], [0, -10.7],
+        { x: -19, z: -7, r: 1.3 },
+        { x: -7, z: -12, r: 1.4 },
+        { x: 5, z: -7, r: 1.2 },
+        { x: 9, z: -13, r: 1.5 },
+        { x: -15, z: -13, r: 1.2 },
+      ].map((s, i) => (
+        <mesh
+          key={`bk-${i}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[s.x, 0.035, s.z]}
+        >
+          <circleGeometry args={[s.r, 24]} />
+          <meshStandardMaterial color="#fde68a" roughness={1} />
+        </mesh>
+      ))}
+
+      {/* ─── Water hazard pond ─── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-2, 0.036, -7]}>
+        <circleGeometry args={[1.6, 28]} />
+        <meshStandardMaterial
+          color="#0e7490"
+          emissive="#22d3ee"
+          emissiveIntensity={0.3}
+          metalness={0.6}
+          roughness={0.2}
+        />
+      </mesh>
+
+      {/* ─── Driving range tee mat + practice balls ─── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3, 0.03, -2.6]}>
+        <planeGeometry args={[8, 1.2]} />
+        <meshStandardMaterial color="#166534" />
+      </mesh>
+      {[-6, -4, -2, 0].map((x) => (
+        <mesh key={`tee-${x}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.035, -2.6]}>
+          <planeGeometry args={[0.06, 1.2]} />
+          <meshStandardMaterial color="#fde047" />
+        </mesh>
+      ))}
+      {[
+        [-7, -2.8], [-6, -2.6], [-5, -2.4], [-4, -2.5], [-3, -2.6],
+        [-2, -2.4], [-1, -2.7], [0, -2.5],
       ].map(([x, z], i) => (
         <mesh
           key={`pb-${i}`}
@@ -445,54 +519,270 @@ function GolfCourse() {
           <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.2} />
         </mesh>
       ))}
-      {/* Three mini greens with flags scattered across the fairway */}
-      {[
-        { x: -8, z: -4, color: "#dc2626" },
-        { x: -16, z: 0, color: "#3b82f6" },
-        { x: -22, z: -6, color: "#fde047" },
-      ].map((g, i) => (
-        <group key={`green-${i}`}>
-          {/* Putting green — darker grass disc */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[g.x, 0.03, g.z]}>
-            <circleGeometry args={[2.5, 24]} />
-            <meshStandardMaterial color="#15803d" roughness={1} />
+
+      {/* ─── Yardage signs on the driving range ─── */}
+      {[100, 150, 200].map((yd, i) => (
+        <group key={`dm-${yd}`} position={[-3 - i * 6, 0, -17]}>
+          <mesh position={[0, 0.5, 0]}>
+            <boxGeometry args={[1, 1, 0.1]} />
+            <meshStandardMaterial color="#fde047" />
           </mesh>
-          <GolfFlag x={g.x} z={g.z} color={g.color} />
+          <Text
+            position={[0, 0.5, 0.06]}
+            fontSize={0.32}
+            color="#0b1220"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {`${yd}y`}
+          </Text>
         </group>
       ))}
-      {/* Sand traps (light bunkers) */}
-      {[
-        { x: -11, z: 2, r: 1.5 },
-        { x: -19, z: 4, r: 1.8 },
-      ].map((s, i) => (
-        <mesh
-          key={`bunker-${i}`}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[s.x, 0.035, s.z]}
-        >
-          <circleGeometry args={[s.r, 24]} />
-          <meshStandardMaterial color="#fde68a" roughness={1} />
+
+      {/* ─── Animated golfer figure on the tee mat ─── */}
+      <group ref={golferRef} position={[-4, 0, -2.6]}>
+        <mesh position={[0, 0.6, 0]} castShadow>
+          <cylinderGeometry args={[0.18, 0.22, 0.9, 10]} />
+          <meshStandardMaterial color="#fef3c7" />
         </mesh>
-      ))}
-      {/* A few pine trees lining the north edge */}
-      {[-26, -20, -14, -8].map((x, i) => (
-        <group key={`tree-${i}`} position={[x, 0, -8]}>
-          <mesh position={[0, 0.7, 0]}>
-            <cylinderGeometry args={[0.15, 0.2, 1.4, 8]} />
+        <mesh position={[0, 1.18, 0]} castShadow>
+          <sphereGeometry args={[0.18, 14, 12]} />
+          <meshStandardMaterial color="#fde68a" />
+        </mesh>
+        {/* Club shaft */}
+        <mesh position={[0.35, 0.7, 0]} rotation={[0, 0, -0.6]} castShadow>
+          <cylinderGeometry args={[0.02, 0.02, 1.2, 6]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {/* Club head */}
+        <mesh position={[0.65, 0.15, 0]}>
+          <boxGeometry args={[0.18, 0.06, 0.1]} />
+          <meshStandardMaterial color="#d1d5db" metalness={0.8} />
+        </mesh>
+      </group>
+
+      {/* ─── MEMBERS POOL ─── */}
+      <group position={[10, 0, -13.5]}>
+        {/* Pool deck */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.038, 0]} receiveShadow>
+          <planeGeometry args={[8, 5.5]} />
+          <meshStandardMaterial color="#fef3c7" roughness={1} />
+        </mesh>
+        {/* Pool water */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <planeGeometry args={[5.5, 3.2]} />
+          <meshStandardMaterial
+            ref={poolMatRef}
+            color="#0ea5e9"
+            emissive="#38bdf8"
+            emissiveIntensity={0.3}
+            metalness={0.6}
+            roughness={0.25}
+          />
+        </mesh>
+        {/* Pool rim */}
+        {[
+          { p: [0, 0.1, 1.65] as [number, number, number], s: [5.7, 0.18, 0.18] as [number, number, number] },
+          { p: [0, 0.1, -1.65] as [number, number, number], s: [5.7, 0.18, 0.18] as [number, number, number] },
+          { p: [2.85, 0.1, 0] as [number, number, number], s: [0.18, 0.18, 3.4] as [number, number, number] },
+          { p: [-2.85, 0.1, 0] as [number, number, number], s: [0.18, 0.18, 3.4] as [number, number, number] },
+        ].map((r, i) => (
+          <mesh key={`pr-${i}`} position={r.p}>
+            <boxGeometry args={r.s} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        ))}
+        {/* Diving board */}
+        <group position={[-3.2, 0, 0]}>
+          <mesh position={[0.5, 0.32, 0]}>
+            <boxGeometry args={[1.2, 0.06, 0.5]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          <mesh position={[0, 0.16, 0]}>
+            <boxGeometry args={[0.2, 0.32, 0.3]} />
+            <meshStandardMaterial color="#475569" />
+          </mesh>
+        </group>
+        {/* Lounge chairs along the deck */}
+        {[
+          { x: -2.4, z: 2.1, r: 0 },
+          { x: -0.8, z: 2.1, r: 0 },
+          { x: 0.8, z: 2.1, r: 0 },
+          { x: 2.4, z: 2.1, r: 0 },
+          { x: -2, z: -2.1, r: Math.PI },
+          { x: 0, z: -2.1, r: Math.PI },
+          { x: 2, z: -2.1, r: Math.PI },
+        ].map((c, i) => (
+          <group key={`lc-${i}`} position={[c.x, 0, c.z]} rotation={[0, c.r, 0]}>
+            <mesh position={[0, 0.15, 0]}>
+              <boxGeometry args={[0.55, 0.08, 1.3]} />
+              <meshStandardMaterial color="#f97316" />
+            </mesh>
+            <mesh position={[0, 0.4, -0.45]} rotation={[-0.5, 0, 0]}>
+              <boxGeometry args={[0.55, 0.08, 0.6]} />
+              <meshStandardMaterial color="#f97316" />
+            </mesh>
+          </group>
+        ))}
+        {/* Pool umbrella */}
+        <group position={[3.0, 0, 2.0]}>
+          <mesh position={[0, 1.2, 0]}>
+            <cylinderGeometry args={[0.04, 0.04, 2.4, 8]} />
             <meshStandardMaterial color="#78350f" />
           </mesh>
-          <mesh position={[0, 2.2, 0]}>
-            <coneGeometry args={[1, 3, 10]} />
+          <mesh position={[0, 2.4, 0]}>
+            <coneGeometry args={[1.1, 0.5, 12]} />
+            <meshStandardMaterial color="#dc2626" />
+          </mesh>
+        </group>
+        {/* Pool sign */}
+        <Text
+          position={[0, 2.4, 2.9]}
+          fontSize={0.32}
+          color="#0ea5e9"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.03}
+          outlineColor="#0b1220"
+        >
+          🏊 MEMBERS POOL
+        </Text>
+      </group>
+
+      {/* ─── TENNIS COURT ─── */}
+      {/* Shifted from local x=-22 → -18 so the 13.2-wide run-off stays
+          inside the declared envelope x_min=-68 (world x_min now ~-66.6). */}
+      <group position={[-18, 0, -15.5]}>
+        {/* Green run-off */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.039, 0]}>
+          <planeGeometry args={[13.2, 7.2]} />
+          <meshStandardMaterial color="#166534" />
+        </mesh>
+        {/* Court surface */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.041, 0]} receiveShadow>
+          <planeGeometry args={[12, 6]} />
+          <meshStandardMaterial color="#0369a1" roughness={0.9} />
+        </mesh>
+        {/* Court lines */}
+        {[
+          { p: [0, 0.046, 2.9] as [number, number, number], s: [11.8, 0.15] as [number, number] },
+          { p: [0, 0.046, -2.9] as [number, number, number], s: [11.8, 0.15] as [number, number] },
+          { p: [-5.9, 0.046, 0] as [number, number, number], s: [0.15, 5.8] as [number, number] },
+          { p: [5.9, 0.046, 0] as [number, number, number], s: [0.15, 5.8] as [number, number] },
+          { p: [0, 0.046, 0] as [number, number, number], s: [0.15, 4.0] as [number, number] },
+          { p: [-3, 0.046, 0] as [number, number, number], s: [0.15, 4.0] as [number, number] },
+          { p: [3, 0.046, 0] as [number, number, number], s: [0.15, 4.0] as [number, number] },
+        ].map((l, i) => (
+          <mesh
+            key={`tl-${i}`}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={l.p}
+          >
+            <planeGeometry args={l.s} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        ))}
+        {/* Net */}
+        <mesh position={[0, 0.5, 0]}>
+          <boxGeometry args={[12, 1, 0.06]} />
+          <meshStandardMaterial color="#1e293b" transparent opacity={0.6} />
+        </mesh>
+        <mesh position={[-6, 0.55, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 1.1, 8]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        <mesh position={[6, 0.55, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 1.1, 8]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {/* Bouncing tennis ball */}
+        <mesh ref={tennisBallRef} position={[0, 0.15, 1.2]}>
+          <sphereGeometry args={[0.12, 14, 10]} />
+          <meshStandardMaterial color="#bef264" emissive="#bef264" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Fence posts */}
+        {[
+          [-6.5, 3.6], [0, 3.6], [6.5, 3.6],
+          [-6.5, -3.6], [0, -3.6], [6.5, -3.6],
+        ].map(([x, z], i) => (
+          <mesh key={`fp-${i}`} position={[x, 1.1, z]}>
+            <cylinderGeometry args={[0.05, 0.05, 2.2, 6]} />
+            <meshStandardMaterial color="#64748b" />
+          </mesh>
+        ))}
+        {/* Tennis sign */}
+        <Text
+          position={[0, 2.6, 4.0]}
+          fontSize={0.3}
+          color="#bef264"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.03}
+          outlineColor="#0b1220"
+        >
+          🎾 TENNIS COURT
+        </Text>
+      </group>
+
+      {/* ─── Clubhouse patio (in front of clubhouse, local x≈-20) ─── */}
+      <group position={[-19, 0, -7]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]} receiveShadow>
+          <planeGeometry args={[6, 3.5]} />
+          <meshStandardMaterial color="#a78bfa" roughness={1} />
+        </mesh>
+        {[
+          { p: [-1.6, -0.4] as [number, number], c: "#dc2626" },
+          { p: [1.6, -0.4] as [number, number], c: "#3b82f6" },
+          { p: [0, 1.0] as [number, number], c: "#fde047" },
+        ].map(({ p, c }, i) => (
+          <group key={`pu-${i}`} position={[p[0], 0, p[1]]}>
+            <mesh position={[0, 0.5, 0]}>
+              <cylinderGeometry args={[0.45, 0.45, 0.08, 16]} />
+              <meshStandardMaterial color="#f8fafc" />
+            </mesh>
+            <mesh position={[0, 0.25, 0]}>
+              <cylinderGeometry args={[0.05, 0.05, 0.5, 8]} />
+              <meshStandardMaterial color="#1e293b" />
+            </mesh>
+            <mesh position={[0, 1.0, 0]}>
+              <cylinderGeometry args={[0.03, 0.03, 1.6, 6]} />
+              <meshStandardMaterial color="#78350f" />
+            </mesh>
+            <mesh position={[0, 1.55, 0]}>
+              <coneGeometry args={[0.9, 0.4, 10]} />
+              <meshStandardMaterial color={c} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* ─── Pine trees ringing the property ─── */}
+      {/* Westmost pines pulled in from local x=-27 → -26 so world x stays
+          inside the envelope x_min=-68. */}
+      {[
+        [-26, -3], [-25, -4], [-23, -3.5],
+        [-10, -3], [-2, -3], [6, -3], [13, -3.2],
+        [-26, -18], [-19, -18.5], [-3, -18], [13, -18],
+      ].map(([x, z], i) => (
+        <group key={`pt-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 0.7, 0]}>
+            <cylinderGeometry args={[0.13, 0.18, 1.4, 8]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+          <mesh position={[0, 2.0, 0]}>
+            <coneGeometry args={[0.9, 2.6, 10]} />
             <meshStandardMaterial color="#166534" />
           </mesh>
         </group>
       ))}
-      {/* Sign over the clubhouse — shifted -20 in local x so it lands
-          back at the clubhouse position (world x=-62) instead of the
-          decor anchor (world x=-42). */}
+
+      {/* ─── Big clubhouse signage (over clubhouse at world x=-62) ─── */}
+      {/* Sign moved from local z=2.4 → -2.5 to clear the R2 runway corridor
+          at world z[74..80]. Now sits on the north face of the clubhouse
+          (world z≈72.5) facing the rest of the course. */}
       <Text
-        position={[-20, 4.5, 2.4]}
-        fontSize={0.42}
+        position={[-20, 5.0, -2.5]}
+        fontSize={0.45}
         color="#15803d"
         anchorX="center"
         anchorY="middle"
@@ -502,16 +792,43 @@ function GolfCourse() {
         ⛳ BOTGOLF COUNTRY CLUB
       </Text>
       <Text
-        position={[-20, 4.0, 2.4]}
-        fontSize={0.2}
+        position={[-20, 4.4, -2.5]}
+        fontSize={0.22}
         color="#65a30d"
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.02}
         outlineColor="#0b1220"
       >
-        Driving Range · 9 Holes
+        18 Holes · Pool · Tennis · Driving Range
       </Text>
+
+      {/* ─── "MEMBERS ONLY" gate at east entry ─── */}
+      <group position={[14, 0, -10]}>
+        <mesh position={[0, 1.2, -1]}>
+          <boxGeometry args={[0.3, 2.4, 0.3]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <mesh position={[0, 1.2, 1]}>
+          <boxGeometry args={[0.3, 2.4, 0.3]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <mesh position={[0, 2.3, 0]}>
+          <boxGeometry args={[0.2, 0.2, 2.4]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <Text
+          position={[0, 2.7, 0]}
+          fontSize={0.22}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#0b1220"
+        >
+          MEMBERS ONLY
+        </Text>
+      </group>
     </group>
   );
 }
