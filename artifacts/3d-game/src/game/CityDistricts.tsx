@@ -3353,16 +3353,26 @@ function Mine() {
   );
 }
 
-// ===== BotZoo & Park @ (-15, 0, 58) ====================================
-// S edge near BotKids. Zoo gate building at (-15, 2.5, 58), footprint 6×4 →
-// world x[-18..-12], z[56..60]. Park lawn + animal pens fan out NORTH of
-// the gate (the south side is the world edge). Player bound ±64 → north
-// envelope stops near z=48.
-//   world envelope used: x ∈ [-22, -8], z ∈ [49, 60]
-//   → local x ∈ [-7, +7], local z ∈ [-9, +2] (origin at -15, 58)
+// ===== BotZoo & Park @ (-22.5, 0, 87) ==================================
+// Expanded MEGA wildlife park along the SW-south edge. Zoo gate kiosk at
+// (-22.5, 2.5, 87). Park lawn + pens fan WEST and NORTH from the gate
+// into the band between airport R3 (north) and the world south edge.
+//   world envelope: x ∈ [-40, -16], z ∈ [81, 92]
+//   → local x ∈ [-17.5, +6.5], local z ∈ [-6, +5] (origin at -22.5, 87)
+// Clearances (HALF=98 world):
+//   • Airport R3 (x[-27.5,-22.5], z[40..80]) → 1u south gap from lawn
+//   • Airport parking lot (x[-57,-43], z[85,91]) → 3u east gap from lawn
+//   • BotKids (-9, 82.5), x_min=-12 → 4u east gap from lawn x_max=-16
+//   • World south edge z=98 → 6u south buffer beyond lawn z_max=92
+// New attractions added in the western expansion: lion enclosure, zebra
+// paddock, penguin pool, walk-in aviary, picnic area, park benches,
+// info kiosk, plus extended conservation tree cluster.
 function Zoo() {
   const giraffeRef = useRef<THREE.Group>(null!);
   const monkeyRef = useRef<THREE.Mesh>(null!);
+  const lionTailRef = useRef<THREE.Mesh>(null!);
+  const penguinRef = useRef<THREE.Mesh>(null!);
+  const birdRef = useRef<THREE.Group>(null!);
   useFrame((s) => {
     const t = s.clock.elapsedTime;
     // Giraffe head bobs slowly like it's chewing leaves.
@@ -3373,13 +3383,33 @@ function Zoo() {
     if (monkeyRef.current) {
       monkeyRef.current.position.y = 0.6 + Math.abs(Math.sin(t * 2.5)) * 0.35;
     }
+    // Lion tail swishes.
+    if (lionTailRef.current) {
+      lionTailRef.current.rotation.z = Math.sin(t * 2) * 0.4;
+    }
+    // Penguin waddles side to side.
+    if (penguinRef.current) {
+      penguinRef.current.rotation.z = Math.sin(t * 3) * 0.18;
+    }
+    // Parrot circles inside the aviary cage.
+    if (birdRef.current) {
+      birdRef.current.position.x = Math.cos(t * 0.9) * 0.9;
+      birdRef.current.position.z = Math.sin(t * 0.9) * 0.9;
+      birdRef.current.rotation.y = -t * 0.9 + Math.PI / 2;
+    }
   });
   return (
     <group position={[-22.5, 0, 87]}>
-      {/* ── Park lawn ── */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, -3.5]}>
-        <planeGeometry args={[13, 10]} />
+      {/* ── Park lawn — enlarged 24×11 (was 13×10), shifted west to
+            cover the new pens. Local x[-17.5..+6.5], z[-6..+5]. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5.5, 0.02, -0.5]} receiveShadow>
+        <planeGeometry args={[24, 11]} />
         <meshStandardMaterial color="#166534" emissive="#22c55e" emissiveIntensity={0.18} />
+      </mesh>
+      {/* ── Winding dirt path connecting gate → west pens ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-8, 0.04, 0]}>
+        <planeGeometry args={[20, 1.4]} />
+        <meshStandardMaterial color="#a16207" roughness={0.95} />
       </mesh>
 
       {/* ── Tall entrance arch over the gate */}
@@ -3526,7 +3556,7 @@ function Zoo() {
       {/* ── Conservation-easement tree cluster (NE corner — protected forest) ── */}
       {[
         [-6, -7, 1.4],
-        [-5.2, -7.6, 1.2],
+        [-7, -7.6, 1.2],
         [-6.5, -8.1, 1.5],
         [5.5, -7.5, 1.3],
         [6.3, -8, 1.5],
@@ -3558,6 +3588,300 @@ function Zoo() {
           <mesh position={[0, 0.55, 0]}>
             <boxGeometry args={[0.9, 0.05, 0.05]} />
             <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ══════════ EXPANSION — new pens & park amenities ══════════ */}
+
+      {/* ── Lion enclosure (NW) — sandy rock outcrop with a lion ── */}
+      <group position={[-12, 0, -4]}>
+        {/* Sandy ground */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <circleGeometry args={[2.6, 24]} />
+          <meshStandardMaterial color="#d4a373" roughness={0.95} />
+        </mesh>
+        {/* Boulders */}
+        <mesh position={[-1.4, 0.45, 0.8]}>
+          <dodecahedronGeometry args={[0.7, 0]} />
+          <meshStandardMaterial color="#78716c" />
+        </mesh>
+        <mesh position={[1.6, 0.35, -0.6]}>
+          <dodecahedronGeometry args={[0.55, 0]} />
+          <meshStandardMaterial color="#57534e" />
+        </mesh>
+        {/* Lion body */}
+        <mesh position={[0, 0.55, 0]} castShadow>
+          <boxGeometry args={[1.5, 0.7, 0.7]} />
+          <meshStandardMaterial color="#ca8a04" />
+        </mesh>
+        {/* Mane */}
+        <mesh position={[0.7, 0.85, 0]} castShadow>
+          <sphereGeometry args={[0.5, 12, 10]} />
+          <meshStandardMaterial color="#78350f" />
+        </mesh>
+        {/* Head */}
+        <mesh position={[0.85, 0.85, 0]} castShadow>
+          <boxGeometry args={[0.4, 0.45, 0.5]} />
+          <meshStandardMaterial color="#ca8a04" />
+        </mesh>
+        {/* Legs */}
+        {[[-0.5, -0.25], [0.5, -0.25], [-0.5, 0.25], [0.5, 0.25]].map(([lx, lz], i) => (
+          <mesh key={`lleg-${i}`} position={[lx, 0.2, lz]}>
+            <boxGeometry args={[0.18, 0.4, 0.18]} />
+            <meshStandardMaterial color="#ca8a04" />
+          </mesh>
+        ))}
+        {/* Tail (swishes) */}
+        <mesh ref={lionTailRef} position={[-0.85, 0.55, 0]}>
+          <boxGeometry args={[0.55, 0.08, 0.08]} />
+          <meshStandardMaterial color="#ca8a04" />
+        </mesh>
+        {/* Sign */}
+        <Text position={[0, 1.7, 2]} fontSize={0.32} color="#fde047" anchorX="center" outlineWidth={0.03} outlineColor="#0b1220">
+          🦁 LIONS
+        </Text>
+      </group>
+
+      {/* ── Zebra paddock (W) ── */}
+      <group position={[-15, 0, 0]}>
+        {/* Grass patch */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+          <planeGeometry args={[4, 3]} />
+          <meshStandardMaterial color="#365314" />
+        </mesh>
+        {/* Zebra body */}
+        <mesh position={[0, 0.8, 0]} castShadow>
+          <boxGeometry args={[1.4, 0.55, 0.55]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        {/* Stripes */}
+        {[-0.5, -0.25, 0, 0.25, 0.5].map((sx, i) => (
+          <mesh key={`zstripe-${i}`} position={[sx, 0.8, 0]}>
+            <boxGeometry args={[0.08, 0.56, 0.56]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+        ))}
+        {/* Head */}
+        <mesh position={[0.85, 0.95, 0]} castShadow>
+          <boxGeometry args={[0.4, 0.45, 0.35]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        {/* Mane */}
+        <mesh position={[0.55, 1.15, 0]}>
+          <boxGeometry args={[0.5, 0.12, 0.1]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        {/* Legs */}
+        {[[-0.45, -0.2], [0.45, -0.2], [-0.45, 0.2], [0.45, 0.2]].map(([lx, lz], i) => (
+          <mesh key={`zleg-${i}`} position={[lx, 0.3, lz]}>
+            <boxGeometry args={[0.14, 0.6, 0.14]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+        ))}
+        {/* Fence rails around paddock */}
+        {[-2, 2].map((fz) => (
+          <mesh key={`zf-${fz}`} position={[0, 0.5, fz]}>
+            <boxGeometry args={[4, 0.08, 0.06]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+        ))}
+        <Text position={[0, 1.9, -1.7]} fontSize={0.28} color="#fde047" anchorX="center" outlineWidth={0.03} outlineColor="#0b1220">
+          🦓 ZEBRAS
+        </Text>
+      </group>
+
+      {/* ── Penguin pool (mid-west) — round water with two penguins ── */}
+      <group position={[-9, 0, -3]}>
+        {/* Pool wall (low) */}
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[1.4, 1.5, 0.2, 24]} />
+          <meshStandardMaterial color="#e2e8f0" />
+        </mesh>
+        {/* Water surface */}
+        <mesh position={[0, 0.21, 0]}>
+          <cylinderGeometry args={[1.3, 1.3, 0.05, 24]} />
+          <meshStandardMaterial color="#0ea5e9" emissive="#38bdf8" emissiveIntensity={0.35} transparent opacity={0.85} />
+        </mesh>
+        {/* Penguin 1 (waddling) */}
+        <group ref={penguinRef} position={[0.6, 0.25, 0.2]}>
+          <mesh position={[0, 0.3, 0]}>
+            <capsuleGeometry args={[0.22, 0.4, 4, 8]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+          <mesh position={[0, 0.32, 0.18]}>
+            <capsuleGeometry args={[0.16, 0.32, 4, 8]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          {/* Beak */}
+          <mesh position={[0, 0.55, 0.22]}>
+            <coneGeometry args={[0.06, 0.18, 6]} />
+            <meshStandardMaterial color="#f59e0b" />
+          </mesh>
+        </group>
+        {/* Penguin 2 (static) */}
+        <group position={[-0.5, 0.25, -0.4]}>
+          <mesh position={[0, 0.3, 0]}>
+            <capsuleGeometry args={[0.22, 0.4, 4, 8]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+          <mesh position={[0, 0.32, 0.18]}>
+            <capsuleGeometry args={[0.16, 0.32, 4, 8]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          <mesh position={[0, 0.55, 0.22]}>
+            <coneGeometry args={[0.06, 0.18, 6]} />
+            <meshStandardMaterial color="#f59e0b" />
+          </mesh>
+        </group>
+        <Text position={[0, 1.7, -1.8]} fontSize={0.26} color="#fde047" anchorX="center" outlineWidth={0.03} outlineColor="#0b1220">
+          🐧 PENGUIN POOL
+        </Text>
+      </group>
+
+      {/* ── Walk-in aviary cage (N) — tall cylinder of bars, parrot circles inside ── */}
+      <group position={[-13, 0, -7]}>
+        {/* Cage base */}
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[1.6, 1.7, 0.1, 16]} />
+          <meshStandardMaterial color="#44403c" />
+        </mesh>
+        {/* Vertical bars */}
+        {Array.from({ length: 16 }).map((_, i) => {
+          const a = (i / 16) * Math.PI * 2;
+          return (
+            <mesh key={`abar-${i}`} position={[Math.cos(a) * 1.6, 1.6, Math.sin(a) * 1.6]}>
+              <cylinderGeometry args={[0.04, 0.04, 3.2, 6]} />
+              <meshStandardMaterial color="#a8a29e" metalness={0.6} roughness={0.4} />
+            </mesh>
+          );
+        })}
+        {/* Top hoop */}
+        <mesh position={[0, 3.2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.6, 0.06, 6, 24]} />
+          <meshStandardMaterial color="#a8a29e" metalness={0.6} />
+        </mesh>
+        {/* Dome cap */}
+        <mesh position={[0, 3.35, 0]}>
+          <sphereGeometry args={[1.6, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#a8a29e" wireframe transparent opacity={0.55} />
+        </mesh>
+        {/* Inner perch */}
+        <mesh position={[0, 1.4, 0]}>
+          <cylinderGeometry args={[0.05, 0.05, 2.6, 6]} />
+          <meshStandardMaterial color="#78350f" />
+        </mesh>
+        {/* Parrot circles inside */}
+        <group ref={birdRef} position={[0.9, 1.8, 0]}>
+          <mesh>
+            <sphereGeometry args={[0.16, 10, 10]} />
+            <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.25} />
+          </mesh>
+          <mesh position={[0.12, 0.04, 0]}>
+            <coneGeometry args={[0.06, 0.16, 6]} />
+            <meshStandardMaterial color="#f59e0b" />
+          </mesh>
+          <mesh position={[-0.18, 0, 0]}>
+            <boxGeometry args={[0.22, 0.05, 0.18]} />
+            <meshStandardMaterial color="#16a34a" />
+          </mesh>
+        </group>
+        <Text position={[0, 3.9, 0]} fontSize={0.3} color="#fde047" anchorX="center" outlineWidth={0.03} outlineColor="#0b1220">
+          🦜 AVIARY
+        </Text>
+      </group>
+
+      {/* ── Picnic area (E side) — two tables on a grass patch ── */}
+      <group position={[4, 0, 3]}>
+        {[[-1.4, 0], [1.4, 0]].map(([px, pz], i) => (
+          <group key={`picnic-${i}`} position={[px, 0, pz]}>
+            {/* Tabletop */}
+            <mesh position={[0, 0.5, 0]} castShadow>
+              <boxGeometry args={[1.2, 0.08, 0.6]} />
+              <meshStandardMaterial color="#a16207" />
+            </mesh>
+            {/* Benches */}
+            <mesh position={[0, 0.3, 0.45]}>
+              <boxGeometry args={[1.2, 0.05, 0.2]} />
+              <meshStandardMaterial color="#78350f" />
+            </mesh>
+            <mesh position={[0, 0.3, -0.45]}>
+              <boxGeometry args={[1.2, 0.05, 0.2]} />
+              <meshStandardMaterial color="#78350f" />
+            </mesh>
+            {/* Legs */}
+            {[[-0.5, 0], [0.5, 0]].map(([lx, lz], j) => (
+              <mesh key={`tl-${j}`} position={[lx, 0.25, lz]}>
+                <boxGeometry args={[0.08, 0.5, 0.6]} />
+                <meshStandardMaterial color="#57534e" />
+              </mesh>
+            ))}
+            {/* Umbrella */}
+            <mesh position={[0, 0.9, 0]}>
+              <cylinderGeometry args={[0.04, 0.04, 0.8, 6]} />
+              <meshStandardMaterial color="#57534e" />
+            </mesh>
+            <mesh position={[0, 1.35, 0]}>
+              <coneGeometry args={[0.9, 0.4, 12]} />
+              <meshStandardMaterial color={i === 0 ? "#dc2626" : "#0ea5e9"} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* ── Park benches along the central path (for the "& Park" aspect) ── */}
+      {[[-3, 2.5], [3, 2.5], [-10, 1.5]].map(([bx, bz], i) => (
+        <group key={`bench-${i}`} position={[bx, 0, bz]}>
+          <mesh position={[0, 0.3, 0]}>
+            <boxGeometry args={[1.2, 0.08, 0.3]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+          <mesh position={[0, 0.55, -0.12]}>
+            <boxGeometry args={[1.2, 0.4, 0.06]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+          {[-0.5, 0.5].map((lx, j) => (
+            <mesh key={`bl-${j}`} position={[lx, 0.15, 0]}>
+              <boxGeometry args={[0.08, 0.3, 0.3]} />
+              <meshStandardMaterial color="#44403c" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* ── Info kiosk / map post near the entrance ── */}
+      <group position={[2, 0, 0]}>
+        <mesh position={[0, 0.7, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 1.4, 6]} />
+          <meshStandardMaterial color="#44403c" />
+        </mesh>
+        <mesh position={[0, 1.4, 0]} rotation={[0, -0.35, 0]}>
+          <boxGeometry args={[0.9, 0.6, 0.04]} />
+          <meshStandardMaterial color="#fde047" emissive="#fbbf24" emissiveIntensity={0.4} />
+        </mesh>
+        <Text position={[0, 1.4, 0.04]} rotation={[0, -0.35, 0]} fontSize={0.13} color="#0b1220" anchorX="center" maxWidth={0.8}>
+          ZOO MAP
+        </Text>
+      </group>
+
+      {/* ── Extended conservation tree cluster (NW perimeter) ── */}
+      {[
+        [-16, -3, 1.6],
+        [-17, -1, 1.4],
+        [-16.5, -6, 1.5],
+        [-14, -8, 1.3],
+        [-8, -9, 1.5],
+        [2, -9, 1.4],
+        [5, -9, 1.5],
+      ].map(([tx, tz, h], i) => (
+        <group key={`xtree-${i}`} position={[tx as number, 0, tz as number]}>
+          <mesh position={[0, (h as number) / 2, 0]}>
+            <cylinderGeometry args={[0.12, 0.16, h as number, 6]} />
+            <meshStandardMaterial color="#78350f" />
+          </mesh>
+          <mesh position={[0, (h as number) + 0.4, 0]}>
+            <sphereGeometry args={[0.75, 10, 10]} />
+            <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.2} />
           </mesh>
         </group>
       ))}
