@@ -198,6 +198,23 @@ const RUNWAY_X_MAX = -30;
 const RUNWAY_LENGTH = RUNWAY_X_MAX - RUNWAY_X_MIN; // 35
 const RUNWAY_CENTER_X = (RUNWAY_X_MIN + RUNWAY_X_MAX) / 2; // -47.5
 
+// ─── Multi-runway expansion ──────────────────────────────────────────
+// Runway 2: longer parallel E-W runway, south of the terminal.
+// Runway 3: N-S cross runway east of the terminal/apron.
+const RUNWAY2_Z = 77;
+const RUNWAY2_WIDTH = 6;
+const RUNWAY2_X_MIN = -75;
+const RUNWAY2_X_MAX = -15;
+const RUNWAY2_LEN = RUNWAY2_X_MAX - RUNWAY2_X_MIN; // 60
+const RUNWAY2_CX = (RUNWAY2_X_MIN + RUNWAY2_X_MAX) / 2; // -45
+
+const RUNWAY3_X = -25;
+const RUNWAY3_WIDTH = 5;
+const RUNWAY3_Z_MIN = 40;
+const RUNWAY3_Z_MAX = 80;
+const RUNWAY3_LEN = RUNWAY3_Z_MAX - RUNWAY3_Z_MIN; // 40
+const RUNWAY3_CZ = (RUNWAY3_Z_MIN + RUNWAY3_Z_MAX) / 2; // 60
+
 function Runway() {
   return (
     <group>
@@ -292,6 +309,740 @@ function Runway() {
       >
         ✈ BOTPLANE INTERNATIONAL
       </Text>
+
+      {/* ═══════════════ RUNWAY 2 — main long parallel E-W ═══════════════
+          z=77, x[-75,-15], width 6, length 60 — south of the terminal */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+        position={[RUNWAY2_CX, 0.03, RUNWAY2_Z]}
+        receiveShadow
+      >
+        <planeGeometry args={[RUNWAY2_WIDTH, RUNWAY2_LEN]} />
+        <meshStandardMaterial color="#1c1917" roughness={0.95} metalness={0.05} />
+      </mesh>
+      {/* Center dashes */}
+      {Array.from({ length: 28 }).map((_, i) => {
+        const t = (i + 0.5) / 28;
+        const x = RUNWAY2_X_MIN + t * RUNWAY2_LEN;
+        return (
+          <mesh
+            key={`r2dash-${i}`}
+            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+            position={[x, 0.05, RUNWAY2_Z]}
+          >
+            <planeGeometry args={[0.35, 1.6]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.1} toneMapped={false} />
+          </mesh>
+        );
+      })}
+      {/* Threshold piano keys at both ends */}
+      {[-2.0, -1.0, 1.0, 2.0].flatMap((zOff) =>
+        [RUNWAY2_X_MIN + 1.4, RUNWAY2_X_MAX - 1.4].map((x) => (
+          <mesh
+            key={`r2th-${zOff}-${x}`}
+            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+            position={[x, 0.05, RUNWAY2_Z + zOff]}
+          >
+            <planeGeometry args={[0.6, 1.4]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+          </mesh>
+        ))
+      )}
+      {/* Runway 2 number markers "09" / "27" */}
+      <Text
+        position={[RUNWAY2_X_MIN + 3.5, 0.06, RUNWAY2_Z]}
+        rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+        fontSize={1.4}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+      >
+        09
+      </Text>
+      <Text
+        position={[RUNWAY2_X_MAX - 3.5, 0.06, RUNWAY2_Z]}
+        rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
+        fontSize={1.4}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+      >
+        27
+      </Text>
+      {/* Blue edge lights along runway 2 — paired north/south */}
+      {Array.from({ length: 16 }).map((_, i) => {
+        const x = RUNWAY2_X_MIN + (i + 0.5) * (RUNWAY2_LEN / 16);
+        return [-RUNWAY2_WIDTH / 2 - 0.2, RUNWAY2_WIDTH / 2 + 0.2].map((zOff, j) => (
+          <mesh key={`r2el-${i}-${j}`} position={[x, 0.1, RUNWAY2_Z + zOff]}>
+            <sphereGeometry args={[0.08, 6, 6]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        ));
+      })}
+      {/* PAPI lights at runway 2 east threshold (4-light vertical bar) */}
+      {[0, 1, 2, 3].map((i) => (
+        <mesh key={`papi-${i}`} position={[RUNWAY2_X_MAX - 1.5, 0.25, RUNWAY2_Z - 4 + i * 0.5]}>
+          <sphereGeometry args={[0.12, 8, 8]} />
+          <meshStandardMaterial color={i < 2 ? "#ef4444" : "#f8fafc"} emissive={i < 2 ? "#ef4444" : "#f8fafc"} emissiveIntensity={1.6} toneMapped={false} />
+        </mesh>
+      ))}
+      {/* Approach lights — strobes leading into east threshold */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <mesh key={`appr-${i}`} position={[RUNWAY2_X_MAX + 1 + i * 1.5, 0.15, RUNWAY2_Z]}>
+          <sphereGeometry args={[0.13, 6, 6]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.5} toneMapped={false} />
+        </mesh>
+      ))}
+
+      {/* ═══════════════ RUNWAY 3 — N-S cross runway ═══════════════════
+          x=-25, z[40,80], width 5, length 40 */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[RUNWAY3_X, 0.03, RUNWAY3_CZ]}
+        receiveShadow
+      >
+        <planeGeometry args={[RUNWAY3_WIDTH, RUNWAY3_LEN]} />
+        <meshStandardMaterial color="#1c1917" roughness={0.95} metalness={0.05} />
+      </mesh>
+      {Array.from({ length: 20 }).map((_, i) => {
+        const t = (i + 0.5) / 20;
+        const z = RUNWAY3_Z_MIN + t * RUNWAY3_LEN;
+        return (
+          <mesh
+            key={`r3dash-${i}`}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[RUNWAY3_X, 0.05, z]}
+          >
+            <planeGeometry args={[0.3, 1.4]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.1} toneMapped={false} />
+          </mesh>
+        );
+      })}
+      {[-2.0, -1.0, 1.0, 2.0].flatMap((xOff) =>
+        [RUNWAY3_Z_MIN + 1.2, RUNWAY3_Z_MAX - 1.2].map((z) => (
+          <mesh
+            key={`r3th-${xOff}-${z}`}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[RUNWAY3_X + xOff, 0.05, z]}
+          >
+            <planeGeometry args={[1.2, 0.5]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+          </mesh>
+        ))
+      )}
+      {/* Blue edge lights along runway 3 */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const z = RUNWAY3_Z_MIN + (i + 0.5) * (RUNWAY3_LEN / 12);
+        return [-RUNWAY3_WIDTH / 2 - 0.2, RUNWAY3_WIDTH / 2 + 0.2].map((xOff, j) => (
+          <mesh key={`r3el-${i}-${j}`} position={[RUNWAY3_X + xOff, 0.1, z]}>
+            <sphereGeometry args={[0.08, 6, 6]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        ));
+      })}
+
+      {/* Taxiway connecting all 3 runways — green-edged path */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-25, 0.025, 66]}>
+        <planeGeometry args={[2, 24]} />
+        <meshStandardMaterial color="#27272a" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-50, 0.025, 66]}>
+        <planeGeometry args={[2, 24]} />
+        <meshStandardMaterial color="#27272a" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-37.5, 0.025, 66]}>
+        <planeGeometry args={[27, 2]} />
+        <meshStandardMaterial color="#27272a" />
+      </mesh>
+    </group>
+  );
+}
+
+// ═════════════════════ AIRPORT EXPANSION ═════════════════════════════
+// Concourse wings, jet bridges, parked aircraft, landing plane, radar
+// tower, helipad, fuel depot, cargo terminal, parking lot, big approach
+// signage. Everything anchored to the SW airport corner. The terminal
+// itself is at world (-75, 3, 67.5) with footprint x[-80,-70] z[64.5,70.5].
+// ═════════════════════════════════════════════════════════════════════
+function AirportExpansion() {
+  const radarRef = useRef<THREE.Group>(null!);
+  const heloBladeRef = useRef<THREE.Group>(null!);
+  const heloTailRef = useRef<THREE.Group>(null!);
+  const beaconMatRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const towerMatRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const landingPlaneRef = useRef<THREE.Group>(null!);
+  const landingBeaconRef = useRef<THREE.Mesh>(null!);
+  const windsockRef = useRef<THREE.Group>(null!);
+  const fuelTruckRef = useRef<THREE.Group>(null!);
+
+  useFrame((state) => {
+    const T = state.clock.elapsedTime;
+    if (radarRef.current) radarRef.current.rotation.y = T * 0.8;
+    if (heloBladeRef.current) heloBladeRef.current.rotation.y = T * 12;
+    if (heloTailRef.current) heloTailRef.current.rotation.x = T * 18;
+    if (beaconMatRef.current) beaconMatRef.current.emissiveIntensity = 1.0 + Math.sin(T * 3) * 0.9;
+    if (towerMatRef.current) towerMatRef.current.emissiveIntensity = 0.8 + (Math.sin(T * 2) > 0 ? 1.2 : 0);
+    if (windsockRef.current) windsockRef.current.rotation.y = Math.sin(T * 0.3) * 0.6;
+    // Landing plane on runway 2 — cycles approach → flare → touchdown → roll-out → reset
+    if (landingPlaneRef.current) {
+      const CYC = 26;
+      const t = (T % CYC) / CYC;
+      let x: number;
+      let y: number;
+      let pitch: number;
+      if (t < 0.45) {
+        // Long descending approach from west of map → east threshold of R2
+        const u = t / 0.45;
+        x = -120 + u * (RUNWAY2_X_MIN - 8 - (-120)); // -120 → ~-83
+        y = 28 - u * 26; // 28 → 2
+        pitch = -0.12;
+      } else if (t < 0.55) {
+        // Flare — pitch up just before touchdown
+        const u = (t - 0.45) / 0.10;
+        x = (RUNWAY2_X_MIN - 8) + u * 6; // -83 → -77
+        y = 2 - u * 1.25; // 2 → 0.75
+        pitch = -0.12 + u * 0.18; // -0.12 → 0.06
+      } else if (t < 0.85) {
+        // Roll-out east along runway 2 decelerating
+        const u = (t - 0.55) / 0.30;
+        const ease = 1 - (1 - u) * (1 - u);
+        x = -77 + ease * (RUNWAY2_X_MAX - 4 - (-77)); // -77 → ~-19
+        y = 0.75;
+        pitch = 0.06 - u * 0.06;
+      } else {
+        // Taxi off / reset — park off-frame
+        x = 140;
+        y = 30;
+        pitch = 0;
+      }
+      landingPlaneRef.current.position.set(x, y, RUNWAY2_Z);
+      landingPlaneRef.current.rotation.z = -Math.PI / 2 + pitch;
+    }
+    if (landingBeaconRef.current) {
+      const mat = landingBeaconRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.5 + Math.sin(T * 5) * 1.3;
+    }
+    // Fuel truck drives slowly along the apron between hangars
+    if (fuelTruckRef.current) {
+      const u = (Math.sin(T * 0.25) + 1) / 2; // 0..1
+      fuelTruckRef.current.position.x = -58 + u * 22;
+      fuelTruckRef.current.rotation.y = Math.cos(T * 0.25) > 0 ? 0 : Math.PI;
+    }
+  });
+
+  return (
+    <group>
+      {/* ────────── EXTENDED TERMINAL CONCOURSE — east of main terminal ────────── */}
+      <group position={[-58, 0, 67.5]}>
+        {/* Long glass concourse */}
+        <mesh position={[0, 2, 0]} castShadow>
+          <boxGeometry args={[14, 4, 5]} />
+          <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.45} metalness={0.6} roughness={0.3} transparent opacity={0.92} />
+        </mesh>
+        {/* Roof trim */}
+        <mesh position={[0, 4.15, 0]}>
+          <boxGeometry args={[14.4, 0.3, 5.4]} />
+          <meshStandardMaterial color="#f8fafc" />
+        </mesh>
+        {/* Window mullions every 2u */}
+        {[-6, -4, -2, 0, 2, 4, 6].map((mx) => (
+          <mesh key={`mul-${mx}`} position={[mx, 2, 2.51]}>
+            <boxGeometry args={[0.15, 4, 0.04]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+        ))}
+        {/* Concourse sign */}
+        <Text
+          position={[0, 5.0, 2.6]}
+          fontSize={0.5}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.035}
+          outlineColor="#0b1220"
+        >
+          ✈ CONCOURSE B · GATES 7–14
+        </Text>
+      </group>
+
+      {/* ────────── JET BRIDGES + GATE-SIDE PARKED PLANES ────────── */}
+      {[-64, -58, -52].map((gx, i) => (
+        <group key={`gate-${i}`} position={[gx, 0, 60.5]}>
+          {/* Jet bridge — angled tube from concourse to plane */}
+          <mesh position={[0, 1.6, 1.5]} rotation={[0, 0, 0]}>
+            <boxGeometry args={[2.5, 0.7, 3.0]} />
+            <meshStandardMaterial color="#cbd5e1" emissive="#38bdf8" emissiveIntensity={0.25} metalness={0.5} />
+          </mesh>
+          <mesh position={[0, 1.6, 1.5]}>
+            <boxGeometry args={[2.4, 0.5, 2.9]} />
+            <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.6} transparent opacity={0.8} />
+          </mesh>
+          {/* Bridge support legs */}
+          {[[-1, 3], [1, 3], [-1, 0], [1, 0]].map(([lx, lz], j) => (
+            <mesh key={`bl-${j}`} position={[lx, 0.8, lz]}>
+              <cylinderGeometry args={[0.1, 0.12, 1.6, 6]} />
+              <meshStandardMaterial color="#475569" metalness={0.6} />
+            </mesh>
+          ))}
+          {/* Gate number */}
+          <Text
+            position={[0, 3.0, 3.2]}
+            fontSize={0.3}
+            color="#fde047"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.022}
+            outlineColor="#0b1220"
+          >
+            GATE {7 + i * 2}
+          </Text>
+          {/* Parked plane (nose facing -x for pushback) */}
+          <group position={[0, 0.75, -2.0]} rotation={[0, 0, -Math.PI / 2]}>
+            <mesh castShadow>
+              <capsuleGeometry args={[0.45, 3.2, 8, 16]} />
+              <meshStandardMaterial color={i === 0 ? "#fef3c7" : i === 1 ? "#e2e8f0" : "#fecaca"} metalness={0.6} roughness={0.35} />
+            </mesh>
+            <mesh position={[0, 1.55, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.4, 0.3, 0.5, 16]} />
+              <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.7} />
+            </mesh>
+            <mesh position={[0, 0, 0]} castShadow>
+              <boxGeometry args={[1.1, 0.14, 4.4]} />
+              <meshStandardMaterial color="#cbd5e1" metalness={0.55} />
+            </mesh>
+            <mesh position={[0, -1.5, 0.45]} castShadow>
+              <boxGeometry args={[0.08, 0.7, 0.7]} />
+              <meshStandardMaterial color={i === 0 ? "#b45309" : i === 1 ? "#0c4a6e" : "#7f1d1d"} />
+            </mesh>
+            <mesh position={[0, -1.55, 0.1]} castShadow>
+              <boxGeometry args={[0.08, 0.5, 1.4]} />
+              <meshStandardMaterial color="#cbd5e1" />
+            </mesh>
+            {[-1.6, 1.6].map((zOff) => (
+              <mesh key={`pe-${zOff}`} position={[0, 0.1, zOff]} castShadow>
+                <cylinderGeometry args={[0.18, 0.16, 0.7, 12]} />
+                <meshStandardMaterial color="#1f2937" metalness={0.9} />
+              </mesh>
+            ))}
+          </group>
+        </group>
+      ))}
+
+      {/* ────────── BIG TERMINAL APRON — connecting concourse to runways ────────── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-58, 0.02, 62]} receiveShadow>
+        <planeGeometry args={[28, 6]} />
+        <meshStandardMaterial color="#27272a" roughness={0.85} />
+      </mesh>
+      {/* Apron taxi lines */}
+      {[-66, -60, -54].map((tx, i) => (
+        <mesh key={`atl-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[tx, 0.03, 62]}>
+          <planeGeometry args={[0.2, 5]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.7} toneMapped={false} />
+        </mesh>
+      ))}
+
+      {/* ────────── NEW ATC CONTROL TOWER — taller, with rotating radar ────────── */}
+      <group position={[-30, 0, 62]}>
+        {/* Base building */}
+        <mesh position={[0, 1.5, 0]} castShadow>
+          <boxGeometry args={[4, 3, 4]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        {/* Tower shaft */}
+        <mesh position={[0, 7, 0]} castShadow>
+          <cylinderGeometry args={[0.5, 0.7, 9, 14]} />
+          <meshStandardMaterial color="#475569" metalness={0.7} roughness={0.35} />
+        </mesh>
+        {/* Glass control room — bigger, octagonal feel */}
+        <mesh position={[0, 12, 0]} castShadow>
+          <cylinderGeometry args={[1.6, 1.3, 1.6, 8]} />
+          <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.85} metalness={0.7} roughness={0.2} transparent opacity={0.85} />
+        </mesh>
+        {/* Tower-top crown ring with lights */}
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <mesh key={`tcl-${i}`} position={[Math.cos((i * Math.PI) / 4) * 1.55, 12.9, Math.sin((i * Math.PI) / 4) * 1.55]}>
+            <sphereGeometry args={[0.1, 6, 6]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Antenna spire */}
+        <mesh position={[0, 14.4, 0]}>
+          <cylinderGeometry args={[0.08, 0.12, 3.2, 6]} />
+          <meshStandardMaterial color="#475569" metalness={0.8} />
+        </mesh>
+        {/* Spire beacon (pulsing) */}
+        <mesh position={[0, 16.3, 0]}>
+          <sphereGeometry args={[0.22, 10, 10]} />
+          <meshStandardMaterial ref={beaconMatRef} color="#ef4444" emissive="#ef4444" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+        {/* Big rotating radar dish on top */}
+        <group ref={radarRef} position={[0, 13.5, 0]}>
+          <mesh position={[1.4, 0, 0]} rotation={[0, 0, -0.4]}>
+            <boxGeometry args={[2.8, 0.08, 0.5]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#22d3ee" emissiveIntensity={0.5} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[1.4, 0.05, 0]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.3, 8]} />
+            <meshStandardMaterial color="#475569" />
+          </mesh>
+        </group>
+        {/* Tower sign */}
+        <mesh position={[0, 3.3, 2.05]}>
+          <boxGeometry args={[3, 0.4, 0.05]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <Text position={[0, 3.3, 2.09]} fontSize={0.28} color="#fde047" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#0b1220">
+          ATC TOWER · KBOT
+        </Text>
+      </group>
+
+      {/* ────────── HELIPAD with rotating helicopter ────────── */}
+      {/* Moved to (-25, 35) — north of R3 (z=40 start), 2u clearance from
+          runway. Originally at (-25, 47) which sat directly on R3. */}
+      <group position={[-25, 0, 35]}>
+        {/* Pad */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
+          <circleGeometry args={[3, 32]} />
+          <meshStandardMaterial color="#1c1917" />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <ringGeometry args={[2.6, 2.85, 32]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.6} toneMapped={false} side={THREE.DoubleSide} />
+        </mesh>
+        <Text
+          position={[0, 0.06, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={2.2}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+        >
+          H
+        </Text>
+        {/* Helicopter */}
+        <group position={[0, 0, 0]}>
+          {/* Body */}
+          <mesh position={[0, 0.9, 0]} castShadow>
+            <sphereGeometry args={[0.7, 14, 10]} />
+            <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.2} metalness={0.5} />
+          </mesh>
+          {/* Tail boom */}
+          <mesh position={[0, 1.05, -1.4]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.18, 1.6, 8]} />
+            <meshStandardMaterial color="#0c4a6e" />
+          </mesh>
+          {/* Tail rotor (rotating around X) */}
+          <group ref={heloTailRef} position={[0.18, 1.05, -2.15]}>
+            <mesh>
+              <boxGeometry args={[0.04, 0.7, 0.04]} />
+              <meshStandardMaterial color="#0b1220" />
+            </mesh>
+            <mesh rotation={[0, 0, Math.PI / 2]}>
+              <boxGeometry args={[0.04, 0.7, 0.04]} />
+              <meshStandardMaterial color="#0b1220" />
+            </mesh>
+          </group>
+          {/* Tail vertical fin */}
+          <mesh position={[0, 1.3, -2.0]}>
+            <boxGeometry args={[0.05, 0.45, 0.3]} />
+            <meshStandardMaterial color="#0c4a6e" />
+          </mesh>
+          {/* Cockpit window */}
+          <mesh position={[0, 0.95, 0.5]}>
+            <sphereGeometry args={[0.45, 12, 10, 0, Math.PI, 0, Math.PI]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.65} transparent opacity={0.8} />
+          </mesh>
+          {/* Landing skids */}
+          {[-0.45, 0.45].map((sx, i) => (
+            <mesh key={`sk-${i}`} position={[sx, 0.2, 0]}>
+              <boxGeometry args={[0.06, 0.06, 1.4]} />
+              <meshStandardMaterial color="#1f2937" />
+            </mesh>
+          ))}
+          {/* Main rotor mast */}
+          <mesh position={[0, 1.55, 0]}>
+            <cylinderGeometry args={[0.06, 0.06, 0.3, 6]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+          {/* Main rotor blades (rotating) */}
+          <group ref={heloBladeRef} position={[0, 1.75, 0]}>
+            <mesh>
+              <boxGeometry args={[3.4, 0.05, 0.18]} />
+              <meshStandardMaterial color="#1f2937" />
+            </mesh>
+            <mesh rotation={[0, Math.PI / 2, 0]}>
+              <boxGeometry args={[3.4, 0.05, 0.18]} />
+              <meshStandardMaterial color="#1f2937" />
+            </mesh>
+          </group>
+          {/* Belly beacon */}
+          <mesh position={[0, 0.3, 0]}>
+            <sphereGeometry args={[0.08, 8, 8]} />
+            <meshStandardMaterial ref={towerMatRef} color="#ef4444" emissive="#ef4444" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ────────── FUEL DEPOT ────────── */}
+      {/* Moved to (-50, 88) — south of runway 2 (z=80 north edge), 25u clear
+          of BotZoo at (-22.5, 87). Originally at (-66, 75) which clipped R2. */}
+      <group position={[-50, 0, 88]}>
+        {[[-2, 0], [0, 0], [2, 0], [-1, 2.5], [1, 2.5]].map(([fx, fz], i) => (
+          <group key={`ft-${i}`} position={[fx, 0, fz]}>
+            <mesh position={[0, 1, 0]} castShadow>
+              <cylinderGeometry args={[0.8, 0.8, 2.0, 16]} />
+              <meshStandardMaterial color="#e5e7eb" metalness={0.7} roughness={0.3} />
+            </mesh>
+            <mesh position={[0, 2.05, 0]}>
+              <sphereGeometry args={[0.8, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+              <meshStandardMaterial color="#e5e7eb" metalness={0.7} />
+            </mesh>
+            {/* Stripe */}
+            <mesh position={[0, 1.4, 0]}>
+              <cylinderGeometry args={[0.82, 0.82, 0.18, 16]} />
+              <meshStandardMaterial color="#dc2626" emissive="#ef4444" emissiveIntensity={0.5} />
+            </mesh>
+            <Text position={[0, 1.4, 0.83]} fontSize={0.18} color="#fff" anchorX="center" anchorY="middle">
+              JET-A
+            </Text>
+          </group>
+        ))}
+        {/* Containment berm */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 1.25]}>
+          <ringGeometry args={[3.8, 4.1, 32]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.4} toneMapped={false} side={THREE.DoubleSide} />
+        </mesh>
+        <Text position={[0, 0.5, -3.2]} fontSize={0.3} color="#ef4444" anchorX="center" anchorY="middle" outlineWidth={0.022} outlineColor="#fef9c3">
+          ⚠ FUEL DEPOT — NO SMOKING
+        </Text>
+      </group>
+
+      {/* Fuel truck driving on apron */}
+      <group ref={fuelTruckRef} position={[-50, 0, 64]}>
+        {/* Cab */}
+        <mesh position={[-0.9, 0.55, 0]} castShadow>
+          <boxGeometry args={[0.9, 0.9, 0.8]} />
+          <meshStandardMaterial color="#dc2626" emissive="#ef4444" emissiveIntensity={0.3} />
+        </mesh>
+        {/* Cab window */}
+        <mesh position={[-0.9, 0.85, 0]}>
+          <boxGeometry args={[0.92, 0.4, 0.5]} />
+          <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.6} />
+        </mesh>
+        {/* Tank */}
+        <mesh position={[0.4, 0.65, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.5, 0.5, 1.8, 16]} />
+          <meshStandardMaterial color="#e5e7eb" metalness={0.7} />
+        </mesh>
+        <Text position={[0.4, 0.65, 0.51]} fontSize={0.18} color="#0b1220" anchorX="center" anchorY="middle">
+          JET-A
+        </Text>
+        {/* Wheels */}
+        {[[-1.1, 0.5], [-1.1, -0.5], [0.0, 0.5], [0.0, -0.5], [0.9, 0.5], [0.9, -0.5]].map(([wx, wz], i) => (
+          <mesh key={`fw-${i}`} position={[wx, 0.18, wz]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.18, 0.18, 0.12, 10]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ────────── CARGO TERMINAL ────────── */}
+      <group position={[-65, 0, 33]}>
+        {/* Main warehouse */}
+        <mesh position={[0, 2.2, 0]} castShadow>
+          <boxGeometry args={[10, 4.4, 7]} />
+          <meshStandardMaterial color="#a16207" roughness={0.7} />
+        </mesh>
+        {/* Roof */}
+        <mesh position={[0, 4.55, 0]}>
+          <boxGeometry args={[10.4, 0.3, 7.4]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        {/* Loading doors (3 garage doors on south face) */}
+        {[-3, 0, 3].map((dx, i) => (
+          <mesh key={`cd-${i}`} position={[dx, 1.5, 3.51]}>
+            <boxGeometry args={[2.2, 2.8, 0.05]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.4} />
+          </mesh>
+        ))}
+        {/* Cargo containers stacked outside */}
+        {[
+          { p: [5.5, 0.75, -2], c: "#dc2626" },
+          { p: [5.5, 0.75, 0], c: "#0c4a6e" },
+          { p: [5.5, 0.75, 2], c: "#15803d" },
+          { p: [5.5, 2.3, -1], c: "#f59e0b" },
+          { p: [5.5, 2.3, 1], c: "#7c3aed" },
+        ].map((c, i) => (
+          <mesh key={`cc-${i}`} position={c.p as [number, number, number]} castShadow>
+            <boxGeometry args={[1.6, 1.5, 1.8]} />
+            <meshStandardMaterial color={c.c} emissive={c.c} emissiveIntensity={0.2} />
+          </mesh>
+        ))}
+        {/* Sign */}
+        <Text
+          position={[0, 5.0, 3.6]}
+          fontSize={0.5}
+          color="#fde047"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.035}
+          outlineColor="#0b1220"
+        >
+          📦 CARGO TERMINAL
+        </Text>
+      </group>
+
+      {/* ────────── LANDING PLANE (on runway 2) ────────── */}
+      <group ref={landingPlaneRef}>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.5, 3.6, 8, 16]} />
+          <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.2} metalness={0.55} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, 1.7, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.45, 0.32, 0.55, 16]} />
+          <meshStandardMaterial color="#0b1220" emissive="#38bdf8" emissiveIntensity={1.1} />
+        </mesh>
+        {/* Bigger wings */}
+        <mesh castShadow>
+          <boxGeometry args={[1.3, 0.16, 5.2]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.55} />
+        </mesh>
+        {/* Tail */}
+        <mesh position={[0, -1.7, 0.55]} castShadow>
+          <boxGeometry args={[0.1, 0.85, 0.85]} />
+          <meshStandardMaterial color="#0c4a6e" />
+        </mesh>
+        <mesh position={[0, -1.75, 0.1]} castShadow>
+          <boxGeometry args={[0.1, 0.55, 1.8]} />
+          <meshStandardMaterial color="#cbd5e1" />
+        </mesh>
+        {/* 4 engines (twinjet on each side, mainline jet feel) */}
+        {[-2.0, -1.0, 1.0, 2.0].map((zOff) => (
+          <mesh key={`lpe-${zOff}`} position={[0, 0.1, zOff]} castShadow>
+            <cylinderGeometry args={[0.2, 0.18, 0.8, 12]} />
+            <meshStandardMaterial color="#1f2937" metalness={0.9} />
+          </mesh>
+        ))}
+        {/* Landing strobe (blink) */}
+        <mesh ref={landingBeaconRef} position={[0, -1.6, 1.0]}>
+          <sphereGeometry args={[0.09, 8, 8]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={2} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ────────── WIND SOCK ────────── */}
+      <group ref={windsockRef} position={[-30, 0, 50]}>
+        <mesh position={[0, 1.5, 0]}>
+          <cylinderGeometry args={[0.05, 0.07, 3, 6]} />
+          <meshStandardMaterial color="#475569" />
+        </mesh>
+        <mesh position={[0, 3.0, 0]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.6} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.8, 3.0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <coneGeometry args={[0.35, 1.4, 12, 1, true]} />
+          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.5} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+
+      {/* ────────── PARKING LOT — south of terminal ────────── */}
+      {/* Moved to (-72, 87) — south of R2 (z=80 north edge), clear of R2 envelope */}
+      <group position={[-72, 0, 87]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+          <planeGeometry args={[14, 6]} />
+          <meshStandardMaterial color="#374151" roughness={0.9} />
+        </mesh>
+        {/* Parking line stripes */}
+        {[-6, -4, -2, 0, 2, 4, 6].map((sx) => (
+          <mesh key={`pls-${sx}`} rotation={[-Math.PI / 2, 0, 0]} position={[sx, 0.03, 0]}>
+            <planeGeometry args={[0.08, 5.5]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.4} toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Parked cars (6) — alternating colors */}
+        {[
+          { p: [-5, -1], c: "#dc2626" },
+          { p: [-3, -1], c: "#1e3a8a" },
+          { p: [-1, -1], c: "#16a34a" },
+          { p: [1, -1], c: "#f59e0b" },
+          { p: [3, -1], c: "#0b1220" },
+          { p: [5, -1], c: "#e2e8f0" },
+        ].map((c, i) => (
+          <group key={`pc-${i}`} position={[c.p[0], 0, c.p[1]]}>
+            <mesh position={[0, 0.35, 0]} castShadow>
+              <boxGeometry args={[1.0, 0.55, 1.8]} />
+              <meshStandardMaterial color={c.c} metalness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.78, 0]} castShadow>
+              <boxGeometry args={[0.9, 0.35, 1.0]} />
+              <meshStandardMaterial color={c.c} metalness={0.4} />
+            </mesh>
+            <mesh position={[0, 0.78, 0]}>
+              <boxGeometry args={[0.92, 0.32, 0.96]} />
+              <meshStandardMaterial color="#0c4a6e" emissive="#38bdf8" emissiveIntensity={0.3} transparent opacity={0.85} />
+            </mesh>
+          </group>
+        ))}
+        {/* Lot sign */}
+        <Text position={[0, 1.0, 3.5]} fontSize={0.32} color="#38bdf8" anchorX="center" anchorY="middle" outlineWidth={0.022} outlineColor="#0b1220">
+          🅿 SHORT-TERM PARKING
+        </Text>
+      </group>
+
+      {/* ────────── BIG ARRIVALS/DEPARTURES SIGN — east approach ────────── */}
+      <group position={[-15, 0, 67.5]}>
+        <mesh position={[0, 3.5, 0]}>
+          <boxGeometry args={[6, 2.5, 0.2]} />
+          <meshStandardMaterial color="#0b1220" />
+        </mesh>
+        <mesh position={[0, 3.5, 0.11]}>
+          <boxGeometry args={[5.7, 2.2, 0.04]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.9} toneMapped={false} />
+        </mesh>
+        <Text position={[0, 4.2, 0.14]} fontSize={0.42} color="#0b1220" anchorX="center" anchorY="middle" outlineWidth={0.025} outlineColor="#22d3ee">
+          ✈ BOTPLANE INTL
+        </Text>
+        <Text position={[0, 3.5, 0.14]} fontSize={0.26} color="#0b1220" anchorX="center" anchorY="middle">
+          ARRIVALS ▲ · DEPARTURES ▼
+        </Text>
+        <Text position={[0, 2.95, 0.14]} fontSize={0.22} color="#0b1220" anchorX="center" anchorY="middle">
+          3 RUNWAYS · 14 GATES
+        </Text>
+        {/* Support posts */}
+        {[-2.7, 2.7].map((px, i) => (
+          <mesh key={`sps-${i}`} position={[px, 1.25, 0]}>
+            <boxGeometry args={[0.2, 2.5, 0.2]} />
+            <meshStandardMaterial color="#475569" metalness={0.6} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ────────── HANGARS row — new airline-branded hangars west ────────── */}
+      {/* North hangar moved from (-78, 14) to (-75, 19) — clears BotGigs at
+          (-82.5, 9). South hangar at (-78, 32) is clear of all neighbors. */}
+      {[
+        { x: -75, z: 19, color: "#dc2626", label: "BOTAIR" },
+        { x: -78, z: 32, color: "#16a34a", label: "GREEN WINGS" },
+      ].map((h, i) => (
+        <group key={`nh-${i}`} position={[h.x, 0, h.z]}>
+          <mesh position={[0, 1.8, 0]} castShadow>
+            <boxGeometry args={[6, 3.6, 5]} />
+            <meshStandardMaterial color="#475569" metalness={0.5} />
+          </mesh>
+          <mesh position={[0, 3.8, 0]} castShadow>
+            <cylinderGeometry args={[3.0, 3.0, 5, 16, 1, false, 0, Math.PI]} />
+            <meshStandardMaterial color="#64748b" metalness={0.6} />
+          </mesh>
+          <mesh position={[0, 1.7, 2.51]}>
+            <planeGeometry args={[5.4, 3.2]} />
+            <meshStandardMaterial color={h.color} emissive={h.color} emissiveIntensity={0.45} />
+          </mesh>
+          <Text position={[0, 1.7, 2.54]} fontSize={0.5} color="#fde047" anchorX="center" anchorY="middle" outlineWidth={0.035} outlineColor="#0b1220">
+            {h.label}
+          </Text>
+        </group>
+      ))}
     </group>
   );
 }
@@ -517,9 +1268,12 @@ export default function CityExpansion() {
       <Runway />
       {/* One plane parked on the apron in front of the terminal, one on the
           runway actively cycling through takeoff. */}
-      <Airplane position={[-70.5, 0.75, 75]} />
+      {/* Parked plane moved off R2 envelope (z[74,80]) onto the original
+          apron at (-50, 49) where it has clear wing room. */}
+      <Airplane position={[-50, 0.75, 49]} />
       <TakeoffPlane />
       <ControlTower />
+      <AirportExpansion />
     </group>
   );
 }
