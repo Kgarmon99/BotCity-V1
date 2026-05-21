@@ -98,12 +98,13 @@ export const QUARTERS: Quarter[] = [
     emoji: "🧠",
     hudTitle: "Foundations",
     color: "#22d3ee",
-    signpost: [-117, 0, -142],
-    signpostRotY: Math.PI / 4, // faces center (SE)
-    // Pushed into the outer-ring band (z∈[-120,-150]) clear of the now-
-    // expanded BotNational Park (footprint x∈[-118,-80], z∈[-114,-68]).
-    // Mirrors Life Events at (-103, 135) on the opposite side of the city.
-    lots: plusLots(-103, -135, "fnd"),
+    signpost: [-22, 0, -91],
+    signpostRotY: -Math.PI / 2, // faces east toward the cluster
+    // Tucked just north of BotThrift & Resale (-13, -103) on the Consumer strip,
+    // threading between BotThrift to the south and BotFactory Yard's south edge
+    // (z=-81) to the north. Well clear of the expanded BotNational Park (east
+    // edge x=-80) and the Golf Course (west edge x=-24).
+    lots: plusLots(-13, -91, "fnd"),
   },
   {
     id: "borrowing",
