@@ -1,27 +1,36 @@
 // Civic plaza decoration in front of BotCityHall.
 //
-// BotCityHall sits at (13, 5, -30) with footprint x[10.5..15.5] z[-33..-27].
-// The plaza extends SOUTH from the building toward the secondary street at
-// z=-18 — about 7 units of open civic space. Includes a tiled stone floor,
-// a central fountain, a flagpole, and four corner bollards with pulsing
-// emerald lights so the plaza reads at night.
+// BotCityHall sits at (19.5, 5, -45) with footprint x[17,22] z[-48,-42].
+// The plaza extends NORTH from the building toward the inner ring road
+// at z=-27 (south sidewalk edge ≈ z=-28.1). A 10×8 plaza centered at
+// (19.5, -35) gives footprint x[14.5,24.5] z[-39,-31] — 3u gap south
+// to CityHall's north face, 2.9u gap north to the road sidewalk.
+//
+// Features:
+//   • Two-tone checker-tile floor + gold inset border
+//   • Cross walkway radiating N/S/E/W from the central fountain
+//   • Two-tier fountain with rotating ring + bobbing water spray
+//   • 4 ornate lamp posts (corners) with emissive lantern tops
+//   • 4 wooden benches flanking the walkways
+//   • 4 planter trees in the inter-axis quadrants
+//   • Central memorial obelisk just north of the fountain
+//   • Flagpole with green city flag
 
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { Text } from "@react-three/drei";
 
 const PLAZA_CX = 19.5;
-// Plaza must sit between CityHall's south face (z=-27) and the secondary
-// street's north sidewalk (z=-19.9, per RoadGrid). A 6-deep plaza centered
-// at z=-24 gives footprint z[-27..-21] — touches the building (intentional)
-// and leaves a 1.1u gap to the sidewalk so the player can walk around it.
-const PLAZA_CZ = -36;
-const PLAZA_W = 7;
-const PLAZA_D = 6;
+const PLAZA_CZ = -35;
+const PLAZA_W = 10;
+const PLAZA_D = 8;
 
 function Fountain() {
   const ringRef = useRef<THREE.Mesh>(null);
   const sprayRef = useRef<THREE.Mesh>(null);
+  const innerSprayRef = useRef<THREE.Mesh>(null);
+  const waterMatRef = useRef<THREE.MeshStandardMaterial>(null);
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (ringRef.current) ringRef.current.rotation.y = t * 0.2;
@@ -29,29 +38,143 @@ function Fountain() {
       const s = 1 + Math.sin(t * 2.5) * 0.08;
       sprayRef.current.scale.set(s, 1 + Math.sin(t * 2) * 0.15, s);
     }
+    if (innerSprayRef.current) {
+      const s = 1 + Math.sin(t * 3.2 + 1) * 0.12;
+      innerSprayRef.current.scale.set(s, 1 + Math.sin(t * 2.8) * 0.2, s);
+    }
+    if (waterMatRef.current) {
+      waterMatRef.current.emissiveIntensity = 0.5 + Math.sin(t * 1.5) * 0.2;
+    }
   });
   return (
     <group position={[PLAZA_CX, 0.05, PLAZA_CZ]}>
-      {/* Outer pool ring */}
-      <mesh ref={ringRef} position={[0, 0.15, 0]} castShadow receiveShadow>
-        <torusGeometry args={[1.4, 0.18, 16, 48]} />
+      {/* Lower (outer) pool ring */}
+      <mesh ref={ringRef} position={[0, 0.18, 0]} castShadow receiveShadow>
+        <torusGeometry args={[1.8, 0.22, 16, 56]} />
         <meshStandardMaterial color="#cbd5e1" roughness={0.5} metalness={0.3} />
       </mesh>
-      {/* Water disc */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.16, 0]}>
-        <circleGeometry args={[1.35, 48]} />
-        <meshStandardMaterial color="#0ea5e9" emissive="#22d3ee" emissiveIntensity={0.6} toneMapped={false} transparent opacity={0.85} />
+      {/* Lower water disc */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.2, 0]}>
+        <circleGeometry args={[1.75, 56]} />
+        <meshStandardMaterial
+          ref={waterMatRef}
+          color="#0ea5e9"
+          emissive="#22d3ee"
+          emissiveIntensity={0.55}
+          toneMapped={false}
+          transparent
+          opacity={0.85}
+        />
       </mesh>
-      {/* Center pedestal */}
-      <mesh position={[0, 0.45, 0]} castShadow>
-        <cylinderGeometry args={[0.4, 0.5, 0.6, 24]} />
+      {/* Mid pedestal */}
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <cylinderGeometry args={[0.55, 0.7, 0.8, 24]} />
         <meshStandardMaterial color="#e2e8f0" roughness={0.4} />
       </mesh>
-      {/* Water spray */}
-      <mesh ref={sprayRef} position={[0, 1.4, 0]}>
-        <coneGeometry args={[0.35, 1.6, 16, 1, true]} />
-        <meshStandardMaterial color="#67e8f9" emissive="#22d3ee" emissiveIntensity={1.2} toneMapped={false} transparent opacity={0.55} side={THREE.DoubleSide} />
+      {/* Upper basin */}
+      <mesh position={[0, 1.05, 0]} castShadow>
+        <torusGeometry args={[0.85, 0.13, 12, 32]} />
+        <meshStandardMaterial color="#cbd5e1" roughness={0.5} metalness={0.3} />
       </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 1.06, 0]}>
+        <circleGeometry args={[0.8, 32]} />
+        <meshStandardMaterial
+          color="#0ea5e9"
+          emissive="#22d3ee"
+          emissiveIntensity={0.65}
+          toneMapped={false}
+          transparent
+          opacity={0.85}
+        />
+      </mesh>
+      {/* Top pedestal */}
+      <mesh position={[0, 1.35, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.24, 0.5, 16]} />
+        <meshStandardMaterial color="#e2e8f0" roughness={0.4} />
+      </mesh>
+      {/* Tall central spray */}
+      <mesh ref={sprayRef} position={[0, 2.4, 0]}>
+        <coneGeometry args={[0.4, 2.0, 16, 1, true]} />
+        <meshStandardMaterial
+          color="#67e8f9"
+          emissive="#22d3ee"
+          emissiveIntensity={1.4}
+          toneMapped={false}
+          transparent
+          opacity={0.6}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Inner narrower jet — pulses at a different rate */}
+      <mesh ref={innerSprayRef} position={[0, 2.2, 0]}>
+        <coneGeometry args={[0.18, 1.6, 12, 1, true]} />
+        <meshStandardMaterial
+          color="#f0f9ff"
+          emissive="#67e8f9"
+          emissiveIntensity={1.8}
+          toneMapped={false}
+          transparent
+          opacity={0.7}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Soft cyan light bathing the plaza at night */}
+      <pointLight color="#22d3ee" intensity={1.2} distance={8} position={[0, 1.6, 0]} />
+    </group>
+  );
+}
+
+function Obelisk() {
+  // Slim civic monument just north of the fountain, commemorating BotCity.
+  return (
+    <group position={[PLAZA_CX, 0, PLAZA_CZ + 2.6]}>
+      {/* Square base */}
+      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.1, 0.4, 1.1]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.6} />
+      </mesh>
+      {/* Mid plinth */}
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <boxGeometry args={[0.8, 0.3, 0.8]} />
+        <meshStandardMaterial color="#cbd5e1" roughness={0.5} metalness={0.2} />
+      </mesh>
+      {/* Tapered shaft */}
+      <mesh position={[0, 1.85, 0]} castShadow>
+        <cylinderGeometry args={[0.12, 0.32, 2.3, 4]} />
+        <meshStandardMaterial color="#e2e8f0" roughness={0.4} metalness={0.3} />
+      </mesh>
+      {/* Gold cap */}
+      <mesh position={[0, 3.15, 0]} castShadow>
+        <coneGeometry args={[0.16, 0.35, 4]} />
+        <meshStandardMaterial
+          color="#fbbf24"
+          emissive="#fbbf24"
+          emissiveIntensity={0.7}
+          metalness={0.6}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Engraved plaque text — facing south toward the fountain */}
+      <Text
+        position={[0, 0.7, 0.42]}
+        fontSize={0.14}
+        color="#fbbf24"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.012}
+        outlineColor="#0b1220"
+      >
+        BOTCITY
+      </Text>
+      <Text
+        position={[0, 0.5, 0.42]}
+        fontSize={0.08}
+        color="#cbd5e1"
+        anchorX="center"
+        anchorY="middle"
+      >
+        EST. 20XX
+      </Text>
     </group>
   );
 }
@@ -60,76 +183,237 @@ function Flagpole() {
   const flagRef = useRef<THREE.Mesh>(null);
   useFrame((state) => {
     if (flagRef.current) {
-      // Subtle wave by rotating the flag plane.
       flagRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.8) * 0.15;
     }
   });
   return (
-    <group position={[PLAZA_CX - 2.6, 0, PLAZA_CZ - 2.6]}>
+    <group position={[PLAZA_CX - 4.2, 0, PLAZA_CZ - 3.2]}>
+      {/* Stone base */}
+      <mesh position={[0, 0.15, 0]} castShadow>
+        <cylinderGeometry args={[0.35, 0.42, 0.3, 12]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.6} />
+      </mesh>
       {/* Pole */}
-      <mesh position={[0, 3, 0]} castShadow>
-        <cylinderGeometry args={[0.06, 0.08, 6, 12]} />
+      <mesh position={[0, 3.5, 0]} castShadow>
+        <cylinderGeometry args={[0.07, 0.09, 7, 12]} />
         <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.3} />
       </mesh>
       {/* Gold finial */}
-      <mesh position={[0, 6.15, 0]} castShadow>
-        <sphereGeometry args={[0.13, 16, 16]} />
-        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} toneMapped={false} />
+      <mesh position={[0, 7.1, 0]} castShadow>
+        <sphereGeometry args={[0.16, 16, 16]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.9} toneMapped={false} />
       </mesh>
       {/* Flag */}
-      <mesh ref={flagRef} position={[0.55, 5.4, 0]}>
-        <planeGeometry args={[1.1, 0.7]} />
-        <meshStandardMaterial color="#22c55e" emissive="#16a34a" emissiveIntensity={0.5} side={THREE.DoubleSide} />
+      <mesh ref={flagRef} position={[0.65, 6.3, 0]}>
+        <planeGeometry args={[1.3, 0.8]} />
+        <meshStandardMaterial
+          color="#22c55e"
+          emissive="#16a34a"
+          emissiveIntensity={0.55}
+          side={THREE.DoubleSide}
+        />
       </mesh>
     </group>
   );
 }
 
-function Bollard({ pos }: { pos: [number, number] }) {
+function LampPost({ pos }: { pos: [number, number] }) {
   return (
     <group position={[pos[0], 0, pos[1]]}>
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <cylinderGeometry args={[0.16, 0.22, 1, 16]} />
-        <meshStandardMaterial color="#0f172a" roughness={0.6} />
+      {/* Base */}
+      <mesh position={[0, 0.18, 0]} castShadow>
+        <cylinderGeometry args={[0.18, 0.24, 0.36, 12]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.7} />
       </mesh>
-      <mesh position={[0, 1.05, 0]}>
-        <sphereGeometry args={[0.18, 16, 16]} />
-        <meshStandardMaterial color="#22c55e" emissive="#4ade80" emissiveIntensity={1.6} toneMapped={false} />
+      {/* Pole */}
+      <mesh position={[0, 1.6, 0]} castShadow>
+        <cylinderGeometry args={[0.07, 0.09, 2.8, 12]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.6} roughness={0.5} />
+      </mesh>
+      {/* Lamp arm */}
+      <mesh position={[0, 3.0, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.06, 0.3, 8]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      {/* Lantern housing */}
+      <mesh position={[0, 3.25, 0]} castShadow>
+        <boxGeometry args={[0.4, 0.5, 0.4]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.6} />
+      </mesh>
+      {/* Emissive lamp core */}
+      <mesh position={[0, 3.25, 0]}>
+        <sphereGeometry args={[0.22, 16, 16]} />
+        <meshStandardMaterial
+          color="#fef3c7"
+          emissive="#fbbf24"
+          emissiveIntensity={2.2}
+          toneMapped={false}
+        />
+      </mesh>
+      <pointLight color="#fbbf24" intensity={0.6} distance={5} position={[0, 3.25, 0]} />
+      {/* Decorative cap */}
+      <mesh position={[0, 3.6, 0]}>
+        <coneGeometry args={[0.25, 0.3, 4]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+    </group>
+  );
+}
+
+function Bench({ pos, rotY = 0 }: { pos: [number, number]; rotY?: number }) {
+  return (
+    <group position={[pos[0], 0, pos[1]]} rotation={[0, rotY, 0]}>
+      {/* Seat plank */}
+      <mesh position={[0, 0.42, 0]} castShadow>
+        <boxGeometry args={[1.6, 0.08, 0.4]} />
+        <meshStandardMaterial color="#78350f" roughness={0.9} />
+      </mesh>
+      {/* Backrest */}
+      <mesh position={[0, 0.75, -0.18]} castShadow>
+        <boxGeometry args={[1.6, 0.5, 0.06]} />
+        <meshStandardMaterial color="#78350f" roughness={0.9} />
+      </mesh>
+      {/* Legs */}
+      <mesh position={[-0.7, 0.2, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.42, 0.4]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+      <mesh position={[0.7, 0.2, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.42, 0.4]} />
+        <meshStandardMaterial color="#0f172a" />
+      </mesh>
+    </group>
+  );
+}
+
+function PlanterTree({ pos }: { pos: [number, number] }) {
+  return (
+    <group position={[pos[0], 0, pos[1]]}>
+      {/* Planter pot */}
+      <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.45, 0.38, 0.44, 16]} />
+        <meshStandardMaterial color="#7c2d12" roughness={0.9} />
+      </mesh>
+      {/* Soil disc */}
+      <mesh position={[0, 0.45, 0]}>
+        <cylinderGeometry args={[0.42, 0.42, 0.04, 16]} />
+        <meshStandardMaterial color="#451a03" roughness={1} />
+      </mesh>
+      {/* Trunk */}
+      <mesh position={[0, 0.85, 0]} castShadow>
+        <cylinderGeometry args={[0.08, 0.1, 0.8, 8]} />
+        <meshStandardMaterial color="#78350f" roughness={0.9} />
+      </mesh>
+      {/* Foliage — three stacked spheres for a topiary feel */}
+      <mesh position={[0, 1.45, 0]} castShadow>
+        <sphereGeometry args={[0.55, 16, 12]} />
+        <meshStandardMaterial color="#16a34a" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 1.95, 0]} castShadow>
+        <sphereGeometry args={[0.42, 16, 12]} />
+        <meshStandardMaterial color="#15803d" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 2.3, 0]} castShadow>
+        <sphereGeometry args={[0.26, 12, 10]} />
+        <meshStandardMaterial color="#22c55e" roughness={0.85} />
       </mesh>
     </group>
   );
 }
 
 export default function CityHallPlaza() {
-  // Corner bollards sit just inside the plaza tile edges so the
-  // glow forms a clean rectangle around it.
-  const hw = PLAZA_W / 2 - 0.4;
-  const hd = PLAZA_D / 2 - 0.4;
+  const hw = PLAZA_W / 2;
+  const hd = PLAZA_D / 2;
+  // Tile grid: 5 cols × 4 rows of 2×2 tiles. Alternating dark/lighter slate.
+  const tiles: Array<{ x: number; z: number; light: boolean }> = [];
+  const cols = 5;
+  const rows = 4;
+  const tileW = PLAZA_W / cols;
+  const tileD = PLAZA_D / rows;
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      tiles.push({
+        x: PLAZA_CX - hw + tileW * (i + 0.5),
+        z: PLAZA_CZ - hd + tileD * (j + 0.5),
+        light: (i + j) % 2 === 0,
+      });
+    }
+  }
   return (
     <group>
-      {/* Tile floor — slightly raised so it overdraws roads cleanly */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.03, PLAZA_CZ]} receiveShadow>
+      {/* Base plaza floor — dark slate underlay */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[PLAZA_CX, 0.025, PLAZA_CZ]}
+        receiveShadow
+      >
         <planeGeometry args={[PLAZA_W, PLAZA_D]} />
-        <meshStandardMaterial color="#1e293b" roughness={0.75} metalness={0.2} />
+        <meshStandardMaterial color="#0f172a" roughness={0.8} />
       </mesh>
-      {/* Inset gold border to frame the plaza */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.035, PLAZA_CZ]}>
-        <ringGeometry args={[PLAZA_W / 2 - 0.5, PLAZA_W / 2 - 0.2, 4, 1, 0, Math.PI * 2]} />
+      {/* Checker tiles on top of the underlay */}
+      {tiles.map((t, i) => (
+        <mesh
+          key={`tile-${i}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[t.x, 0.03, t.z]}
+          receiveShadow
+        >
+          <planeGeometry args={[tileW - 0.08, tileD - 0.08]} />
+          <meshStandardMaterial
+            color={t.light ? "#475569" : "#1e293b"}
+            roughness={0.75}
+            metalness={0.15}
+          />
+        </mesh>
+      ))}
+      {/* Gold inset frame around the perimeter */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.04, PLAZA_CZ - hd + 0.18]}>
+        <planeGeometry args={[PLAZA_W - 0.6, 0.12]} />
         <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} toneMapped={false} />
       </mesh>
-      {/* Diagonal pathway accent — cosmetic stripe on the N-S axis */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.04, PLAZA_CZ]}>
-        <planeGeometry args={[1.2, PLAZA_D - 1]} />
-        <meshStandardMaterial color="#334155" roughness={0.7} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.04, PLAZA_CZ + hd - 0.18]}>
+        <planeGeometry args={[PLAZA_W - 0.6, 0.12]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} toneMapped={false} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX - hw + 0.18, 0.04, PLAZA_CZ]}>
+        <planeGeometry args={[0.12, PLAZA_D - 0.6]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} toneMapped={false} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX + hw - 0.18, 0.04, PLAZA_CZ]}>
+        <planeGeometry args={[0.12, PLAZA_D - 0.6]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} toneMapped={false} />
+      </mesh>
+      {/* Cross walkways radiating from the fountain — lighter stone */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.045, PLAZA_CZ]}>
+        <planeGeometry args={[1.6, PLAZA_D - 0.5]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.7} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[PLAZA_CX, 0.045, PLAZA_CZ]}>
+        <planeGeometry args={[PLAZA_W - 0.5, 1.6]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.7} />
       </mesh>
 
       <Fountain />
+      <Obelisk />
       <Flagpole />
 
-      <Bollard pos={[PLAZA_CX - hw, PLAZA_CZ - hd]} />
-      <Bollard pos={[PLAZA_CX + hw, PLAZA_CZ - hd]} />
-      <Bollard pos={[PLAZA_CX - hw, PLAZA_CZ + hd]} />
-      <Bollard pos={[PLAZA_CX + hw, PLAZA_CZ + hd]} />
+      {/* Lamp posts at the four plaza corners */}
+      <LampPost pos={[PLAZA_CX - hw + 0.5, PLAZA_CZ - hd + 0.5]} />
+      <LampPost pos={[PLAZA_CX + hw - 0.5, PLAZA_CZ - hd + 0.5]} />
+      <LampPost pos={[PLAZA_CX - hw + 0.5, PLAZA_CZ + hd - 0.5]} />
+      <LampPost pos={[PLAZA_CX + hw - 0.5, PLAZA_CZ + hd - 0.5]} />
+
+      {/* Benches flanking the E-W walkway, facing it */}
+      <Bench pos={[PLAZA_CX - 3.0, PLAZA_CZ - 1.4]} rotY={Math.PI} />
+      <Bench pos={[PLAZA_CX + 3.0, PLAZA_CZ - 1.4]} rotY={Math.PI} />
+      <Bench pos={[PLAZA_CX - 3.0, PLAZA_CZ + 1.4]} rotY={0} />
+      <Bench pos={[PLAZA_CX + 3.0, PLAZA_CZ + 1.4]} rotY={0} />
+
+      {/* Planter trees in the four corner quadrants of the plaza */}
+      <PlanterTree pos={[PLAZA_CX - hw + 1.4, PLAZA_CZ - hd + 1.6]} />
+      <PlanterTree pos={[PLAZA_CX + hw - 1.4, PLAZA_CZ - hd + 1.6]} />
+      <PlanterTree pos={[PLAZA_CX - hw + 1.4, PLAZA_CZ + hd - 1.6]} />
+      <PlanterTree pos={[PLAZA_CX + hw - 1.4, PLAZA_CZ + hd - 1.6]} />
     </group>
   );
 }
