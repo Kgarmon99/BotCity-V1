@@ -270,8 +270,8 @@ function OceanWaves() {
     }
   });
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[62.5, 0.05, 25]}>
-      <planeGeometry args={[20, 130, 1, 1]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[88, 0.05, 50]}>
+      <planeGeometry args={[40, 180, 1, 1]} />
       <meshStandardMaterial
         ref={ref}
         color="#0e7490"
@@ -317,36 +317,79 @@ function Beach() {
   // sits inside this at (44, 25).
   return (
     <group>
-      {/* Giant sand strip along the east edge */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[66.75, 0.03, 52.5]}>
-        <planeGeometry args={[15, 60]} />
+      {/* Giant sand strip along the east edge — enlarged to span palms→shore */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[66.75, 0.03, 52.5]} receiveShadow>
+        <planeGeometry args={[22, 100]} />
         <meshStandardMaterial
-          color="#fef3c7"
+          color="#fde68a"
           emissive="#fcd34d"
-          emissiveIntensity={0.18}
-          roughness={0.95}
+          emissiveIntensity={0.08}
+          roughness={1}
+        />
+      </mesh>
+      {/* Darker dry-sand inner band (subtle color variation) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[62, 0.035, 52.5]}>
+        <planeGeometry args={[10, 95]} />
+        <meshStandardMaterial
+          color="#fcd34d"
+          emissive="#f59e0b"
+          emissiveIntensity={0.05}
+          roughness={1}
+          transparent
+          opacity={0.45}
         />
       </mesh>
       {/* Wet-sand band where the surf laps the shore */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[77.25, 0.04, 45]}>
-        <planeGeometry args={[2, 70]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[77, 0.04, 50]}>
+        <planeGeometry args={[3.5, 110]} />
         <meshStandardMaterial
-          color="#d4a574"
-          emissive="#fbbf24"
-          emissiveIntensity={0.3}
-          roughness={0.85}
+          color="#c89968"
+          emissive="#f59e0b"
+          emissiveIntensity={0.15}
+          roughness={0.7}
+          metalness={0.2}
         />
       </mesh>
+      {/* Small sand dunes / mounds along the back edge for texture */}
+      {[[58, 12], [59, 38], [58.5, 70], [59.5, 92]].map(([dx, dz], i) => (
+        <mesh
+          key={`dune-${i}`}
+          position={[dx, 0.15, dz]}
+          rotation={[0, i * 0.7, 0]}
+          castShadow
+          receiveShadow
+        >
+          <sphereGeometry args={[1.8, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2.4]} />
+          <meshStandardMaterial color="#fde68a" roughness={1} />
+        </mesh>
+      ))}
+      {/* Sandcastle near the center of the beach */}
+      <group position={[68, 0, 55]}>
+        <mesh position={[0, 0.35, 0]} castShadow>
+          <cylinderGeometry args={[0.5, 0.7, 0.7, 8]} />
+          <meshStandardMaterial color="#fcd34d" roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 0.85, 0]} castShadow>
+          <coneGeometry args={[0.35, 0.4, 6]} />
+          <meshStandardMaterial color="#f59e0b" roughness={0.9} />
+        </mesh>
+        {[[0.8, 0.7], [-0.8, 0.7], [0.8, -0.7], [-0.8, -0.7]].map(([tx, tz], i) => (
+          <mesh key={`tower-${i}`} position={[tx, 0.25, tz]} castShadow>
+            <cylinderGeometry args={[0.18, 0.22, 0.5, 6]} />
+            <meshStandardMaterial color="#fcd34d" roughness={0.95} />
+          </mesh>
+        ))}
+      </group>
       {/* The ocean — huge animated water plane reaching the world edge */}
       <OceanWaves />
-      {/* Distant waves / breakers — a couple of darker emissive strips */}
-      {[58, 65, 70].map((wx) => (
+      {/* Distant waves / breakers — emissive strips ON the ocean surface */}
+      {[82, 92, 100].map((wx) => (
         <mesh
           key={`wave-${wx}`}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[wx, 0.07, 25]}
+          position={[wx, 0.07, 50]}
         >
-          <planeGeometry args={[0.4, 110]} />
+          <planeGeometry args={[0.5, 160]} />
           <meshStandardMaterial
             color="#67e8f9"
             emissive="#a5f3fc"
@@ -358,31 +401,31 @@ function Beach() {
         </mesh>
       ))}
       {/* Palms scattered along the back of the beach */}
-      <PalmTree x={39} z={10} scale={1.1} />
-      <PalmTree x={38} z={20} />
-      <PalmTree x={39} z={30} scale={1.15} />
-      <PalmTree x={38} z={40} scale={0.95} />
-      <PalmTree x={39} z={50} scale={1.05} />
-      <PalmTree x={38} z={60} />
-      <PalmTree x={42} z={5} scale={0.9} />
-      <PalmTree x={43} z={64} scale={1.1} />
+      <PalmTree x={58.5} z={15} scale={1.1} />
+      <PalmTree x={57} z={30} />
+      <PalmTree x={58.5} z={45} scale={1.15} />
+      <PalmTree x={57} z={60} scale={0.95} />
+      <PalmTree x={58.5} z={75} scale={1.05} />
+      <PalmTree x={57} z={90} />
+      <PalmTree x={63} z={7.5} scale={0.9} />
+      <PalmTree x={64.5} z={96} scale={1.1} />
       {/* Umbrellas spread across the sand */}
-      <BeachUmbrella x={45} z={15} color="#ef4444" />
-      <BeachUmbrella x={47} z={22} color="#f97316" />
-      <BeachUmbrella x={46} z={32} color="#facc15" />
-      <BeachUmbrella x={48} z={42} color="#ec4899" />
-      <BeachUmbrella x={45} z={55} color="#22c55e" />
-      <BeachUmbrella x={47} z={60} color="#a855f7" />
+      <BeachUmbrella x={67.5} z={22.5} color="#ef4444" />
+      <BeachUmbrella x={70.5} z={33} color="#f97316" />
+      <BeachUmbrella x={69} z={48} color="#facc15" />
+      <BeachUmbrella x={72} z={63} color="#ec4899" />
+      <BeachUmbrella x={67.5} z={82.5} color="#22c55e" />
+      <BeachUmbrella x={70.5} z={90} color="#a855f7" />
       {/* Beach chairs facing the ocean */}
-      <BeachChair x={49} z={18} rot={-Math.PI / 2} />
-      <BeachChair x={49} z={28} rot={-Math.PI / 2} />
-      <BeachChair x={49} z={38} rot={-Math.PI / 2} />
-      <BeachChair x={49} z={48} rot={-Math.PI / 2} />
-      <BeachChair x={49} z={58} rot={-Math.PI / 2} />
+      <BeachChair x={73.5} z={27} rot={-Math.PI / 2} />
+      <BeachChair x={73.5} z={42} rot={-Math.PI / 2} />
+      <BeachChair x={73.5} z={57} rot={-Math.PI / 2} />
+      <BeachChair x={73.5} z={72} rot={-Math.PI / 2} />
+      <BeachChair x={73.5} z={87} rot={-Math.PI / 2} />
       {/* Surfboards staked into the sand */}
-      <Surfboard x={41} z={15} color="#22d3ee" rot={0.3} />
-      <Surfboard x={42} z={45} color="#f97316" rot={-0.2} />
-      <Surfboard x={41} z={58} color="#ec4899" rot={0.4} />
+      <Surfboard x={61.5} z={22.5} color="#22d3ee" rot={0.3} />
+      <Surfboard x={63} z={67.5} color="#f97316" rot={-0.2} />
+      <Surfboard x={61.5} z={87} color="#ec4899" rot={0.4} />
       {/* Beach balls */}
       <mesh position={[69, 0.42, 75]} castShadow>
         <sphereGeometry args={[0.4, 16, 16]} />

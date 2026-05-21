@@ -528,7 +528,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // just south of the south stand at z=-48.
     id: "botsoccer",
     label: "BotSoccer Stadium",
-    position: [-40.5, 1.5, -72],
+    position: [-40.5, 1.5, -76],
     color: "#22c55e",
     roofColor: "#ffffff",
     width: 1.8,
@@ -543,7 +543,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // band, 2.9u to z=36 road band.
     id: "botbasketball",
     label: "BotHoops Arena",
-    position: [40.5, 1.5, 30.75],
+    position: [40.5, 1.5, 34],
     color: "#f97316",
     roofColor: "#7c2d12",
     width: 1.8,

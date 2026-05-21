@@ -189,7 +189,7 @@ function GridFloor() {
   return (
     <gridHelper
       ref={gridRef}
-      args={[150, 150, "#4ade80", "#16a34a"]}
+      args={[280, 280, "#4ade80", "#16a34a"]}
       position={[0, 0.01, 0]}
     />
   );
@@ -302,7 +302,7 @@ export default function World() {
     <group>
       {/* Dark emerald ground */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[150, 150]} />
+        <planeGeometry args={[280, 280]} />
         <meshStandardMaterial color="#042f1f" roughness={0.4} metalness={0.5} />
       </mesh>
 
