@@ -328,8 +328,9 @@ function ElementarySchool() {
   });
   return (
     <group position={[55, 0, 75]}>
-      {/* Bright playground turf */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 4]}>
+      {/* Bright playground turf — pushed south to z=4.5 so its north edge
+          (z=2.25) clears the building's south face (z=2.0) by 0.25u. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 4.5]}>
         <planeGeometry args={[6, 4.5]} />
         <meshStandardMaterial color="#fbbf24" roughness={0.95} />
       </mesh>
@@ -390,8 +391,9 @@ function ElementarySchool() {
           ))}
         </group>
       </group>
-      {/* School bus parked at front */}
-      <SchoolBus position={[3.5, 0, -2]} />
+      {/* School bus parked at front — moved east from x=3.5 to x=4.5 so its
+          west edge (x=3.0) clears the building's east face (x=2.5) by 0.5u. */}
+      <SchoolBus position={[4.5, 0, -2]} />
       <Flagpole position={[-3, 0, -1]} />
       {/* Sign */}
       <Text

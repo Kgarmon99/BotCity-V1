@@ -100,6 +100,28 @@ export default function MiniMap() {
                   the city's grid so the radar feels like a real map. */}
               <line x1={RADAR_SIZE / 2} y1="0" x2={RADAR_SIZE / 2} y2={RADAR_SIZE} stroke="rgba(34,197,94,0.1)" />
               <line x1="0" y1={RADAR_SIZE / 2} x2={RADAR_SIZE} y2={RADAR_SIZE / 2} stroke="rgba(34,197,94,0.1)" />
+              {/* Cardinal compass labels — sit just inside the outer ring so
+                  the player can tell at a glance which way is which. World
+                  +Z is south on the radar (see worldToRadar comment). */}
+              {[
+                { x: RADAR_SIZE / 2, y: 9, label: "N" },
+                { x: RADAR_SIZE / 2, y: RADAR_SIZE - 5, label: "S" },
+                { x: 7, y: RADAR_SIZE / 2 + 3, label: "W" },
+                { x: RADAR_SIZE - 7, y: RADAR_SIZE / 2 + 3, label: "E" },
+              ].map((c) => (
+                <text
+                  key={c.label}
+                  x={c.x}
+                  y={c.y}
+                  fontSize={9}
+                  fontWeight="bold"
+                  textAnchor="middle"
+                  fill="rgba(134,239,172,0.7)"
+                  style={{ pointerEvents: "none", letterSpacing: "0.05em" }}
+                >
+                  {c.label}
+                </text>
+              ))}
 
               {/* Building blips: amber & pulsing if unvisited, dim green
                   with a check if done. Stadiums/etc all use the same

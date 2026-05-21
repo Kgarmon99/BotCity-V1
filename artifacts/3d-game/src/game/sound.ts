@@ -303,6 +303,15 @@ class SoundManager {
   ping() {
     this.blip(880, 0.05, "sine", 0.03);
   }
+  /**
+   * Footstep — short low-frequency thud, alternating slightly between
+   * left/right via `alt` so consecutive steps don't sound identical.
+   * Cheap to call every step (~3Hz walking) — same blip() path everything
+   * else uses.
+   */
+  step(alt: boolean) {
+    this.blip(alt ? 165 : 145, 0.045, "triangle", 0.028, alt ? 12 : -12);
+  }
 }
 
 export const sound = new SoundManager();

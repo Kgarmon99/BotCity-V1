@@ -43,6 +43,10 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   // transitions, not 60x/sec from useFrame. Belt-and-suspenders alongside
   // sound.ts's own idempotency check.
   const lastJetSound = useRef(false);
+  // Footstep cadence: accumulate horizontal distance moved on the ground and
+  // fire a step thud every STEP_DISTANCE units. Alternates left/right pitch.
+  const stepDistAccum = useRef(0);
+  const stepAlt = useRef(false);
   const cameraMode = useGameStore((s) => s.cameraMode);
   // Track the last touch interact tick we've consumed so a single tap fires
   // onInteract exactly once.
@@ -225,6 +229,26 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       groupRef.current.position.z = Math.max(-bound, Math.min(bound, groupRef.current.position.z));
 
       isMoving.current = velocity.current.length() > 0.02;
+
+      // Footsteps: only on the ground, only while actually walking (not in
+      // the BotMobile — wheels don't go thud). Accumulate horizontal
+      // displacement (velocity here is per-frame meters) and fire a step
+      // every STEP_DISTANCE units of ground travel. At WALK_SPEED=9 u/s,
+      // 3.0u/step → ~3 Hz cadence, which sounds like a natural jog. We
+      // subtract (not reset) the threshold so leftover distance carries
+      // over to the next step → cadence stays stable across frame hiccups.
+      const STEP_DISTANCE = 3.0;
+      if (isMoving.current && !isAirborne && !ridingRef.current) {
+        stepDistAccum.current += velocity.current.length();
+        if (stepDistAccum.current >= STEP_DISTANCE) {
+          stepDistAccum.current -= STEP_DISTANCE;
+          stepAlt.current = !stepAlt.current;
+          sound.step(stepAlt.current);
+        }
+      } else {
+        // Reset so the first step after stopping/landing isn't immediate.
+        stepDistAccum.current = 0;
+      }
 
       if (isMoving.current) {
         const angle = Math.atan2(velocity.current.x, velocity.current.z);
