@@ -119,6 +119,11 @@ export default function DialogModal() {
     basketball: "botbasketball",
     gallery: "botgallery",
     fashion: "botfashion",
+    elementary: "botelementary",
+    middle: "botmiddle",
+    high: "bothigh",
+    golf: "botgolf",
+    park: "botpark",
   };
 
   const handleAction = () => {

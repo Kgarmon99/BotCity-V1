@@ -51,7 +51,12 @@ export interface DialogContent {
     | "basketball"
     | "gallery"
     | "fashion"
-    | "zoo";
+    | "zoo"
+    | "elementary"
+    | "middle"
+    | "high"
+    | "golf"
+    | "park";
   amount?: number;
 }
 

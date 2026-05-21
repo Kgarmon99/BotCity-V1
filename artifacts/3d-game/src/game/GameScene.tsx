@@ -20,6 +20,7 @@ import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
 import CityExpansion from "./CityExpansion";
 import CityDistricts from "./CityDistricts";
+import CityDistrictsExtra from "./CityDistrictsExtra";
 import CityHallPlaza from "./CityHallPlaza";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
@@ -583,6 +584,71 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 3,
     emoji: "👗",
   },
+  // ─── Education Row — three K-12 schools along z=75, far-north band ─────
+  // Players already have BotU North/South (universities) and LittleBots
+  // (daycare). These three fill the K-12 gap and form a visible "school
+  // row" along the north edge of the map.
+  {
+    id: "bothigh",
+    label: "Bot High School",
+    position: [22, 3, 75],
+    color: "#475569",
+    roofColor: "#f59e0b",
+    width: 5,
+    depth: 4,
+    height: 6,
+    emoji: "🎓",
+  },
+  {
+    id: "botmiddle",
+    label: "Bot Middle School",
+    position: [40, 3, 75],
+    color: "#0ea5e9",
+    roofColor: "#f87171",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🏫",
+  },
+  {
+    id: "botelementary",
+    label: "Bot Elementary",
+    position: [55, 3, 75],
+    color: "#fde68a",
+    roofColor: "#ef4444",
+    width: 5,
+    depth: 4,
+    height: 4,
+    emoji: "✏️",
+  },
+  // ─── BotGolf clubhouse @ (-62, 0, 75) ──────────────────────────────────
+  // Clubhouse building. The fairway / greens / driving range are rendered
+  // by CityDistricts.GolfCourse to the west and south of the clubhouse.
+  {
+    id: "botgolf",
+    label: "BotGolf Country Club",
+    position: [-62, 3, 75],
+    color: "#ecfccb",
+    roofColor: "#15803d",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "⛳",
+  },
+  // ─── BotNational Park visitor center @ (-92, 0, -78) ──────────────────
+  // Far SW corner. The mountains, pines and lake are rendered by
+  // CityDistricts.NationalPark around this anchor.
+  {
+    id: "botpark",
+    label: "BotNational Park",
+    position: [-92, 3, -78],
+    color: "#78350f",
+    roofColor: "#14532d",
+    width: 5,
+    depth: 4,
+    height: 4,
+    emoji: "🏔️",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;
@@ -725,6 +791,7 @@ export default function GameScene() {
           <CityBuildings />
           <CityExpansion />
           <CityDistricts />
+          <CityDistrictsExtra />
           <Streetscape />
           <BuildingAccents />
           <DistrictDetails />

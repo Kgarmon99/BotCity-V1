@@ -221,6 +221,41 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     action: "charity",
   }),
 
+  botelementary: () => ({
+    buildingId: "botelementary",
+    title: "✏️ Bot Elementary — Kid Tax Credits 101",
+    body: `Welcome to Bot Elementary! Even tiny bots cost real money — and the tax code helps parents recoup some of it.\n\n📖 CHILD TAX CREDIT (CTC):\nUp to $2,000 per qualifying child under 17. A CREDIT (not a deduction) — it cuts your tax bill dollar-for-dollar. Up to $1,700 is refundable, meaning you can get it even if you owe zero tax.\n\n📖 CHILD & DEPENDENT CARE CREDIT:\nPaid for daycare or after-school care so you (and your spouse) could work? Claim 20-35% of up to $3,000 of expenses for one child, $6,000 for two+.\n\n📖 529 PLANS — TAX-FREE COLLEGE SAVINGS:\nContributions grow tax-free; withdrawals are tax-free if used for qualified education (now including K-12 tuition up to $10k/yr, apprenticeships, and even student loan payoffs up to $10k lifetime).\n\n💡 Lesson: Claim the CTC for every qualifying child. If you pay for childcare while you work, the Care Credit stacks on top. Start a 529 early — compounding does the heavy lifting.`,
+    action: "elementary",
+  }),
+
+  botmiddle: () => ({
+    buildingId: "botmiddle",
+    title: "🏫 Bot Middle School — Earned Income & Allowances",
+    body: `Welcome to Bot Middle School! Middle-school bots are old enough for first jobs — and that means first tax lessons.\n\n📖 KIDDIE TAX:\nA child's UNEARNED income (interest, dividends) above ~$2,600 is taxed at the PARENT'S rate, not the child's. Earned income (wages from a real job) is taxed at the child's own — usually 0% — rate.\n\n📖 EARNED-INCOME ROTH IRA:\nA kid with a real paycheck can fund a Roth IRA up to the lower of $7,000 or their earned income. Five-decade tax-free runway — the single best long-term tax move a parent can make for a child.\n\n📖 STANDARD DEDUCTION FOR DEPENDENTS:\nA dependent's standard deduction is the GREATER of $1,300 or earned income + $450, capped at the regular standard deduction. A kid earning $5,000 owes zero federal tax.\n\n💡 Lesson: Pay kids for real work, put the earnings in a Roth IRA, watch the magic of 50+ years of tax-free compounding.`,
+    action: "middle",
+  }),
+
+  bothigh: () => ({
+    buildingId: "bothigh",
+    title: "🎓 Bot High School — Education Credits & FAFSA",
+    body: `Welcome to Bot High School! Almost college time — the IRS has two big education credits waiting.\n\n📖 AMERICAN OPPORTUNITY CREDIT (AOTC):\nUp to $2,500 per student per year for the first 4 years of college. 40% is REFUNDABLE — you can pocket up to $1,000 even with zero tax owed. Income limits: $80k single / $160k joint phase-out.\n\n📖 LIFETIME LEARNING CREDIT (LLC):\nUp to $2,000/yr for any post-secondary education (grad school, professional certs, one-off classes). No 4-year limit. Same income phase-out as AOTC. You can only claim ONE of AOTC or LLC per student per year.\n\n📖 STUDENT LOAN INTEREST DEDUCTION:\nUp to $2,500/yr of student loan interest is deductible ABOVE the line — you don't have to itemize. Phases out at $80k single / $165k joint.\n\n📖 FAFSA & TAXES:\nThe Free Application for Federal Student Aid uses your tax return (specifically AGI) to determine aid. Lowering AGI via HSA/401(k) contributions can boost financial aid eligibility.\n\n💡 Lesson: Claim the AOTC for the first 4 years — it's worth more and is partially refundable. Switch to the LLC for grad school or continuing ed.`,
+    action: "high",
+  }),
+
+  botgolf: () => ({
+    buildingId: "botgolf",
+    title: "⛳ BotGolf Country Club — Business Meals & Entertainment",
+    body: `Welcome to BotGolf! That round with a client — deductible or not? The rules changed in 2018, and most bots get this wrong.\n\n📖 ENTERTAINMENT IS DEAD (for taxes):\nThe Tax Cuts and Jobs Act killed the 50% deduction for client entertainment. Greens fees, concert tickets, sporting events — ZERO deduction now, even with a clear business purpose. No exceptions.\n\n📖 BUSINESS MEALS — STILL 50%:\nMeals with a client, prospect, or employee where business is discussed are still 50% deductible. Keep the receipt, note who you ate with and what you discussed. The food at the 19th hole? 50% if it's a real business meeting.\n\n📖 CLUB DUES — NOT DEDUCTIBLE:\nAnnual country-club, gym, or social-club dues are NEVER deductible, even if you only use the club for client meetings. Congress closed this loophole decades ago.\n\n📖 ROUND OF GOLF FOR EMPLOYEES:\nA company outing for ALL employees (not just executives) is still 100% deductible as a "de minimis fringe benefit" or team-building expense. Selective entertainment for top brass = no deduction.\n\n💡 Lesson: Buy the client lunch (50%), don't buy them the round (0%). Annual dues never deduct. Whole-company outings still pencil out.`,
+    action: "golf",
+  }),
+
+  botpark: () => ({
+    buildingId: "botpark",
+    title: "🏔️ BotNational Park — Conservation Easements & Land Tax",
+    body: `Welcome to BotNational Park! Land and nature get their own corner of the tax code — and a few of the biggest deductions in the book.\n\n📖 CONSERVATION EASEMENTS:\nDonate development rights on land to a qualified land trust and you can deduct the appraised value of those rights — often hundreds of thousands of dollars — as a charitable contribution. The IRS heavily scrutinizes "syndicated" easements (a current audit target), so legitimate easements only.\n\n📖 PROPERTY TAX DEDUCTION:\nState and local property taxes on land you own are itemizable on Schedule A — but capped by the $10,000 SALT limit (state + local + property taxes combined).\n\n📖 TIMBER & FARMLAND:\nIncome from selling timber qualifies for long-term CAPITAL GAINS rates if held more than a year. Farmland enrolled in conservation programs may qualify for reduced assessments and special-use valuation at estate-tax time.\n\n📖 NATIONAL PARK FEES:\nNot deductible. Recreational visits are personal expenses — no matter how educational. (Sorry.)\n\n💡 Lesson: Real estate has surprisingly generous tax breaks. Conservation easements can be enormous, but only if the easement is real and the appraisal defensible.`,
+    action: "park",
+  }),
+
   botcrypto: () => ({
     buildingId: "botcrypto",
     title: "₿ BotCrypto Exchange — Capital Gains & 1099-B",
