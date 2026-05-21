@@ -1,0 +1,56 @@
+Big topics with no home in BotCity yet
+Money fundamentals (surprisingly thin coverage):
+
+💵 BotMint / Federal Reserve — what money is, fiat vs gold, inflation, how the Fed sets rates, M1/M2. You teach taxes on money but never teach money itself.
+📊 BotEcon Lab — supply & demand, recessions, GDP, unemployment. Macro literacy.
+💳 BotCredit Bureau — credit scores, FICO factors, building credit, identity theft, debt-to-income.
+📒 BotBudget Cafe — zero-based budgeting, 50/30/20, envelope method, tracking spending. The most basic skill, missing.
+🐖 BotSavings / Piggy Plaza — emergency funds, high-yield savings, CDs, money market accounts, sinking funds.
+Borrowing (almost entirely absent):
+
+🏘️ BotRealty / Mortgage Office — buying a home, mortgage types, points, PMI, refinancing, amortization.
+🎒 BotLoans / Student Aid — FAFSA, federal vs private loans, SAVE/IDR plans, loan forgiveness.
+🚗💸 BotAutoLoans — APR vs financing, lease vs buy, underwater loans, depreciation curves.
+💀 BotPawn / Payday — predatory lending, APR traps, alternatives. (Cautionary kiosk.)
+⚖️🔨 BotBankruptcy Court — Ch 7 vs 13, debt discharge, rebuilding.
+Investing (you have BotBroker + BotCrypto — but that's it):
+
+🏦📈 BotIndex / ETF House — index funds, expense ratios, diversification, dollar-cost averaging, Bogleheads basics.
+🏠💰 BotREIT Tower — real estate investing, rental properties, REITs, cap rates.
+💎 BotCommodities — gold/silver/oil, futures basics, hedging.
+🌱 BotVenture / Angel Hall — startups, equity, cap tables, vesting, accredited investor rules.
+🔮 BotBehavioral Lab — loss aversion, FOMO, herd behavior, sunk-cost, the psychology of bad financial decisions. This is huge and missing.
+Life events & planning:
+
+💍 BotChapel — marriage finances: joint accounts, prenups, combining/splitting credit.
+👶 BotMaternity / Baby Hospital — cost of raising a kid, 529s, life insurance need, will/guardianship.
+⚱️ BotFuneral / Estate Planning — wills, trusts, probate, beneficiary designations, power of attorney.
+🏥📋 BotHealthPlan — choosing insurance plans, HDHP vs PPO, deductibles vs premiums, network basics. (BotHospital is visiting the doctor; this is choosing coverage.)
+Entrepreneurship & income:
+
+🚀 BotStartup Incubator — bootstrapping, fundraising, runway, burn rate, unit economics. WorkCorp is W-2 land.
+🤝 BotFreelance Hub — invoicing, contracts, client management, 1099 vs W-2 trade-offs. (BotGigs is gig-economy taxes, not the business of freelancing.)
+📜 BotPatent / IP Office — royalties, licensing, intellectual property as an asset.
+🌐 BotRemote / Coworking — remote work economics, geographic arbitrage, digital nomadism.
+Consumer / behavioral:
+
+🛡️📋 BotConsumer Protection — scams, fraud, CFPB, your rights, robocalls, phishing.
+🎯 BotAds / Marketing District — how marketing manipulates spending, dark patterns, subscription traps.
+♻️ BotThrift / Resale — buying used, depreciation, reselling, the "stuff" economy.
+🌍 BotGiving / Philanthropy Center — beyond tax-deductible donations: effective altruism, donor-advised funds, legacy giving. (BotCharity is the tax side.)
+International & macro:
+
+🌐💱 BotForex / Currency Exchange — exchange rates, sending money abroad, currency risk.
+🌍 BotEmbassy — expat finance, foreign accounts, currency conversion, international banking.
+⚖️🌐 BotTradeHall — tariffs, trade deficits, why prices change with global events.
+Curricular structure suggestion
+A real financial-ed game has a progression: earn → budget → save → borrow wisely → invest → protect → plan → give. Your city is mostly tax-flavored end-state knowledge. Adding the foundational layer (budget, savings, credit, behavioral) would let a 16-year-old start the game and actually learn finance from zero.
+
+What to build next — pick a direction
+(A) Foundations pack — BotBudget Cafe, BotSavings Plaza, BotCredit Bureau, BotBehavioral Lab. The "before-you-earn" layer that's missing entirely.
+(B) Borrowing pack — BotRealty/Mortgage, BotLoans/Student Aid, BotAutoLoans, BotPawn (cautionary). Debt literacy.
+(C) Investing pack — BotIndex/ETF House, BotREIT, BotBehavioral Lab, BotCommodities. Beyond the single broker.
+(D) Life events pack — Chapel, Baby Hospital, Funeral/Estate, HealthPlan. Money around life milestones.
+(E) Macro/money pack — BotMint/Fed, BotEcon Lab, BotForex, BotTradeHall. How money itself works.
+(F) Just go wide — pick the 6 highest-impact ones across all packs (my pick: BotBudget Cafe, BotCredit Bureau, BotBehavioral Lab, BotRealty/Mortgage, BotIndex/ETF House, BotMint/Fed).
+Which direction? Or want me to start with F (highest-impact spread of 6) right now?
