@@ -1279,7 +1279,7 @@ export default function KioskDecor() {
         );
       })}
       {/* Per-quarter signature monuments (Task #4) — visible from afar */}
-      <FoundationsMonument position={[-102, -102]} />
+      <FoundationsMonument position={[-70, -108]} />
       <BorrowingMonument position={[115, -115]} />
       <InvestingMonument position={[115, 115]} />
       <LifeEventsMonument position={[-115, 147]} />
