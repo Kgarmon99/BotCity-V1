@@ -205,18 +205,18 @@ export default function AmbientLife() {
 
       {/* === Food carts at plazas (each cleared of road bands and bldgs) === */}
       {/* Inner intersection corners (≥4u off the road axis) */}
-      <HotDogCart position={[5, 0, 5]} rotation={Math.PI * 1.25} />
-      <NewsCart position={[-5, 0, 5]} rotation={-Math.PI / 4} />
+      <HotDogCart position={[7.5, 0, 7.5]} rotation={Math.PI * 1.25} />
+      <NewsCart position={[-7.5, 0, 7.5]} rotation={-Math.PI / 4} />
       {/* Near the museums on the north middle ring */}
-      <NewsCart position={[20, 0, -22.5]} rotation={Math.PI} />
+      <NewsCart position={[30, 0, -33.75]} rotation={Math.PI} />
       {/* Near BotBeach (≥4u east of beach kiosk) */}
-      <HotDogCart position={[40, 0, 22]} rotation={Math.PI / 2} />
+      <HotDogCart position={[60, 0, 33]} rotation={Math.PI / 2} />
       {/* Near BotShops (SW) */}
       {/* z=15.5 keeps it off the secondary road band centered at z=18
           (band z∈[16.9,19.1]) and ≥5u from botshops at (-27, 20.5). */}
-      <IceCreamCart position={[-22, 0, 15.5]} rotation={Math.PI / 6} />
+      <IceCreamCart position={[-33, 0, 23.25]} rotation={Math.PI / 6} />
       {/* Near LittleBots / river bank */}
-      <IceCreamCart position={[15, 0, 30]} rotation={-Math.PI / 3} />
+      <IceCreamCart position={[22.5, 0, 45]} rotation={-Math.PI / 3} />
     </group>
   );
 }

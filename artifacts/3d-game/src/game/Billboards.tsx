@@ -73,12 +73,12 @@ function Billboard({ position, rotation, color, msgIndex }: BillboardProps) {
 }
 
 const billboards: BillboardProps[] = [
-  { position: [-12, 3, -12], rotation: [0, Math.PI / 4, 0], color: "#4ade80", msgIndex: 0 },
-  { position: [12, 3, -12], rotation: [0, -Math.PI / 4, 0], color: "#fbbf24", msgIndex: 1 },
-  { position: [-12, 3, 12], rotation: [0, (3 * Math.PI) / 4, 0], color: "#22c55e", msgIndex: 2 },
-  { position: [12, 3, 12], rotation: [0, -(3 * Math.PI) / 4, 0], color: "#86efac", msgIndex: 3 },
-  { position: [0, 3, -20], rotation: [0, 0, 0], color: "#4ade80", msgIndex: 4 },
-  { position: [0, 3, 20], rotation: [0, Math.PI, 0], color: "#fbbf24", msgIndex: 5 },
+  { position: [-18, 3, -18], rotation: [0, Math.PI / 4, 0], color: "#4ade80", msgIndex: 0 },
+  { position: [18, 3, -18], rotation: [0, -Math.PI / 4, 0], color: "#fbbf24", msgIndex: 1 },
+  { position: [-18, 3, 18], rotation: [0, (3 * Math.PI) / 4, 0], color: "#22c55e", msgIndex: 2 },
+  { position: [18, 3, 18], rotation: [0, -(3 * Math.PI) / 4, 0], color: "#86efac", msgIndex: 3 },
+  { position: [0, 3, -30], rotation: [0, 0, 0], color: "#4ade80", msgIndex: 4 },
+  { position: [0, 3, 30], rotation: [0, Math.PI, 0], color: "#fbbf24", msgIndex: 5 },
 ];
 
 // ─── GetMoneyBot.com brand billboards ────────────────────────────────
@@ -213,13 +213,13 @@ function GmbBillboard({ position, rotation, seed }: GmbBillboardProps) {
 // touch ground (y=0..6 vertical span). All clear of road bands.
 const gmbBillboards: GmbBillboardProps[] = [
   // North edge — facing south (toward city center)
-  { position: [0, 5, -40], rotation: [0, 0, 0], seed: 0 },
+  { position: [0, 5, -60], rotation: [0, 0, 0], seed: 0 },
   // South edge — facing north
-  { position: [0, 5, 40], rotation: [0, Math.PI, 0], seed: 1 },
+  { position: [0, 5, 60], rotation: [0, Math.PI, 0], seed: 1 },
   // West edge — facing east
-  { position: [-40, 5, 0], rotation: [0, Math.PI / 2, 0], seed: 2 },
+  { position: [-60, 5, 0], rotation: [0, Math.PI / 2, 0], seed: 2 },
   // East edge — facing west
-  { position: [40, 5, 0], rotation: [0, -Math.PI / 2, 0], seed: 3 },
+  { position: [60, 5, 0], rotation: [0, -Math.PI / 2, 0], seed: 3 },
 ];
 
 export default function Billboards() {

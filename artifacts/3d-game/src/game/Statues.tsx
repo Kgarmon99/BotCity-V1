@@ -107,13 +107,13 @@ function Statue({ position, rotation = 0, pose = "hero", plaque }: StatueProps) 
 const statues: StatueProps[] = [
   // NW quadrant — pedestal sits on the NW outer corner of the (-18, -18)
   // intersection, looking SE toward downtown.
-  { position: [-22, 0, -22], rotation:  Math.PI / 4,     pose: "hero",    plaque: "MOMOBOT\nThe Founder" },
+  { position: [-33, 0, -33], rotation:  Math.PI / 4,     pose: "hero",    plaque: "MOMOBOT\nThe Founder" },
   // NE quadrant — outer corner of the (18, -18) intersection.
-  { position: [ 22, 0, -22], rotation: -Math.PI / 4,     pose: "thinker", plaque: "PROF.\nLEDGERINGTON" },
+  { position: [33, 0, -33], rotation: -Math.PI / 4,     pose: "thinker", plaque: "PROF.\nLEDGERINGTON" },
   // SW quadrant — outer corner of the (-18, 18) intersection.
-  { position: [-22, 0,  22], rotation:  Math.PI * 3 / 4, pose: "wave",    plaque: "MAYOR\nBYTECOIN" },
+  { position: [-33, 0, 33], rotation:  Math.PI * 3 / 4, pose: "wave",    plaque: "MAYOR\nBYTECOIN" },
   // SE quadrant — outer corner of the (18, 18) intersection.
-  { position: [ 22, 0,  22], rotation: -Math.PI * 3 / 4, pose: "salute",  plaque: "GOVERNOR\nSILICONIA" },
+  { position: [33, 0, 33], rotation: -Math.PI * 3 / 4, pose: "salute",  plaque: "GOVERNOR\nSILICONIA" },
 ];
 
 export default function Statues() {

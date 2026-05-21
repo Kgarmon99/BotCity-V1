@@ -74,7 +74,7 @@ function Streetlight({ position }: { position: [number, number, number] }) {
   );
 }
 
-const HALF = 65;       // city half-extent (extended for suburbs ring)
+const HALF = 98;       // city half-extent (extended for suburbs ring)
 const MAIN_W = 3;      // main avenue width
 const SEC_W = 2.2;     // secondary street width
 
@@ -83,18 +83,18 @@ const SEC_W = 2.2;     // secondary street width
 // Outer ring streets: at x=±36 and z=±36
 const verticalRoads = [
   { x: 0,   w: MAIN_W, color: "#22c55e" },
-  { x: 18,  w: SEC_W,  color: "#4ade80" },
-  { x: -18, w: SEC_W,  color: "#4ade80" },
-  { x: 36,  w: SEC_W,  color: "#86efac" },
-  { x: -36, w: SEC_W,  color: "#86efac" },
+  { x: 27,  w: SEC_W,  color: "#4ade80" },
+  { x: -27, w: SEC_W,  color: "#4ade80" },
+  { x: 54,  w: SEC_W,  color: "#86efac" },
+  { x: -54, w: SEC_W,  color: "#86efac" },
 ];
 
 const horizontalRoads = [
   { z: 0,   w: MAIN_W, color: "#4ade80" },
-  { z: 18,  w: SEC_W,  color: "#22c55e" },
-  { z: -18, w: SEC_W,  color: "#22c55e" },
-  { z: 36,  w: SEC_W,  color: "#86efac" },
-  { z: -36, w: SEC_W,  color: "#86efac" },
+  { z: 27,  w: SEC_W,  color: "#22c55e" },
+  { z: -27, w: SEC_W,  color: "#22c55e" },
+  { z: 54,  w: SEC_W,  color: "#86efac" },
+  { z: -54, w: SEC_W,  color: "#86efac" },
 ];
 
 const streetlights: [number, number, number][] = [];
@@ -111,10 +111,10 @@ for (const v of verticalRoads) {
 
 const crosswalks: [number, number, number][] = [];
 // Crosswalks where main avenues meet secondary streets
-for (const v of [-36, -18, 18, 36]) {
+for (const v of [-54, -27, 27, 54]) {
   crosswalks.push([v, 0, 0]); // east-west avenue crosses vertical street
 }
-for (const h of [-36, -18, 18, 36]) {
+for (const h of [-54, -27, 27, 54]) {
   crosswalks.push([0, 0, h]); // north-south avenue crosses horizontal street
 }
 

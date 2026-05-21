@@ -6,7 +6,7 @@ import * as THREE from "three";
 // GetMoneyBot.com brand blimp — slow circular orbit at altitude over the city.
 // Path: radius 40 (just inside the world bound ±45), altitude 22 (well above
 // the tallest outer skyscrapers at h=16). One full orbit takes ~60s.
-const RADIUS = 40;
+const RADIUS = 78;
 const ALTITUDE = 22;
 const PERIOD = 60;
 
@@ -50,7 +50,7 @@ export default function Blimp() {
       </group>
 
       {/* Side banner — left flank (+Z) */}
-      <mesh position={[0, 0, 1.48]}>
+      <mesh position={[0, 0, 2.22]}>
         <planeGeometry args={[7, 1.4]} />
         <meshStandardMaterial
           color="#0b0823"
@@ -60,7 +60,7 @@ export default function Blimp() {
         />
       </mesh>
       <Text
-        position={[0, 0, 1.52]}
+        position={[0, 0, 2.28]}
         fontSize={0.7}
         color="#22d3ee"
         anchorX="center"
@@ -73,7 +73,7 @@ export default function Blimp() {
       </Text>
 
       {/* Side banner — right flank (-Z), flipped so it reads from outside */}
-      <mesh position={[0, 0, -1.48]} rotation={[0, Math.PI, 0]}>
+      <mesh position={[0, 0, -2.22]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[7, 1.4]} />
         <meshStandardMaterial
           color="#0b0823"
@@ -83,7 +83,7 @@ export default function Blimp() {
         />
       </mesh>
       <Text
-        position={[0, 0, -1.52]}
+        position={[0, 0, -2.28]}
         rotation={[0, Math.PI, 0]}
         fontSize={0.7}
         color="#22d3ee"
@@ -97,7 +97,7 @@ export default function Blimp() {
       </Text>
 
       {/* Tail fins at rear (-X) — vertical + two horizontals */}
-      <mesh position={[-4.1, 0.9, 0]}>
+      <mesh position={[-6.15, 0.9, 0]}>
         <boxGeometry args={[1.3, 1.3, 0.08]} />
         <meshStandardMaterial
           color="#7c3aed"
@@ -105,7 +105,7 @@ export default function Blimp() {
           emissiveIntensity={0.7}
         />
       </mesh>
-      <mesh position={[-4.1, 0, 0.6]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[-6.15, 0, 0.9]} rotation={[Math.PI / 2, 0, 0]}>
         <boxGeometry args={[1.3, 1.1, 0.08]} />
         <meshStandardMaterial
           color="#7c3aed"
@@ -113,7 +113,7 @@ export default function Blimp() {
           emissiveIntensity={0.7}
         />
       </mesh>
-      <mesh position={[-4.1, 0, -0.6]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[-6.15, 0, -0.9]} rotation={[Math.PI / 2, 0, 0]}>
         <boxGeometry args={[1.3, 1.1, 0.08]} />
         <meshStandardMaterial
           color="#7c3aed"
@@ -123,7 +123,7 @@ export default function Blimp() {
       </mesh>
 
       {/* Gondola hanging below */}
-      <mesh position={[0.4, -1.6, 0]} castShadow>
+      <mesh position={[0.6, -1.6, 0]} castShadow>
         <boxGeometry args={[1.8, 0.55, 0.85]} />
         <meshStandardMaterial
           color="#1e1b4b"
@@ -134,7 +134,7 @@ export default function Blimp() {
         />
       </mesh>
       {/* Gondola window strip */}
-      <mesh position={[0.4, -1.55, 0.43]}>
+      <mesh position={[0.6, -1.55, 0.65]}>
         <boxGeometry args={[1.5, 0.22, 0.02]} />
         <meshStandardMaterial
           color="#22d3ee"
@@ -143,7 +143,7 @@ export default function Blimp() {
           toneMapped={false}
         />
       </mesh>
-      <mesh position={[0.4, -1.55, -0.43]}>
+      <mesh position={[0.6, -1.55, -0.64]}>
         <boxGeometry args={[1.5, 0.22, 0.02]} />
         <meshStandardMaterial
           color="#22d3ee"
@@ -154,7 +154,7 @@ export default function Blimp() {
       </mesh>
 
       {/* Spinning rear propeller */}
-      <mesh ref={propRef} position={[-4.6, 0, 0]} rotation={[0, 0, 0]}>
+      <mesh ref={propRef} position={[-6.9, 0, 0]} rotation={[0, 0, 0]}>
         <boxGeometry args={[0.04, 1.2, 0.12]} />
         <meshStandardMaterial color="#0b0823" metalness={0.7} />
       </mesh>

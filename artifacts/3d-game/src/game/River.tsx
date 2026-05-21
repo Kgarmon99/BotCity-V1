@@ -104,7 +104,7 @@ export default function River() {
     <group>
       {/* Riverbed — dark blue plane just under the water surface */}
       <mesh
-        position={[3, 0.02, 42]}
+        position={[4.5, 0.02, 63]}
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow
       >
@@ -114,7 +114,7 @@ export default function River() {
       {/* Water surface */}
       <mesh
         ref={waterRef}
-        position={[3, 0.05, 42]}
+        position={[4.5, 0.05, 63]}
         rotation={[-Math.PI / 2, 0, 0]}
       >
         <planeGeometry args={[3.5, 19.5]} />
@@ -140,17 +140,17 @@ export default function River() {
         </mesh>
       ))}
       {/* Rocks along the banks */}
-      <Rock position={[1, 0.22, 35]} scale={0.9} />
-      <Rock position={[5, 0.22, 37]} scale={1.1} color="#44403c" />
-      <Rock position={[1, 0.22, 45]} scale={0.8} />
-      <Rock position={[5, 0.22, 49]} scale={1.0} color="#44403c" />
-      <Rock position={[3, 0.12, 50.5]} scale={0.6} />
+      <Rock position={[1.5, 0.22, 52.5]} scale={0.9} />
+      <Rock position={[7.5, 0.22, 55.5]} scale={1.1} color="#44403c" />
+      <Rock position={[1.5, 0.22, 67.5]} scale={0.8} />
+      <Rock position={[7.5, 0.22, 73.5]} scale={1.0} color="#44403c" />
+      <Rock position={[4.5, 0.12, 75.75]} scale={0.6} />
       {/* Drifting lily pads on the water surface */}
-      <mesh ref={lilyRef1} position={[2.6, 0.07, 36]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={lilyRef1} position={[3.9, 0.07, 54]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.4, 10]} />
         <meshStandardMaterial color="#22c55e" />
       </mesh>
-      <mesh ref={lilyRef2} position={[3.4, 0.07, 48]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={lilyRef2} position={[5.1, 0.07, 72]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.35, 10]} />
         <meshStandardMaterial color="#16a34a" />
       </mesh>
@@ -169,7 +169,7 @@ export default function River() {
           Bridge deck is 6u along local X, 2.2u along local Z; the river
           runs N-S so we mount it unrotated so the long axis crosses the
           ~3.5u water span (deck spans world x ∈ [0, 6]). */}
-      <ArchedBridge position={[3, 0, 40]} />
+      <ArchedBridge position={[4.5, 0, 60]} />
     </group>
   );
 }

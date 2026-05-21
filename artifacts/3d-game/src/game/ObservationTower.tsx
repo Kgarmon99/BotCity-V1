@@ -33,7 +33,7 @@ export default function ObservationTower() {
   });
 
   return (
-    <group position={[60, 0, 35]}>
+    <group position={[90, 0, 52.5]}>
       {/* Base plaza */}
       <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[4, 24]} />
@@ -45,12 +45,12 @@ export default function ObservationTower() {
         <meshStandardMaterial color="#475569" metalness={0.4} />
       </mesh>
       {/* External elevator track (yellow strip) */}
-      <mesh position={[1.2, 11, 0]}>
+      <mesh position={[1.8, 11, 0]}>
         <boxGeometry args={[0.18, 22, 0.4]} />
         <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} />
       </mesh>
       {/* Glass elevator car (rides the track) */}
-      <mesh ref={elevatorRef} position={[1.35, 1, 0]} castShadow>
+      <mesh ref={elevatorRef} position={[2.03, 1, 0]} castShadow>
         <boxGeometry args={[0.55, 1.0, 0.7]} />
         <meshStandardMaterial color="#67e8f9" transparent opacity={0.7} metalness={0.5} />
       </mesh>
@@ -91,7 +91,7 @@ export default function ObservationTower() {
           <cylinderGeometry args={[0.6, 0.15, 0.1, 18, 1, true]} />
           <meshStandardMaterial color="#cbd5e1" side={THREE.DoubleSide} />
         </mesh>
-        <mesh position={[0.7, 0, 0]}>
+        <mesh position={[1.05, 0, 0]}>
           <boxGeometry args={[0.1, 0.1, 0.1]} />
           <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.6} />
         </mesh>
@@ -107,11 +107,11 @@ export default function ObservationTower() {
         />
       </mesh>
       {/* Entrance archway on south face */}
-      <mesh position={[0, 1.4, 1.7]} castShadow>
+      <mesh position={[0, 1.4, 2.55]} castShadow>
         <boxGeometry args={[0.9, 2.6, 0.15]} />
         <meshStandardMaterial color="#0f172a" />
       </mesh>
-      <mesh position={[0, 1.4, 1.78]}>
+      <mesh position={[0, 1.4, 2.67]}>
         <boxGeometry args={[0.7, 2.3, 0.04]} />
         <meshStandardMaterial color="#67e8f9" emissive="#67e8f9" emissiveIntensity={0.5} transparent opacity={0.6} />
       </mesh>

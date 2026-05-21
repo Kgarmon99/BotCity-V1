@@ -125,20 +125,20 @@ function CityBuilding({ pos, rotY, w, d, h, shape, color, beaconColor }: Buildin
 const buildings: BuildingSpec[] = [
   // INNER RING — buildings inside the 4 inner blocks, facing the main avenues
   // NW inner block (x<0, z<0): need to leave room for taxmart at (-9,-8)
-  { pos: [-14, 0, -5],  rotY:  Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "tower",    color: "#22d3ee", beaconColor: "#67e8f9" }, // faces east (+x toward main avenue x=0)
-  { pos: [-5,  0, -14], rotY: 0,            w: 3, d: 2.6, h: 7, shape: "box",      color: "#a78bfa", beaconColor: "#c4b5fd" }, // faces south (+z toward main avenue z=0)
+  { pos: [-21, 0, -7.5],  rotY:  Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "tower",    color: "#22d3ee", beaconColor: "#67e8f9" }, // faces east (+x toward main avenue x=0)
+  { pos: [-7.5, 0, -21], rotY: 0,            w: 3, d: 2.6, h: 7, shape: "box",      color: "#a78bfa", beaconColor: "#c4b5fd" }, // faces south (+z toward main avenue z=0)
 
   // NE inner block (x>0, z<0): workcorp at (8,-10)
-  { pos: [14, 0, -5],   rotY: -Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "dome",      color: "#fbbf24", beaconColor: "#fde047" },
-  { pos: [5,  0, -14],  rotY: 0,            w: 3, d: 2.6, h: 7, shape: "tower",    color: "#22c55e", beaconColor: "#4ade80" },
+  { pos: [21, 0, -7.5],   rotY: -Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "dome",      color: "#fbbf24", beaconColor: "#fde047" },
+  { pos: [7.5, 0, -21],  rotY: 0,            w: 3, d: 2.6, h: 7, shape: "tower",    color: "#22c55e", beaconColor: "#4ade80" },
 
   // SW inner block (x<0, z>0): irs at (-9,9); BotPlane terminal + runway occupy the
   // z=10..16 strip so the inner filler at (-5, 14) was removed.
-  { pos: [-14, 0, 5],   rotY:  Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "cylinder", color: "#f472b6", beaconColor: "#f9a8d4" },
+  { pos: [-21, 0, 7.5],   rotY:  Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "cylinder", color: "#f472b6", beaconColor: "#f9a8d4" },
 
   // SE inner block (x>0, z>0): firstbank at (9,9); BotTrain station + tracks occupy
   // the z=10..16 strip so the inner filler at (5, 14) was removed.
-  { pos: [14, 0, 5],    rotY: -Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "tower",    color: "#22d3ee", beaconColor: "#67e8f9" },
+  { pos: [21, 0, 7.5],    rotY: -Math.PI / 2, w: 2.6, d: 3, h: 6, shape: "tower",    color: "#22d3ee", beaconColor: "#67e8f9" },
 
   // MIDDLE RING — between secondary streets (±18) and outer ring (±36)
   // All offsets avoid main avenues (x=0, z=0) and secondary streets (x=±18, z=±18)
@@ -146,40 +146,40 @@ const buildings: BuildingSpec[] = [
   // Shops), so the adjacent fillers at (±27, ∓23) and (±23, ∓27) were removed
   // to clear room for them. See CityDistricts.tsx.
   // West column (x ≈ -27): face east (rotY = π/2) toward x=-18 street
-  { pos: [-27, 0,  -9], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#22c55e", beaconColor: "#4ade80" },
-  { pos: [-27, 0,   9], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 8,  shape: "dome",    color: "#f472b6", beaconColor: "#f9a8d4" },
+  { pos: [-40.5, 0, -13.5], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#22c55e", beaconColor: "#4ade80" },
+  { pos: [-40.5, 0, 13.5], rotY:  Math.PI / 2, w: 3.5, d: 4, h: 8,  shape: "dome",    color: "#f472b6", beaconColor: "#f9a8d4" },
   // East column (x ≈ 27)
-  { pos: [ 27, 0,  -9], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 9,  shape: "pyramid", color: "#22d3ee", beaconColor: "#67e8f9" },
-  { pos: [ 27, 0,   9], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
+  { pos: [40.5, 0, -13.5], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 9,  shape: "pyramid", color: "#22d3ee", beaconColor: "#67e8f9" },
+  { pos: [40.5, 0, 13.5], rotY: -Math.PI / 2, w: 3.5, d: 4, h: 12, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
   // North row (z ≈ -27): face south (rotY = 0).
   // The (-9, -27) filler was removed to make room for BotDealer showroom + lot
   // (see CityDistricts.tsx and BUILDING_DEFS in GameScene.tsx).
-  { pos: [  9, 0, -27], rotY: 0,            w: 4, d: 3.5, h: 12, shape: "tower",   color: "#a78bfa", beaconColor: "#c4b5fd" },
+  { pos: [13.5, 0, -40.5], rotY: 0,            w: 4, d: 3.5, h: 12, shape: "tower",   color: "#a78bfa", beaconColor: "#c4b5fd" },
   // South row (z ≈ 27). The (9, 27) filler was removed to clear the site
   // for LittleBots DayCare (see BUILDING_DEFS in GameScene.tsx).
-  { pos: [ -9, 0,  27], rotY: Math.PI,      w: 4, d: 3.5, h: 11, shape: "box",     color: "#f472b6", beaconColor: "#f9a8d4" },
+  { pos: [-13.5, 0, 40.5], rotY: Math.PI,      w: 4, d: 3.5, h: 11, shape: "box",     color: "#f472b6", beaconColor: "#f9a8d4" },
 
   // OUTER RING — beyond ±36 streets — taller skyscrapers, facing inward
   // West outer (x ≈ -41)
-  { pos: [-41, 0, -23], rotY:  Math.PI / 2, w: 5, d: 5, h: 16, shape: "tower", color: "#22d3ee", beaconColor: "#67e8f9" },
-  { pos: [-41, 0,  -9], rotY:  Math.PI / 2, w: 5, d: 5, h: 20, shape: "tower", color: "#22c55e", beaconColor: "#4ade80" },
-  { pos: [-41, 0,   9], rotY:  Math.PI / 2, w: 5, d: 5, h: 18, shape: "tower", color: "#a78bfa", beaconColor: "#c4b5fd" },
-  { pos: [-41, 0,  23], rotY:  Math.PI / 2, w: 5, d: 5, h: 14, shape: "dome",  color: "#f472b6", beaconColor: "#f9a8d4" },
+  { pos: [-61.5, 0, -34.5], rotY:  Math.PI / 2, w: 5, d: 5, h: 16, shape: "tower", color: "#22d3ee", beaconColor: "#67e8f9" },
+  { pos: [-61.5, 0, -13.5], rotY:  Math.PI / 2, w: 5, d: 5, h: 20, shape: "tower", color: "#22c55e", beaconColor: "#4ade80" },
+  { pos: [-61.5, 0, 13.5], rotY:  Math.PI / 2, w: 5, d: 5, h: 18, shape: "tower", color: "#a78bfa", beaconColor: "#c4b5fd" },
+  { pos: [-61.5, 0, 34.5], rotY:  Math.PI / 2, w: 5, d: 5, h: 14, shape: "dome",  color: "#f472b6", beaconColor: "#f9a8d4" },
   // East outer
-  { pos: [ 41, 0, -23], rotY: -Math.PI / 2, w: 5, d: 5, h: 18, shape: "tower",   color: "#fbbf24", beaconColor: "#fde047" },
-  { pos: [ 41, 0,  -9], rotY: -Math.PI / 2, w: 5, d: 5, h: 22, shape: "tower",   color: "#22c55e", beaconColor: "#4ade80" },
-  { pos: [ 41, 0,   9], rotY: -Math.PI / 2, w: 5, d: 5, h: 16, shape: "pyramid", color: "#f472b6", beaconColor: "#f9a8d4" },
-  { pos: [ 41, 0,  23], rotY: -Math.PI / 2, w: 5, d: 5, h: 19, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
+  { pos: [61.5, 0, -34.5], rotY: -Math.PI / 2, w: 5, d: 5, h: 18, shape: "tower",   color: "#fbbf24", beaconColor: "#fde047" },
+  { pos: [61.5, 0, -13.5], rotY: -Math.PI / 2, w: 5, d: 5, h: 22, shape: "tower",   color: "#22c55e", beaconColor: "#4ade80" },
+  { pos: [61.5, 0, 13.5], rotY: -Math.PI / 2, w: 5, d: 5, h: 16, shape: "pyramid", color: "#f472b6", beaconColor: "#f9a8d4" },
+  { pos: [61.5, 0, 34.5], rotY: -Math.PI / 2, w: 5, d: 5, h: 19, shape: "tower",   color: "#34d399", beaconColor: "#6ee7b7" },
   // North outer
-  { pos: [-23, 0, -41], rotY: 0, w: 5, d: 5, h: 17, shape: "tower", color: "#22d3ee", beaconColor: "#67e8f9" },
-  { pos: [ -9, 0, -41], rotY: 0, w: 5, d: 5, h: 24, shape: "tower", color: "#22c55e", beaconColor: "#4ade80" },
-  { pos: [  9, 0, -41], rotY: 0, w: 5, d: 5, h: 21, shape: "box",   color: "#fbbf24", beaconColor: "#fde047" },
-  { pos: [ 23, 0, -41], rotY: 0, w: 5, d: 5, h: 16, shape: "dome",  color: "#a78bfa", beaconColor: "#c4b5fd" },
+  { pos: [-34.5, 0, -61.5], rotY: 0, w: 5, d: 5, h: 17, shape: "tower", color: "#22d3ee", beaconColor: "#67e8f9" },
+  { pos: [-13.5, 0, -61.5], rotY: 0, w: 5, d: 5, h: 24, shape: "tower", color: "#22c55e", beaconColor: "#4ade80" },
+  { pos: [13.5, 0, -61.5], rotY: 0, w: 5, d: 5, h: 21, shape: "box",   color: "#fbbf24", beaconColor: "#fde047" },
+  { pos: [34.5, 0, -61.5], rotY: 0, w: 5, d: 5, h: 16, shape: "dome",  color: "#a78bfa", beaconColor: "#c4b5fd" },
   // South outer
-  { pos: [-23, 0,  41], rotY: Math.PI, w: 5, d: 5, h: 16, shape: "cylinder", color: "#a78bfa", beaconColor: "#c4b5fd" },
-  { pos: [ -9, 0,  41], rotY: Math.PI, w: 5, d: 5, h: 23, shape: "tower",    color: "#22c55e", beaconColor: "#4ade80" },
-  { pos: [  9, 0,  41], rotY: Math.PI, w: 5, d: 5, h: 17, shape: "dome",     color: "#34d399", beaconColor: "#6ee7b7" },
-  { pos: [ 23, 0,  41], rotY: Math.PI, w: 5, d: 5, h: 20, shape: "tower",    color: "#fbbf24", beaconColor: "#fde047" },
+  { pos: [-34.5, 0, 61.5], rotY: Math.PI, w: 5, d: 5, h: 16, shape: "cylinder", color: "#a78bfa", beaconColor: "#c4b5fd" },
+  { pos: [-13.5, 0, 61.5], rotY: Math.PI, w: 5, d: 5, h: 23, shape: "tower",    color: "#22c55e", beaconColor: "#4ade80" },
+  { pos: [13.5, 0, 61.5], rotY: Math.PI, w: 5, d: 5, h: 17, shape: "dome",     color: "#34d399", beaconColor: "#6ee7b7" },
+  { pos: [34.5, 0, 61.5], rotY: Math.PI, w: 5, d: 5, h: 20, shape: "tower",    color: "#fbbf24", beaconColor: "#fde047" },
 ];
 
 export default function CityBuildings() {

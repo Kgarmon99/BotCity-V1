@@ -297,39 +297,39 @@ export default function CityDetails() {
   return (
     <group>
       {/* District pylons near each building — matches the building's accent color */}
-      <DistrictPylon position={[-13, 0, -4]} label="WORK\nDISTRICT" color="#60a5fa" />
-      <DistrictPylon position={[13, 0, -4]} label="MARKET\nDISTRICT" color="#fbbf24" />
-      <DistrictPylon position={[-13, 0, 4]} label="FINANCIAL\nDISTRICT" color="#a78bfa" />
-      <DistrictPylon position={[13, 0, 4]} label="GOV\nDISTRICT" color="#f87171" />
+      <DistrictPylon position={[-19.5, 0, -6]} label="WORK\nDISTRICT" color="#60a5fa" />
+      <DistrictPylon position={[19.5, 0, -6]} label="MARKET\nDISTRICT" color="#fbbf24" />
+      <DistrictPylon position={[-19.5, 0, 6]} label="FINANCIAL\nDISTRICT" color="#a78bfa" />
+      <DistrictPylon position={[19.5, 0, 6]} label="GOV\nDISTRICT" color="#f87171" />
 
       {/* Welcome pylons at city entry points — off main avenue (x=0) */}
-      <DistrictPylon position={[-4, 0, -22]} label="WELCOME\nTO\nBOTCITY" color="#4ade80" rotation={Math.PI / 12} />
-      <DistrictPylon position={[ 4, 0,  22]} label="POP. 9001\nBOTS" color="#86efac" rotation={Math.PI + Math.PI / 12} />
+      <DistrictPylon position={[-6, 0, -33]} label="WELCOME\nTO\nBOTCITY" color="#4ade80" rotation={Math.PI / 12} />
+      <DistrictPylon position={[6, 0, 33]} label="POP. 9001\nBOTS" color="#86efac" rotation={Math.PI + Math.PI / 12} />
 
       {/* Hover platforms scattered in block interiors */}
-      <HoverPlatform position={[-6, 2.5, -6]} color="#22c55e" />
-      <HoverPlatform position={[6, 2.5, -6]} color="#fbbf24" />
-      <HoverPlatform position={[-6, 2.5, 6]} color="#4ade80" />
-      <HoverPlatform position={[6, 2.5, 6]} color="#86efac" />
+      <HoverPlatform position={[-9, 2.5, -9]} color="#22c55e" />
+      <HoverPlatform position={[9, 2.5, -9]} color="#fbbf24" />
+      <HoverPlatform position={[-9, 2.5, 9]} color="#4ade80" />
+      <HoverPlatform position={[9, 2.5, 9]} color="#86efac" />
 
       {/* Benches in plaza corners (off the main avenues) */}
-      <Bench position={[-4, 0, -4]} rotation={Math.PI / 4} />
-      <Bench position={[ 4, 0, -4]} rotation={-Math.PI / 4} />
-      <Bench position={[-4, 0,  4]} rotation={(3 * Math.PI) / 4} />
-      <Bench position={[ 4, 0,  4]} rotation={-(3 * Math.PI) / 4} />
+      <Bench position={[-6, 0, -6]} rotation={Math.PI / 4} />
+      <Bench position={[6, 0, -6]} rotation={-Math.PI / 4} />
+      <Bench position={[-6, 0, 6]} rotation={(3 * Math.PI) / 4} />
+      <Bench position={[6, 0, 6]} rotation={-(3 * Math.PI) / 4} />
 
       {/* Neighborhood amenities — middle-ring block interiors. Each footprint
           is ≤ 5×3.5, placed between the secondary road band (±18) and the
           outer building ring (~±27), so they slot into the empty quadrants
           without touching either. */}
-      <Park position={[-22, 0, -22]} rotation={Math.PI / 6} />
-      <Playground position={[22, 0, -22]} rotation={-Math.PI / 8} />
-      <Pool position={[22, 0, 22]} rotation={Math.PI / 12} />
-      <Park position={[-22, 0, 22]} rotation={-Math.PI / 5} />
+      <Park position={[-33, 0, -33]} rotation={Math.PI / 6} />
+      <Playground position={[33, 0, -33]} rotation={-Math.PI / 8} />
+      <Pool position={[33, 0, 33]} rotation={Math.PI / 12} />
+      <Park position={[-33, 0, 33]} rotation={-Math.PI / 5} />
 
       {/* Outer-suburb plazas — between the major outer districts. */}
-      <Pool position={[8, 0, -45]} rotation={Math.PI / 8} />
-      <Playground position={[10, 0, 40]} rotation={-Math.PI / 6} />
+      <Pool position={[12, 0, -67.5]} rotation={Math.PI / 8} />
+      <Playground position={[15, 0, 60]} rotation={-Math.PI / 6} />
     </group>
   );
 }

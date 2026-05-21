@@ -23,8 +23,8 @@ interface PlayerProps {
   isMoving: React.MutableRefObject<boolean>;
 }
 
-const WALK_SPEED = 7;
-const RIDE_SPEED = 17; // BotMobile boost (~2.4x walking)
+const WALK_SPEED = 9;
+const RIDE_SPEED = 22; // BotMobile boost (~2.4x walking)
 const JETPACK_THRUST = 28; // upward accel when Shift held (m/s²)
 const GRAVITY = 22; // downward accel (m/s²)
 const MAX_ALTITUDE = 55; // ceiling so we don't fly off the skybox

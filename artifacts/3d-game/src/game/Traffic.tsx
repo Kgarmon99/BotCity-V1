@@ -25,8 +25,8 @@ interface CarPath {
 
 // City extends roughly ±60 along each main avenue; using ±65 keeps the
 // wrap-around well outside the visible spawn camera frame.
-const RANGE_MIN = -65;
-const RANGE_MAX = 65;
+const RANGE_MIN = -98;
+const RANGE_MAX = 98;
 const RANGE = RANGE_MAX - RANGE_MIN;
 
 const CARS: CarPath[] = [

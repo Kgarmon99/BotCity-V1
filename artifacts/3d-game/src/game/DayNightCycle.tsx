@@ -91,11 +91,11 @@ export default function DayNightCycle() {
         color="#fef3c7"
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-far={180}
-        shadow-camera-left={-70}
-        shadow-camera-right={70}
-        shadow-camera-top={70}
-        shadow-camera-bottom={-70}
+        shadow-camera-far={270}
+        shadow-camera-left={-105}
+        shadow-camera-right={105}
+        shadow-camera-top={105}
+        shadow-camera-bottom={-105}
       />
       <hemisphereLight ref={hemiRef} args={["#4ade80", "#16a34a", 0.6]} />
       {/* Visible sun + soft halo */}

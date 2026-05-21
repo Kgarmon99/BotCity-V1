@@ -10,12 +10,12 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-const PLAZA_CX = 13;
+const PLAZA_CX = 19.5;
 // Plaza must sit between CityHall's south face (z=-27) and the secondary
 // street's north sidewalk (z=-19.9, per RoadGrid). A 6-deep plaza centered
 // at z=-24 gives footprint z[-27..-21] — touches the building (intentional)
 // and leaves a 1.1u gap to the sidewalk so the player can walk around it.
-const PLAZA_CZ = -24;
+const PLAZA_CZ = -36;
 const PLAZA_W = 7;
 const PLAZA_D = 6;
 

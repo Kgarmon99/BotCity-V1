@@ -37,7 +37,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "workcorp",
     label: "WorkCorp",
-    position: [8, 3, -10],
+    position: [12, 3, -15],
     color: "#60a5fa",
     roofColor: "#3b82f6",
     width: 5,
@@ -48,7 +48,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "taxmart",
     label: "TaxMart",
-    position: [-9, 2, -8],
+    position: [-13.5, 2, -12],
     color: "#fbbf24",
     roofColor: "#f59e0b",
     width: 6,
@@ -59,7 +59,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "firstbank",
     label: "First Bank",
-    position: [9, 2.5, 9],
+    position: [13.5, 2.5, 13.5],
     color: "#a78bfa",
     roofColor: "#8b5cf6",
     width: 5,
@@ -70,7 +70,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "irs",
     label: "IRS Office",
-    position: [-9, 3, 9],
+    position: [-13.5, 3, 13.5],
     color: "#f87171",
     roofColor: "#ef4444",
     width: 5,
@@ -84,7 +84,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // SW inner-block corner — mirror of BotU North across the E-W avenue.
     // Footprint x[-17.5..-12.5] z[11.5..16.5]. Clear of irs (-9,9 → south edge
     // z=11 ⇒ 0.5u gap), and 0.4u from the south secondary road band.
-    position: [-15, 3.5, 14],
+    position: [-22.5, 3.5, 21],
     color: "#0ea5e9",
     roofColor: "#fbbf24",
     width: 5,
@@ -98,7 +98,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // NW inner-block corner — clear of roads (main x/z=0, secondary ±18) and
     // other buildings. Paired with botusouth across the south road for a
     // north/south split-campus university.
-    position: [-14, 4, -14],
+    position: [-21, 4, -21],
     color: "#22c55e",
     roofColor: "#fbbf24",
     width: 5,
@@ -111,7 +111,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotTrain Station",
     // SE inner block. Building footprint x=12..16, z=10..14. Tracks run east-west
     // at z=15.5 (north of station; clear of secondary street at z=18 / 16.9..19.1).
-    position: [14, 2.5, 12],
+    position: [21, 2.5, 18],
     color: "#fb923c",
     roofColor: "#7c2d12",
     width: 4,
@@ -128,7 +128,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // z=55, with apron + hangars rendered in CityExpansion. Empty corner —
     // nearest neighbors are botfarm at (-40, -41) (86u north) and botgigs at
     // (-55, 6) (39u north).
-    position: [-50, 3, 45],
+    position: [-75, 3, 67.5],
     color: "#38bdf8",
     roofColor: "#0c4a6e",
     width: 10,
@@ -143,7 +143,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botstadium",
     label: "BotStadium",
-    position: [-27, 1.5, -20.5],
+    position: [-40.5, 1.5, -30.75],
     color: "#dc2626",
     roofColor: "#fde047",
     width: 1.8,
@@ -154,7 +154,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botmarket",
     label: "BotMarket",
-    position: [27, 1.5, -20.5],
+    position: [40.5, 1.5, -30.75],
     color: "#f97316",
     roofColor: "#fde68a",
     width: 1.8,
@@ -169,7 +169,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // belong on the edge of the world, not in the middle of the city. The
     // boardwalk pavilion now sits ON the giant east-edge beach at (44, *, 25),
     // with the sand strip and ocean rendered in CityDistricts.Beach().
-    position: [44, 1.5, 25],
+    position: [66, 1.5, 37.5],
     color: "#22d3ee",
     roofColor: "#fcd34d",
     width: 3,
@@ -180,7 +180,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botshops",
     label: "BotShops",
-    position: [-27, 1.5, 20.5],
+    position: [-40.5, 1.5, 30.75],
     color: "#a855f7",
     roofColor: "#f9a8d4",
     width: 1.8,
@@ -197,7 +197,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // at (14,-5) and (5,-14). Tower footprint x[11..15], z[-15..-11] —
     // clears workcorp by 0.5u and stays inside secondary streets (±18).
     // Door faces +z (south, toward main avenue z=0).
-    position: [13, 6, -13],
+    position: [19.5, 6, -19.5],
     color: "#1e293b",
     roofColor: "#fbbf24",
     width: 4,
@@ -212,7 +212,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // other buildings. Door faces +z (south, toward the city) so players
     // approach from the secondary/main avenues. Surrounded by crop fields
     // and a silo rendered in CityDistricts.tsx.
-    position: [-40, 2, -41],
+    position: [-60, 2, -61.5],
     color: "#dc2626",
     roofColor: "#fef3c7",
     width: 5,
@@ -226,7 +226,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // North middle-ring, replaces the removed filler at (-9, -27). Showroom
     // footprint x=-11.5..-6.5, z=-29..-25. Parking lot + cars rendered south
     // of the building in CityDistricts.tsx (z = -26..-22).
-    position: [-9, 2.5, -27],
+    position: [-13.5, 2.5, -40.5],
     color: "#22d3ee",
     roofColor: "#fde047",
     width: 5,
@@ -242,7 +242,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotHospital",
     // North middle ring, east half. botdealer occupies x[-11.5..-6.5] z[-29..-25];
     // hospital at x=5 keeps a 5.5u gap. Footprint x[2.5..7.5] z[-29..-25].
-    position: [5, 2.5, -27],
+    position: [7.5, 2.5, -40.5],
     color: "#ef4444",
     roofColor: "#fecaca",
     width: 5,
@@ -255,7 +255,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotRetirement Plaza",
     // South middle ring. Empty band; place west of S-N axis so it doesn't sit
     // on the central avenue (x=0). Footprint x[-7.5..-2.5] z[25..29].
-    position: [-5, 2.5, 27],
+    position: [-7.5, 2.5, 40.5],
     color: "#7c3aed",
     roofColor: "#fde68a",
     width: 5,
@@ -268,7 +268,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotCrypto Exchange",
     // East middle ring. Avoid main E-W avenue at z=0 by offsetting north.
     // Footprint x[24.5..29.5] z[-7..-3].
-    position: [27, 2.5, -5],
+    position: [40.5, 2.5, -7.5],
     color: "#f59e0b",
     roofColor: "#78350f",
     width: 5,
@@ -283,7 +283,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // clear the main E-W avenue at z=0. Footprint x[-29.5..-24.5] z[-7..-3].
     // Tall corporate-HQ tower — neon purple body, cyan accent — visible from
     // anywhere in the city, mirroring MoneyBotTowers on the east side.
-    position: [-27, 5, -5],
+    position: [-40.5, 5, -7.5],
     color: "#a855f7",
     roofColor: "#22d3ee",
     width: 5,
@@ -296,7 +296,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotCharity Center",
     // West middle ring. Offset south to clear the main avenue at z=0.
     // Footprint x[-29.5..-24.5] z[3..7].
-    position: [-27, 2.5, 5],
+    position: [-40.5, 2.5, 7.5],
     color: "#ec4899",
     roofColor: "#fce7f3",
     width: 5,
@@ -314,7 +314,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotHaus",
     // North suburbs. Offset +6 in x to clear the N-S avenue at x=0.
     // Footprint x[3..9] z[-58..-52].
-    position: [6, 3, -55],
+    position: [9, 3, -82.5],
     color: "#0ea5e9",
     roofColor: "#fde047",
     width: 6,
@@ -327,7 +327,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotBroker",
     // East suburbs (financial district). Offset -6 in z to clear the E-W
     // avenue at z=0. Footprint x[52..58] z[-9..-3].
-    position: [55, 3, -6],
+    position: [82.5, 3, -9],
     color: "#1e3a8a",
     roofColor: "#fbbf24",
     width: 6,
@@ -340,7 +340,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotKids",
     // South suburbs (family district). Offset -6 in x to clear x=0.
     // Footprint x[-9..-3] z[52..58].
-    position: [-6, 3, 55],
+    position: [-9, 3, 82.5],
     color: "#f97316",
     roofColor: "#86efac",
     width: 6,
@@ -353,7 +353,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     label: "BotGigs",
     // West suburbs (gig economy hub). Offset +6 in z to clear z=0.
     // Footprint x[-58..-52] z[3..9].
-    position: [-55, 3, 6],
+    position: [-82.5, 3, 9],
     color: "#a855f7",
     roofColor: "#fde047",
     width: 6,
@@ -369,7 +369,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "littlebots",
     label: "LittleBots DayCare",
-    position: [12, 1.8, 27],
+    position: [18, 1.8, 40.5],
     color: "#fb7185",
     roofColor: "#fef3c7",
     width: 5,
@@ -385,7 +385,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botrocket",
     label: "BotRocket Station",
-    position: [50, 3, -50],
+    position: [75, 3, -75],
     color: "#cbd5e1",
     roofColor: "#ef4444",
     width: 4,
@@ -404,7 +404,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "bothistory",
     label: "Bot History Museum",
     // NW: behind MOMOBOT "The Founder" statue. Footprint x[-24..-20] z[-29..-25].
-    position: [-22, 2.5, -27],
+    position: [-33, 2.5, -40.5],
     color: "#94a3b8",
     roofColor: "#22d3ee",
     width: 4,
@@ -416,7 +416,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "eduhistory",
     label: "Education History Museum",
     // NE: behind Prof. Ledgerington statue. Footprint x[20..24] z[-29..-25].
-    position: [22, 2.5, -27],
+    position: [33, 2.5, -40.5],
     color: "#fde68a",
     roofColor: "#92400e",
     width: 4,
@@ -428,7 +428,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     id: "finhistory",
     label: "Finance History Museum",
     // SW: behind Mayor Bytecoin statue. Footprint x[-24..-20] z[25..29].
-    position: [-22, 2.5, 27],
+    position: [-33, 2.5, 40.5],
     color: "#f8fafc",
     roofColor: "#fbbf24",
     width: 4,
@@ -457,7 +457,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // Far SE coast. Footprint x[47..53] z[45.5..50.5]. Closest neighbor is
     // BotBeach boardwalk at (44, 25) — 23u north. Player bound ±64 → east
     // edge at 53 leaves 11u for the sea/docks rendered in CityDistricts.
-    position: [50, 2, 48],
+    position: [75, 2, 72],
     color: "#0c4a6e",
     roofColor: "#fbbf24",
     width: 6,
@@ -471,7 +471,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // NE outer area, off the avenue grid. Footprint x[32.5..37.5] z[-42..-38].
     // Closest neighbor BotRocket (50, -50) is 18u away — both spectacle
     // landmarks but well separated. BotBroker (55, -6) is 39u south.
-    position: [35, 4, -40],
+    position: [52.5, 4, -60],
     color: "#7c2d12",
     roofColor: "#fde047",
     width: 5,
@@ -486,7 +486,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // ±64 → west edge at -52.5 leaves 11.5u for the mineshaft entrance
     // and ore piles. BotGigs at (-55, 6) is 31u south; nothing else
     // within 60u.
-    position: [-50, 1.5, -25],
+    position: [-75, 1.5, -37.5],
     color: "#44403c",
     roofColor: "#a16207",
     width: 5,
@@ -500,7 +500,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // S edge near the BotKids family district. Footprint x[-18..-12] z[56..60].
     // BotKids at (-6, 55) is 10u east — reads as an adjacent attraction.
     // Player bound ±64 → south edge at 60 leaves 4u for the entrance arch.
-    position: [-15, 2.5, 58],
+    position: [-22.5, 2.5, 87],
     color: "#15803d",
     roofColor: "#fde047",
     width: 6,
@@ -511,7 +511,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botcityhall",
     label: "BotCityHall",
-    position: [13, 5, -30],
+    position: [19.5, 5, -45],
     color: "#f1f5f9",
     roofColor: "#fbbf24",
     width: 5,
@@ -528,7 +528,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // just south of the south stand at z=-48.
     id: "botsoccer",
     label: "BotSoccer Stadium",
-    position: [-27, 1.5, -48],
+    position: [-40.5, 1.5, -72],
     color: "#22c55e",
     roofColor: "#ffffff",
     width: 1.8,
@@ -543,7 +543,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // band, 2.9u to z=36 road band.
     id: "botbasketball",
     label: "BotHoops Arena",
-    position: [27, 1.5, 20.5],
+    position: [40.5, 1.5, 30.75],
     color: "#f97316",
     roofColor: "#7c2d12",
     width: 1.8,
@@ -559,7 +559,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // accent matches museum-row siblings (bothistory, eduhistory).
     id: "botgallery",
     label: "BotGallery",
-    position: [-50, 2.5, 27],
+    position: [-75, 2.5, 40.5],
     color: "#f1f5f9",
     roofColor: "#fbbf24",
     width: 5,
@@ -575,7 +575,7 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     // road band by 2.4u.
     id: "botfashion",
     label: "BotFashion District",
-    position: [-27, 1.5, 39.5],
+    position: [-40.5, 1.5, 59.25],
     color: "#ec4899",
     roofColor: "#f9a8d4",
     width: 1.8,
@@ -752,7 +752,7 @@ export default function GameScene() {
 
           {/* Wayfinding beacon for the tucked-away University building */}
           <WayfindingBeacon
-            position={[-14, 8, -14]}
+            position={[-47.25, 8, -47.25]}
             label="MoneyBot U"
             color="#fbbf24"
           />

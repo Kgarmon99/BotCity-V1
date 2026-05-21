@@ -517,7 +517,7 @@ export default function CityExpansion() {
       <Runway />
       {/* One plane parked on the apron in front of the terminal, one on the
           runway actively cycling through takeoff. */}
-      <Airplane position={[-47, 0.75, 50]} />
+      <Airplane position={[-70.5, 0.75, 75]} />
       <TakeoffPlane />
       <ControlTower />
     </group>

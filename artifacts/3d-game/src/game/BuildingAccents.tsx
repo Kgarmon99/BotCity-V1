@@ -29,7 +29,7 @@ import * as THREE from "three";
 // ----- WorkCorp: rooftop AC compressors + solar array. -----
 function WorkCorpAccent() {
   return (
-    <group position={[8, 6, -10]}>
+    <group position={[12, 6, -15]}>
       {/* AC compressor row */}
       <mesh position={[-1.5, 0.35, 0.8]} castShadow>
         <boxGeometry args={[0.9, 0.7, 0.9]} />
@@ -69,7 +69,7 @@ function WorkCorpAccent() {
 // ----- TaxMart: rooftop neon sign + parapet wall. -----
 function TaxMartAccent() {
   return (
-    <group position={[-9, 4, -8]}>
+    <group position={[-13.5, 4, -12]}>
       {/* Parapet wall around the perimeter (slightly inset from the 6x5 footprint) */}
       <mesh position={[0, 0.25, 2.4]}>
         <boxGeometry args={[5.8, 0.5, 0.15]} />
@@ -119,7 +119,7 @@ function FirstBankAccent() {
     }
   });
   return (
-    <group position={[9, 5, 9]}>
+    <group position={[13.5, 5, 13.5]}>
       {/* Dome drum */}
       <mesh position={[0, 0.25, 0]} castShadow>
         <cylinderGeometry args={[1.3, 1.5, 0.5, 16]} />
@@ -165,7 +165,7 @@ function IRSAccent() {
     }
   });
   return (
-    <group position={[-9, 6, 9]}>
+    <group position={[-13.5, 6, 13.5]}>
       {/* Stepped parapet */}
       <mesh position={[0, 0.2, 0]}>
         <boxGeometry args={[4.6, 0.3, 3.6]} />
@@ -217,7 +217,7 @@ function BotTrainAccent() {
     }
   });
   return (
-    <group position={[14, 5, 12]}>
+    <group position={[21, 5, 18]}>
       {/* Clock tower box */}
       <mesh position={[0, 0.9, 0]} castShadow>
         <boxGeometry args={[1.5, 1.8, 1.5]} />
@@ -269,7 +269,7 @@ function MoneyBotTowersAccent() {
     }
   });
   return (
-    <group position={[13, 12, -13]}>
+    <group position={[19.5, 12, -19.5]}>
       {/* Helipad disk */}
       <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[1.6, 24]} />
@@ -321,7 +321,7 @@ function MoneyBotTowersAccent() {
 // ----- BotHospital: red cross sign + small helipad. -----
 function BotHospitalAccent() {
   return (
-    <group position={[5, 5, -27]}>
+    <group position={[7.5, 5, -40.5]}>
       {/* Small helipad behind the cross */}
       <mesh position={[0, 0.04, -0.8]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[1.0, 20]} />
@@ -353,7 +353,7 @@ function BotHospitalAccent() {
 // cityhall: pos (13, 5, -30), w=5 d=6 h=8 → top y=9, south face z=-27.
 function BotCityHallAccent() {
   return (
-    <group position={[13, 9, -30]}>
+    <group position={[19.5, 9, -45]}>
       {/* Drum */}
       <mesh position={[0, 0.35, 0]} castShadow>
         <cylinderGeometry args={[1.5, 1.7, 0.7, 18]} />
@@ -400,7 +400,7 @@ function BotCryptoAccent() {
   });
   // botcrypto: pos (27, 2.5, -5), h=6 → roof top y=5.5
   return (
-    <group position={[27, 5.5, -5]}>
+    <group position={[40.5, 5.5, -7.5]}>
       {/* Hologram base disk */}
       <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[1.5, 32]} />
@@ -445,7 +445,7 @@ function BotCharityAccent() {
     if (mP) mP.emissiveIntensity = emiss;
   });
   return (
-    <group position={[-27, 5, 5]}>
+    <group position={[-40.5, 5, 7.5]}>
       {/* Sign backplate */}
       <mesh position={[0, 0.6, 0]}>
         <boxGeometry args={[2.4, 1.5, 0.1]} />
@@ -490,7 +490,7 @@ function LittleBotsAccent() {
     }
   });
   return (
-    <group position={[12, 0, 27]}>
+    <group position={[18, 0, 40.5]}>
       {/* Anchor point on roof */}
       <mesh position={[0, 3.3, 0]}>
         <sphereGeometry args={[0.06, 8, 6]} />
@@ -528,7 +528,7 @@ function LittleBotsAccent() {
 // ----- BotRetirement: rooftop greenhouse with garden. -----
 function BotRetirementAccent() {
   return (
-    <group position={[-5, 5, 27]}>
+    <group position={[-7.5, 5, 40.5]}>
       {/* Greenhouse glass */}
       <mesh position={[0, 0.45, 0]} castShadow>
         <boxGeometry args={[2.4, 0.9, 1.6]} />
@@ -583,7 +583,7 @@ function BotDealerAccent() {
     }
   });
   return (
-    <group position={[-9, 5, -27]}>
+    <group position={[-13.5, 5, -40.5]}>
       {/* Turntable disc */}
       <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[1.4, 24]} />
@@ -628,7 +628,7 @@ function BotDealerAccent() {
 // ----- BotHistory Museum: rooftop book stack + telescope. -----
 function BotHistoryAccent() {
   return (
-    <group position={[-22, 5, -27]}>
+    <group position={[-33, 5, -40.5]}>
       {/* Stack of books, each a different color */}
       {[
         [0.0, 0.15, "#dc2626"],
@@ -672,7 +672,7 @@ function EduHistoryAccent() {
     }
   });
   return (
-    <group position={[22, 5, -27]}>
+    <group position={[33, 5, -40.5]}>
       {/* Cap base (skullcap) */}
       <mesh position={[0, 0.4, 0]} castShadow>
         <cylinderGeometry args={[0.65, 0.65, 0.4, 18]} />
@@ -715,7 +715,7 @@ function FinHistoryAccent() {
     }
   });
   return (
-    <group position={[-22, 5, 27]}>
+    <group position={[-33, 5, 40.5]}>
       {/* Stack of giant coins */}
       {[0, 0.2, 0.4, 0.6].map((y, i) => (
         <mesh key={i} position={[-0.8, y + 0.1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
@@ -762,7 +762,7 @@ function BotHausAccent() {
     }
   });
   return (
-    <group position={[6, 6, -55]}>
+    <group position={[9, 6, -82.5]}>
       {/* Pitched roof (gable along E-W) — 5x4 footprint becomes a ridge */}
       <mesh position={[0, 0.6, 0]} rotation={[0, 0, 0]} castShadow>
         <boxGeometry args={[5.0, 0.15, 4.0]} />
@@ -815,7 +815,7 @@ function BotBrokerAccent() {
     }
   });
   return (
-    <group position={[55, 7, -6]}>
+    <group position={[82.5, 7, -9]}>
       {/* Wraparound ticker band on the south facade */}
       <mesh position={[0, 0.3, 1.95]}>
         <boxGeometry args={[4.6, 0.5, 0.1]} />
@@ -860,7 +860,7 @@ function BotGigsAccent() {
     }
   });
   return (
-    <group position={[-55, 6, 6]}>
+    <group position={[-82.5, 6, 9]}>
       {/* Laptop base */}
       <mesh position={[0, 0.1, 0]} castShadow>
         <boxGeometry args={[1.8, 0.15, 1.2]} />
@@ -898,7 +898,7 @@ function BotGigsAccent() {
 // ----- BotKids: rooftop spiral slide + small play structure. -----
 function BotKidsAccent() {
   return (
-    <group position={[-6, 5.5, 55]}>
+    <group position={[-9, 5.5, 82.5]}>
       {/* Platform */}
       <mesh position={[-1.0, 0.4, 0]} castShadow>
         <boxGeometry args={[1.0, 0.15, 1.0]} />

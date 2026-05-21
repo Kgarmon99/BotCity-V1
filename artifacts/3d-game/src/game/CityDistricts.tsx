@@ -23,7 +23,7 @@ function Stadium() {
     }
   });
   return (
-    <group position={[-27, 0, -27]}>
+    <group position={[-40.5, 0, -40.5]}>
       {/* Outer ring of stands — open-topped cylinder shell */}
       <mesh position={[0, 1.6, 0]} castShadow>
         <cylinderGeometry args={[5, 5.5, 3.2, 32, 1, true]} />
@@ -161,7 +161,7 @@ function MarketStall({
 
 function Market() {
   return (
-    <group position={[27, 0, -27]}>
+    <group position={[40.5, 0, -40.5]}>
       {/* Plaza tiled floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
         <planeGeometry args={[11, 11]} />
@@ -318,7 +318,7 @@ function Beach() {
   return (
     <group>
       {/* Giant sand strip along the east edge */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[44.5, 0.03, 35]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[66.75, 0.03, 52.5]}>
         <planeGeometry args={[15, 60]} />
         <meshStandardMaterial
           color="#fef3c7"
@@ -328,7 +328,7 @@ function Beach() {
         />
       </mesh>
       {/* Wet-sand band where the surf laps the shore */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[51.5, 0.04, 30]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[77.25, 0.04, 45]}>
         <planeGeometry args={[2, 70]} />
         <meshStandardMaterial
           color="#d4a574"
@@ -384,17 +384,17 @@ function Beach() {
       <Surfboard x={42} z={45} color="#f97316" rot={-0.2} />
       <Surfboard x={41} z={58} color="#ec4899" rot={0.4} />
       {/* Beach balls */}
-      <mesh position={[46, 0.42, 50]} castShadow>
+      <mesh position={[69, 0.42, 75]} castShadow>
         <sphereGeometry args={[0.4, 16, 16]} />
         <meshStandardMaterial color="#dc2626" emissive="#fde047" emissiveIntensity={0.5} />
       </mesh>
-      <mesh position={[44, 0.35, 35]} castShadow>
+      <mesh position={[66, 0.35, 52.5]} castShadow>
         <sphereGeometry args={[0.33, 16, 16]} />
         <meshStandardMaterial color="#22d3ee" emissive="#a855f7" emissiveIntensity={0.5} />
       </mesh>
       {/* Big oceanfront sign */}
       <Text
-        position={[40, 4.5, 35]}
+        position={[60, 4.5, 52.5]}
         rotation={[0, Math.PI / 2, 0]}
         fontSize={1.1}
         color="#0c4a6e"
@@ -468,7 +468,7 @@ function RocketStation() {
   });
 
   return (
-    <group position={[50, 0, -50]}>
+    <group position={[75, 0, -75]}>
       {/* Concrete launch pad */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[12, 12]} />
@@ -699,7 +699,7 @@ function Shop({
 
 function ShopsCluster() {
   return (
-    <group position={[-27, 0, 27]}>
+    <group position={[-40.5, 0, 40.5]}>
       {/* Plaza floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
         <planeGeometry args={[11, 11]} />
@@ -815,7 +815,7 @@ function Dealer() {
     }
   });
   return (
-    <group position={[-9, 0, -27]}>
+    <group position={[-13.5, 0, -40.5]}>
       {/* Parking lot tarmac — south of the showroom */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 3]}>
         <planeGeometry args={[7.5, 4]} />
@@ -911,7 +911,7 @@ function Farm() {
     }
   });
   return (
-    <group position={[-40, 0, -41]}>
+    <group position={[-60, 0, -61.5]}>
       {/* ── Soil patch under the barn (darker brown so the barn pops) ── */}
       {/* 5×4 (matches barn footprint) → world x[-42.5,-37.5], z[-43,-39] */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
@@ -1107,7 +1107,7 @@ function MoneyBotTowers() {
   });
 
   return (
-    <group position={[13, 0, -13]}>
+    <group position={[19.5, 0, -19.5]}>
       {/* ── Plaza tiles around the towers (6×7 dark glass) ─────────── */}
       {/* Center local (+0.7, 0, -0.2), size 6×7 → world x[10.7,16.7] ✓
           (clears workcorp east edge at 10.5 by 0.2u), z[-16.7,-9.7] ✓
@@ -1303,7 +1303,7 @@ function Port() {
     if (ship2Ref.current) ship2Ref.current.rotation.z = Math.sin(t * 0.7 + 1.4) * 0.05;
   });
   return (
-    <group position={[50, 0, 48]}>
+    <group position={[75, 0, 72]}>
       {/* ── Sea surface — wide plane east of the building (x≥4 local).
           Spans local x[4, 13] z[-5, 14], i.e. world x[54..63] z[43..62] */}
       <mesh ref={waveRef} rotation={[-Math.PI / 2, 0, 0]} position={[8.5, 0.04, 4.5]}>
@@ -1498,7 +1498,7 @@ function Casino() {
     }
   });
   return (
-    <group position={[35, 0, -40]}>
+    <group position={[52.5, 0, -60]}>
       {/* ── Red carpet leading south to the door */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 3.5]}>
         <planeGeometry args={[2.5, 5]} />
@@ -1636,7 +1636,7 @@ function Mine() {
     }
   });
   return (
-    <group position={[-50, 0, -25]}>
+    <group position={[-75, 0, -37.5]}>
       {/* ── Dirt patch under the entire district ── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-0.5, 0.02, 0]}>
         <planeGeometry args={[10, 8]} />
@@ -1800,7 +1800,7 @@ function Zoo() {
     }
   });
   return (
-    <group position={[-15, 0, 58]}>
+    <group position={[-22.5, 0, 87]}>
       {/* ── Park lawn ── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, -3.5]}>
         <planeGeometry args={[13, 10]} />
@@ -2004,7 +2004,7 @@ function SoccerStadium() {
     }
   });
   return (
-    <group position={[-27, 0, -55]}>
+    <group position={[-40.5, 0, -82.5]}>
       {/* Pitch — green grass rectangle (12 wide x 7 deep) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
         <planeGeometry args={[12, 7]} />
@@ -2129,7 +2129,7 @@ function BasketballArena() {
     }
   });
   return (
-    <group position={[27, 0, 27]}>
+    <group position={[40.5, 0, 40.5]}>
       {/* Cylindrical arena wall */}
       <mesh position={[0, 2, 0]} castShadow>
         <cylinderGeometry args={[5, 5.3, 4, 28]} />
@@ -2232,7 +2232,7 @@ function ArtDistrict() {
     if (torusRef.current) torusRef.current.rotation.y = s.clock.elapsedTime * 0.3;
   });
   return (
-    <group position={[-50, 0, 27]}>
+    <group position={[-75, 0, 40.5]}>
       {/* Polished marble plaza floor around the gallery */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[14, 12]} />
@@ -2372,7 +2372,7 @@ function FashionDistrict() {
     }
   });
   return (
-    <group position={[-27, 0, 45]}>
+    <group position={[-40.5, 0, 67.5]}>
       {/* Plaza floor — dark with magenta glow (12 wide x 10 deep) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[12, 10]} />
@@ -2510,7 +2510,7 @@ function GamingHQCrown() {
     }
   });
   return (
-    <group position={[-27, 0, -5]}>
+    <group position={[-40.5, 0, -7.5]}>
       {/* Antenna pole rising from rooftop */}
       <mesh position={[0, 11.5, 0]} castShadow>
         <cylinderGeometry args={[0.06, 0.1, 3, 6]} />

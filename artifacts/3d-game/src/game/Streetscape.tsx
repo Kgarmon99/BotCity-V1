@@ -282,10 +282,10 @@ export default function Streetscape() {
       {/* === District wayfinding signposts at the four cardinal exits === */}
       {/* Each points outward toward the major outer district. Colors match
           the destination's emissive accent so the signs read at a glance. */}
-      <Signpost position={[2.8, 0, -22]} rotation={-Math.PI / 2} label="N → BotPlane" color="#60a5fa" />
-      <Signpost position={[-2.8, 0, 22]} rotation={Math.PI / 2} label="S → BotKids" color="#f472b6" />
-      <Signpost position={[22, 0, 2.8]} rotation={Math.PI} label="E → BotBroker" color="#fbbf24" />
-      <Signpost position={[-22, 0, -2.8]} rotation={0} label="W → BotGigs" color="#a78bfa" />
+      <Signpost position={[4.2, 0, -33]} rotation={-Math.PI / 2} label="N → BotPlane" color="#60a5fa" />
+      <Signpost position={[-4.2, 0, 33]} rotation={Math.PI / 2} label="S → BotKids" color="#f472b6" />
+      <Signpost position={[33, 0, 4.2]} rotation={Math.PI} label="E → BotBroker" color="#fbbf24" />
+      <Signpost position={[-33, 0, -4.2]} rotation={0} label="W → BotGigs" color="#a78bfa" />
 
       {/* === Center rotating wayfinder === */}
       <CenterPlaqueRotor />
