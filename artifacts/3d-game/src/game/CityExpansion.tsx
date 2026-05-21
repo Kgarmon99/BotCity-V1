@@ -701,9 +701,11 @@ function AirportExpansion() {
       </group>
 
       {/* ────────── HELIPAD with rotating helicopter ────────── */}
-      {/* Moved to (-25, 35) — north of R3 (z=40 start), 2u clearance from
-          runway. Originally at (-25, 47) which sat directly on R3. */}
-      <group position={[-25, 0, 35]}>
+      {/* Moved to (-50, 70) — south of R1 (z=55) in the band freed up by
+          BotGolf's relocation to NW. Gives the helipad real space for
+          approach/departure clear of the runway pattern. R3 east edge is
+          x=-22.5 → 27.5u east; R1 south edge z=57.5 → 12.5u north. */}
+      <group position={[-50, 0, 70]}>
         {/* Pad */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
           <circleGeometry args={[3, 32]} />
@@ -788,10 +790,11 @@ function AirportExpansion() {
       </group>
 
       {/* ────────── FUEL DEPOT ────────── */}
-      {/* Moved to (-15, 22) — north of R2 (z=30) once R2 was pulled to the
-          north side of the field. Keeps fuel near the runway but well
-          clear of BotGolf Country Club to the south. */}
-      <group position={[-15, 0, 22]}>
+      {/* Held at (-15, 20) — north of R2 (z=27 south edge). Berm ring
+          (center local z=1.25, radius 4.1) → world z[16.15, 25.35],
+          giving 1.65u clearance to R2. (Tried moving south to (-15, 75)
+          but the berm clipped BotZoo's lawn at z=78+.) */}
+      <group position={[-15, 0, 20]}>
         {[[-2, 0], [0, 0], [2, 0], [-1, 2.5], [1, 2.5]].map(([fx, fz], i) => (
           <group key={`ft-${i}`} position={[fx, 0, fz]}>
             <mesh position={[0, 1, 0]} castShadow>
@@ -952,9 +955,10 @@ function AirportExpansion() {
       </group>
 
       {/* ────────── PARKING LOT ────────── */}
-      {/* Moved to (-30, 22) — north of R2 (now at z=30) and east of the
-          terminal. Frees the south side of the field for BotGolf. */}
-      <group position={[-30, 0, 22]}>
+      {/* Moved to (-50, 88) — south of R3 (z_max=80) in the BotGolf-vacated
+          band. Lot is 14×6 (x[-57,-43], z[85,91]); 5u clear of R3 in z,
+          20u east of botplane kiosk at x=-75, far west of BotZoo (x=-22.5). */}
+      <group position={[-50, 0, 88]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
           <planeGeometry args={[14, 6]} />
           <meshStandardMaterial color="#374151" roughness={0.9} />
@@ -1270,12 +1274,12 @@ export default function CityExpansion() {
       <MovingTrain />
       <TrainStationSign />
 
-      {/* ─── Airport district (far SW edge) ─── */}
+      {/* ─── Airport district (far SW edge) ───
+         Runways/hangars sit against ArtDistrict's north edge so they can't
+         be shifted bodily south. Instead, the helipad/fuel/parking moved
+         south into the band freed up by BotGolf's relocation to NW. See
+         AirportExpansion for per-feature positions. */}
       <Runway />
-      {/* One plane parked on the apron in front of the terminal, one on the
-          runway actively cycling through takeoff. */}
-      {/* Parked plane moved off R2 envelope (z[74,80]) onto the original
-          apron at (-50, 49) where it has clear wing room. */}
       <Airplane position={[-50, 0.75, 49]} />
       <TakeoffPlane />
       <ControlTower />

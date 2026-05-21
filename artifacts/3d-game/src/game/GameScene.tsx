@@ -19,6 +19,7 @@ import CityDetails from "./CityDetails";
 import Statues from "./Statues";
 import CityBuildings from "./CityBuildings";
 import CityExpansion from "./CityExpansion";
+import Landmarks from "./Landmarks";
 import CityDistricts from "./CityDistricts";
 import CityDistrictsExtra from "./CityDistrictsExtra";
 import CityHallPlaza from "./CityHallPlaza";
@@ -123,12 +124,12 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botplane",
     label: "BotPlane International",
-    // Real airports take a lot of land, so BotPlane has been moved out of the
-    // inner-block grid and given an entire corner of the map. Terminal sits on
-    // the far SW edge at (-50, *, 45); a 35-unit runway runs E-W behind it at
-    // z=55, with apron + hangars rendered in CityExpansion. Empty corner —
-    // nearest neighbors are botfarm at (-40, -41) (86u north) and botgigs at
-    // (-55, 6) (39u north).
+    // Real airports take a lot of land, so BotPlane has been moved out of
+    // the inner-block grid and given an entire corner of the map. Terminal
+    // sits on the far SW edge; runway 1 runs E-W behind it at z=55, with
+    // hangars + expanded airport (helipad, fuel, cargo, parking, control
+    // tower) rendered in CityExpansion. After BotGolf moved to NW, the
+    // helipad/fuel/parking expanded SOUTH into the freed z>60 band.
     position: [-75, 3, 67.5],
     color: "#38bdf8",
     roofColor: "#0c4a6e",
@@ -804,6 +805,7 @@ export default function GameScene() {
           <CityHallPlaza />
           <Blimp />
           <Statues />
+          <Landmarks />
           <Billboards />
           <NPCBots />
           <CitizenBots />
