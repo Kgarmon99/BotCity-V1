@@ -323,22 +323,25 @@ function ElementarySchool() {
 }
 
 // =====================================================================
-// GOLF COURSE @ (-62, 0, 75) — clubhouse + driving range + 3 mini-greens
-// Footprint envelope: world x[-90..-44], z[55..92]
-// Stays clear of:
-//   botgallery (-75, 40.5)  — well south (z=40.5 vs course z>=55)
-//   botzoo     (-22.5, 87)  — east edge x=-19.5 (course east edge x=-44)
-//   botgigs    (-82.5, 9)   — far south
+// GOLF COURSE @ (-58, 0, -85) — clubhouse + driving range + 18 holes
+// Footprint envelope: world x[-64..-24], z[-103..-87]
+// NW-quadrant location near BotFarm; see GolfCourse() header for the
+// full clearance breakdown.
 // =====================================================================
 
 function GolfCourse() {
-  // Expanded BotGolf Country Club. Anchor world (-42, 0, 89).
-  // Decor envelope: world x[-68..-28], z[71..87].
-  // Anchor shifted from z=75 → z=89 in tandem with the BotGolf clubhouse
-  // building (GameScene) so the course gets real separation from the
-  // BotPlane airport. R2 was simultaneously pulled north to z=30, so
-  // the south side of the field is now BotGolf-only.
-  // Clubhouse building lives at world (-62, 89); its sign sits over it
+  // Expanded BotGolf Country Club. Anchor world (-38, 0, -85).
+  // Decor envelope: world x[-64..-24], z[-103..-87].
+  // Relocated to the NW quadrant near BotFarm (-60,-61.5), out of the
+  // BotPlane airport footprint entirely. Conflict checks:
+  //   • BotFarm (-60,-61.5) → 25u north of CC envelope z=-87. clear.
+  //   • BotMine (-75,-37.5) → far north. clear.
+  //   • BotPark visitor center (-92,-78) + decor (lake ~(-85,-84),
+  //     mountains z<-94) → CC envelope x_min=-64 is 19u east of lake;
+  //     mountains all south of z=-94 → CC north edge z=-87 has 7u gap.
+  //   • BotSoccer kiosk (-40.5,-76), stadium center (-27,-55) → kiosk
+  //     z=-76 sits 11u north of CC; stadium decor far NE.
+  // Clubhouse building lives at world (-58, -85); its sign sits over it
   // via local x=-20. Amenities fan out across the strip:
   //   • 18 numbered holes scattered across a 40×16 fairway
   //   • Members pool with deck, diving board, lounge chairs, umbrella
@@ -401,7 +404,7 @@ function GolfCourse() {
   ];
 
   return (
-    <group position={[-42, 0, 89]}>
+    <group position={[-38, 0, -85]}>
       {/* ─── Main fairway (40×16) ─── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.02, -10]} receiveShadow>
         <planeGeometry args={[40, 16]} />
