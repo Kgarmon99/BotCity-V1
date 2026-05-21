@@ -22,6 +22,7 @@ import CityExpansion from "./CityExpansion";
 import Landmarks from "./Landmarks";
 import CityDistricts from "./CityDistricts";
 import CityDistrictsExtra from "./CityDistrictsExtra";
+import NewDistricts from "./NewDistricts";
 import CityHallPlaza from "./CityHallPlaza";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
@@ -699,6 +700,64 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 4,
     emoji: "🏔️",
   },
+  // ─── BotCourt kiosk @ (85, 0, -36) ──────────────────────────────────
+  // South entrance of the tax-court plaza. District at (85, 0, -42) fp
+  // x[73,97] z[-52,-32]; kiosk sits just south of plaza edge at z=-30.
+  {
+    id: "botcourt",
+    label: "BotCourt (Tax Court)",
+    position: [85, 1.5, -30],
+    color: "#cbd5e1",
+    roofColor: "#fbbf24",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "⚖️",
+  },
+  // ─── BotInsurance kiosk @ (-85, 0, 87) ──────────────────────────────
+  // South entrance, just outside Insurance plaza at z[89,105]. Sits in
+  // the 4u gap between Airport/NatPark south edge (z=85) and the
+  // Insurance plaza north edge (z=89).
+  {
+    id: "botinsurance",
+    label: "BotInsurance HQ",
+    position: [-85, 1.5, 87],
+    color: "#1e40af",
+    roofColor: "#f59e0b",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🛡️",
+  },
+  // ─── BotEnergy kiosk @ (41, 0, 85.5) ────────────────────────────────
+  // North entrance to the solar/EV/wind plaza at z[87, 105]. Sits in
+  // the 3u gap between MiddleSchool south edge (z=84) and the BotEnergy
+  // plaza north edge (z=87).
+  {
+    id: "botenergy",
+    label: "BotEnergy",
+    position: [41, 1.5, 85.5],
+    color: "#16a34a",
+    roofColor: "#fbbf24",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "⚡",
+  },
+  // ─── BotFactory kiosk @ (-15, 0, -63) ───────────────────────────────
+  // South entrance to factory yard at z[-81, -65]. North of the yard;
+  // gap to z=-54 secondary road sidewalk (-55.1) is 7.9u.
+  {
+    id: "botfactory",
+    label: "BotFactory",
+    position: [-15, 1.5, -63],
+    color: "#7c2d12",
+    roofColor: "#fbbf24",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🏭",
+  },
 ];
 
 const INTERACT_RADIUS = 4.5;
@@ -842,6 +901,7 @@ export default function GameScene() {
           <CityExpansion />
           <CityDistricts />
           <CityDistrictsExtra />
+          <NewDistricts />
           <Streetscape />
           <BuildingAccents />
           <DistrictDetails />

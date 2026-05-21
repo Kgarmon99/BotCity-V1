@@ -64,6 +64,12 @@ const BUILDINGS = [
   { id: "botcasino", emoji: "🎰", label: "BotCasino" },
   { id: "botmine", emoji: "⛏️", label: "BotMine" },
   { id: "botzoo", emoji: "🦒", label: "BotZoo & Park" },
+  { id: "botfactory", emoji: "🏭", label: "BotFactory" },
+  { id: "botenergy", emoji: "⚡", label: "BotEnergy" },
+
+  // ⚖️  Justice, risk & disputes
+  { id: "botcourt", emoji: "⚖️", label: "BotCourt (Tax Court)" },
+  { id: "botinsurance", emoji: "🛡️", label: "BotInsurance HQ" },
 ] as const;
 
 interface RowProps {
