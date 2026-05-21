@@ -127,16 +127,16 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   {
     id: "botplane",
     label: "BotPlane International",
-    // Pushed FURTHER OUT to the far SW corner and expanded 2.25× by area.
-    // The whole airport district (Runway/Airplane/TakeoffPlane/
-    // ControlTower/AirportExpansion) is wrapped in a (-30, 0, -12)
+    // Pushed EVEN FURTHER OUT to the SW outer edge, expanded 2.25× by
+    // area. The whole airport district (Runway/Airplane/TakeoffPlane/
+    // ControlTower/AirportExpansion) is wrapped in a (-40, 0, -15)
     // translation group with scale=1.5 in CityExpansion's default export.
-    // New world envelope: x[-147, -63.75] × z[16.5, 117]. Detailed
-    // terminal world center ≈ (-105, 55.5); parking lot world z[108,117].
+    // New world envelope: x[-157, -73.75] × z[13.5, 114]. Detailed
+    // terminal world center ≈ (-115, 52.5); parking lot world z[105, 114].
     // Kiosk relocated to the SE corner of the new airport plaza so the
     // player can walk up to it from the city center (gap to inner ring
-    // road z=120 is 5.7u; well inside the new airport footprint).
-    position: [-75, 3, 110],
+    // road z=120 is 6.7u; well inside the new airport footprint).
+    position: [-85, 3, 107],
     color: "#38bdf8",
     roofColor: "#0c4a6e",
     width: 10,

@@ -1393,28 +1393,27 @@ export default function CityExpansion() {
       <MovingTrain />
       <TrainStationSign />
 
-      {/* ─── Airport district (pushed FURTHER OUT to the far SW corner,
-         and expanded 2.25× by area) ───
-         Whole district shifted by (-30, 0, -12) AND uniformly scaled 1.5×
-         around the local origin. The detailed terminal now spans world
-         x=-105±, z=55.5±, runways and parking lot all 1.5× longer/wider.
-         World envelope after transform: x[-147, -63.75] × z[16.5, 117].
+      {/* ─── Airport district (pushed EVEN FURTHER OUT to the SW outer
+         edge, expanded 2.25× by area) ───
+         Whole district shifted by (-40, 0, -15) AND uniformly scaled 1.5×
+         around the local origin. The airport now CROSSES the outer ring
+         road (x=-150, band x[-151.3, -148.7]) — its west edge reaches
+         x=-157, only 3u inside the player bound at -160.
+         World envelope after transform: x[-157, -73.75] × z[13.5, 114].
          Clearances:
-           • Outer ring road x=-150 inner edge -148.7 → 1.7u gap to airport
-             west edge -147 (airport sits between the two ring roads).
-           • Inner ring road z=120 north edge 118.7 → 1.7u gap to airport
-             south edge 117 (parking lot world z[108,117]).
-           • Life Events quarter (-103,135), nearest lot north edge z=123
-             → 6u gap to airport south edge.
-           • Airport east edge -63.75 sits 8u west of the inner ring road
-             at x=-54 (band west edge -55.1) — no road crossing on the
-             east side now.
+           • Player bound x=-160 → 3u gap to airport west edge -157.
+           • Inner ring road z=120 north edge 118.7 → 4.7u gap to airport
+             south edge 114 (parking lot world z[108, 114]).
+           • Life Events quarter (-103, 135), nearest lot north edge z=123
+             → 9u gap to airport south edge.
+           • Inner ring road x=-54 (band west edge -55.1) → 18.4u east
+             gap to airport east edge -73.75.
          Inner constants (RUNWAY_Z, RUNWAY2_X_MIN/MAX, RUNWAY3_X, etc.)
          remain local. Animation refs (TakeoffPlane, landing plane, fuel
          truck) write to refs inside this group so their coords are
          already local — under scale 1.5 their travel range expands
          proportionally with the runway, which is correct. */}
-      <group position={[-30, 0, -12]} scale={1.5}>
+      <group position={[-40, 0, -15]} scale={1.5}>
         <Runway />
         <Airplane position={[-50, 0.75, 49]} />
         <TakeoffPlane />
