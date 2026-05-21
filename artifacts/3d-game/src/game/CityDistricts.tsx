@@ -6359,6 +6359,480 @@ export default function CityDistricts() {
       <HospitalDistrict />
       <UniversityCampus />
       <MuseumPlaza />
+      <CivicSafetyComplex />
+    </group>
+  );
+}
+
+// ===== Civic Safety Complex @ (52.5, 0, -82) =========================
+// Paired BotPolice (kiosk at 45,-82) + BotFire (kiosk at 60,-82) civic
+// services complex. Shared plaza between the two kiosks at x∈[47.5, 57.5]
+// (10u wide). Built strictly within the corridor between BotHaus (west,
+// 23u gap to police kiosk west edge) and BotRocket (east, ~11u gap to
+// fire kiosk east edge), so total decor envelope stays inside
+// x∈[34, 71], z∈[-92, -72]. Avoids the rocket launch pad's flame plume
+// to the NE.
+function CivicSafetyComplex() {
+  const sirenA = useRef<THREE.Group>(null!);
+  const sirenB = useRef<THREE.Group>(null!);
+  const beaconR = useRef<THREE.Mesh>(null!);
+  const beaconB = useRef<THREE.Mesh>(null!);
+  const cruiser = useRef<THREE.Group>(null!);
+  const engine = useRef<THREE.Group>(null!);
+  const ladderPivot = useRef<THREE.Group>(null!);
+  const flag = useRef<THREE.Mesh>(null!);
+  const hydrantWater = useRef<THREE.Mesh>(null!);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    // Roof beacons rotate (1 Hz) and pulse glow on opposite phases.
+    if (sirenA.current) sirenA.current.rotation.y = t * Math.PI * 2;
+    if (sirenB.current) sirenB.current.rotation.y = -t * Math.PI * 2;
+    if (beaconR.current) {
+      const m = beaconR.current.material as THREE.MeshStandardMaterial;
+      m.emissiveIntensity = 0.6 + 0.9 * (Math.sin(t * 4) * 0.5 + 0.5);
+    }
+    if (beaconB.current) {
+      const m = beaconB.current.material as THREE.MeshStandardMaterial;
+      m.emissiveIntensity = 0.6 + 0.9 * (Math.sin(t * 4 + Math.PI) * 0.5 + 0.5);
+    }
+    // Cruiser idles in place — gentle bob simulating engine vibration.
+    if (cruiser.current) cruiser.current.position.y = 0.35 + Math.sin(t * 8) * 0.01;
+    // Fire engine bobs similarly.
+    if (engine.current) engine.current.position.y = 0.45 + Math.sin(t * 7) * 0.012;
+    // Aerial ladder slowly rotates a few degrees, never aiming at the
+    // station building (sweep stays in the southern arc).
+    if (ladderPivot.current) ladderPivot.current.rotation.y = Math.sin(t * 0.4) * 0.4;
+    // Flag waves
+    if (flag.current) flag.current.rotation.z = Math.sin(t * 2) * 0.08;
+    // Hydrant test plume — pulses height twice every 6 s
+    if (hydrantWater.current) {
+      const phase = (t % 6) / 6;
+      const active = phase > 0.5 && phase < 0.85;
+      const h = active ? 0.4 + Math.sin((phase - 0.5) * Math.PI * 3) * 0.35 : 0.001;
+      hydrantWater.current.scale.y = h;
+      hydrantWater.current.position.y = 0.4 + h * 0.5;
+      (hydrantWater.current.material as THREE.MeshStandardMaterial).opacity = active ? 0.7 : 0;
+    }
+  });
+
+  // Centerpoint between the two kiosks. World-position helpers below
+  // use absolute world coords for clarity (no group-local offsets).
+  const PLAZA_X = 52.5;
+  const PLAZA_Z = -82;
+
+  return (
+    <group>
+      {/* ── Shared plaza pavement (asphalt with painted civic crest) ── */}
+      <mesh position={[PLAZA_X, 0.02, PLAZA_Z]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[20, 14]} />
+        <meshStandardMaterial color="#1f2937" roughness={0.95} />
+      </mesh>
+      {/* Painted star/badge in the plaza center (gold) */}
+      {[0, 0.4, 0.8, 1.2, 1.6].map((r, i) => (
+        <mesh
+          key={`crest-${i}`}
+          position={[PLAZA_X, 0.025, PLAZA_Z]}
+          rotation={[-Math.PI / 2, 0, (i * Math.PI) / 5]}
+        >
+          <ringGeometry args={[r, r + 0.08, 32]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#f59e0b" emissiveIntensity={0.3} />
+        </mesh>
+      ))}
+      {/* Plaza lamp posts at four corners */}
+      {[
+        [PLAZA_X - 8, PLAZA_Z - 5],
+        [PLAZA_X + 8, PLAZA_Z - 5],
+        [PLAZA_X - 8, PLAZA_Z + 5],
+        [PLAZA_X + 8, PLAZA_Z + 5],
+      ].map(([lx, lz], i) => (
+        <group key={`lamp-${i}`} position={[lx, 0, lz]}>
+          <mesh position={[0, 1.6, 0]}>
+            <cylinderGeometry args={[0.08, 0.08, 3.2, 8]} />
+            <meshStandardMaterial color="#475569" />
+          </mesh>
+          <mesh position={[0, 3.25, 0]}>
+            <sphereGeometry args={[0.22, 12, 12]} />
+            <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ╔══════════════════════════════════════════════════════════════╗
+          ║  POLICE PRECINCT @ kiosk (45, -82) — west half               ║
+          ╚══════════════════════════════════════════════════════════════╝ */}
+
+      {/* Roof beacon — rotating siren bar on the police kiosk roof.
+            Kiosk roof top is y = 2.5 + 5/2 = 5. */}
+      <group ref={sirenA} position={[45, 5.25, -82]}>
+        <mesh>
+          <boxGeometry args={[1.4, 0.18, 0.5]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh ref={beaconR} position={[0.4, 0.15, 0]}>
+          <sphereGeometry args={[0.18, 12, 12]} />
+          <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={1.5} toneMapped={false} />
+        </mesh>
+        <mesh ref={beaconB} position={[-0.4, 0.15, 0]}>
+          <sphereGeometry args={[0.18, 12, 12]} />
+          <meshStandardMaterial color="#3b82f6" emissive="#2563eb" emissiveIntensity={1.5} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* Precinct sign — "POLICE" letters above the front door. The
+            kiosk sign already shows the BotPolice label; this is a
+            secondary block-letter sign on the south façade. */}
+      <Text
+        position={[45, 4.4, -79.9]}
+        fontSize={0.42}
+        color="#fbbf24"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#0f172a"
+      >
+        POLICE
+      </Text>
+      <Text
+        position={[45, 3.95, -79.9]}
+        fontSize={0.18}
+        color="#cbd5e1"
+        anchorX="center"
+        anchorY="middle"
+      >
+        PROTECT • SERVE • REPORT
+      </Text>
+
+      {/* Flagpole at the precinct front (south side) — US-style stars
+            & stripes flag waving on a tall white pole. */}
+      <group position={[42, 0, -78.8]}>
+        <mesh position={[0, 3, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 6, 8]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        <mesh position={[0, 5.95, 0]}>
+          <sphereGeometry args={[0.12, 12, 12]} />
+          <meshStandardMaterial color="#fbbf24" metalness={0.7} roughness={0.3} />
+        </mesh>
+        <mesh ref={flag} position={[0.6, 5.2, 0]}>
+          <planeGeometry args={[1.2, 0.7]} />
+          <meshStandardMaterial color="#1e3a8a" side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+
+      {/* Parked cruiser — police car beside the precinct (east side of
+            kiosk, between kiosk and plaza center). Black with two-tone
+            white doors, light bar on top. */}
+      {/* Cruiser body 2.4×0.55×1.1 rotated -π/2 in Y → world half-extents
+            x=0.55 (body) + wheel cyl protrusion → ~0.64. Police kiosk
+            east edge is at world x=47.5, so cruiser center is pushed to
+            x=48.5 → world x range [47.86, 49.14], clearance 0.36u. */}
+      <group ref={cruiser} position={[48.5, 0.35, -82]} rotation={[0, -Math.PI / 2, 0]}>
+        {/* Body */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[2.4, 0.55, 1.1]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        {/* White door panels */}
+        <mesh position={[0, 0, 0.56]}>
+          <boxGeometry args={[1.2, 0.45, 0.02]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        <mesh position={[0, 0, -0.56]}>
+          <boxGeometry args={[1.2, 0.45, 0.02]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        {/* Cabin */}
+        <mesh position={[0.1, 0.45, 0]}>
+          <boxGeometry args={[1.3, 0.4, 0.95]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        {/* Light bar */}
+        <mesh position={[0.1, 0.72, 0]}>
+          <boxGeometry args={[0.8, 0.08, 0.35]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[-0.15, 0.77, 0]}>
+          <sphereGeometry args={[0.07, 8, 8]} />
+          <meshStandardMaterial color="#3b82f6" emissive="#2563eb" emissiveIntensity={1.8} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.35, 0.77, 0]}>
+          <sphereGeometry args={[0.07, 8, 8]} />
+          <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={1.8} toneMapped={false} />
+        </mesh>
+        {/* Windshield */}
+        <mesh position={[0.75, 0.45, 0]}>
+          <boxGeometry args={[0.04, 0.35, 0.8]} />
+          <meshStandardMaterial color="#0ea5e9" transparent opacity={0.5} />
+        </mesh>
+        {/* Wheels */}
+        {[
+          [-0.8, -0.3, 0.55],
+          [-0.8, -0.3, -0.55],
+          [0.8, -0.3, 0.55],
+          [0.8, -0.3, -0.55],
+        ].map(([wx, wy, wz], i) => (
+          <mesh key={`p-wheel-${i}`} position={[wx, wy, wz]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.22, 0.22, 0.18, 12]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+        ))}
+        {/* Roof "POLICE" decal — small text on the trunk lid (back) */}
+        <Text
+          position={[-1.05, 0.4, 0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          fontSize={0.16}
+          color="#fbbf24"
+          anchorX="center"
+          anchorY="middle"
+        >
+          POLICE
+        </Text>
+      </group>
+
+      {/* Speed-trap radar gun pedestal — fun decor west of the precinct */}
+      <group position={[40.5, 0, -84]}>
+        <mesh position={[0, 0.4, 0]}>
+          <cylinderGeometry args={[0.12, 0.18, 0.8, 8]} />
+          <meshStandardMaterial color="#334155" />
+        </mesh>
+        <mesh position={[0, 0.95, 0]} rotation={[0, Math.PI / 4, 0]}>
+          <boxGeometry args={[0.6, 0.25, 0.35]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[0.18, 0.95, 0.18]}>
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={2} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* Concrete "K-9 unit" badge on a low pedestal — pure flavor */}
+      <group position={[42.5, 0, -84]}>
+        <mesh position={[0, 0.25, 0]}>
+          <boxGeometry args={[0.9, 0.5, 0.6]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.95} />
+        </mesh>
+        <Text
+          position={[0, 0.55, 0.31]}
+          fontSize={0.16}
+          color="#0f172a"
+          anchorX="center"
+          anchorY="middle"
+        >
+          K-9 UNIT
+        </Text>
+      </group>
+
+      {/* ╔══════════════════════════════════════════════════════════════╗
+          ║  FIRE STATION @ kiosk (60, -82) — east half                  ║
+          ╚══════════════════════════════════════════════════════════════╝ */}
+
+      {/* Roof rotating beacon — single amber dome on fire station */}
+      <group ref={sirenB} position={[60, 5.25, -82]}>
+        <mesh position={[0, 0.18, 0]}>
+          <cylinderGeometry args={[0.22, 0.28, 0.36, 12]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#f59e0b" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+        <mesh position={[0.5, 0.18, 0]}>
+          <boxGeometry args={[0.6, 0.16, 0.16]} />
+          <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={1.5} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* Block-letter "FIRE STATION 1" on the south façade */}
+      <Text
+        position={[60, 4.4, -79.9]}
+        fontSize={0.42}
+        color="#fbbf24"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.04}
+        outlineColor="#7f1d1d"
+      >
+        FIRE STATION 1
+      </Text>
+      <Text
+        position={[60, 3.95, -79.9]}
+        fontSize={0.18}
+        color="#fef3c7"
+        anchorX="center"
+        anchorY="middle"
+      >
+        RESCUE • RESPOND • RESTORE
+      </Text>
+
+      {/* Garage-bay door — large red door on the south side suggesting
+            the engine drives out south onto the plaza access lane. */}
+      <mesh position={[60, 1.6, -79.95]}>
+        <boxGeometry args={[3.0, 2.6, 0.08]} />
+        <meshStandardMaterial color="#7f1d1d" roughness={0.55} />
+      </mesh>
+      {/* Door panel grooves (3 horizontal lines) */}
+      {[-0.7, 0, 0.7].map((y, i) => (
+        <mesh key={`gd-${i}`} position={[60, 1.6 + y, -79.91]}>
+          <boxGeometry args={[2.95, 0.04, 0.02]} />
+          <meshStandardMaterial color="#450a0a" />
+        </mesh>
+      ))}
+
+      {/* Fire engine parked beside the station (west of kiosk, between
+            kiosk and plaza center). Red ladder truck with rotating
+            aerial ladder. */}
+      {/* Fire engine body 3.2×0.8×1.2 rotated +π/2 → world half-extents
+            x=0.6 (body) + wheel protrusion → ~0.73. Fire kiosk west edge
+            is at world x=57.5, so engine center pushed to x=56.2 → world
+            x range [55.47, 56.93], clearance 0.57u from kiosk. */}
+      <group ref={engine} position={[56.2, 0.45, -82]} rotation={[0, Math.PI / 2, 0]}>
+        {/* Lower hull */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[3.2, 0.8, 1.2]} />
+          <meshStandardMaterial color="#dc2626" />
+        </mesh>
+        {/* Cab */}
+        <mesh position={[-1.0, 0.65, 0]}>
+          <boxGeometry args={[1.1, 0.55, 1.05]} />
+          <meshStandardMaterial color="#b91c1c" />
+        </mesh>
+        {/* Cab windshield */}
+        <mesh position={[-0.45, 0.68, 0]}>
+          <boxGeometry args={[0.04, 0.4, 0.95]} />
+          <meshStandardMaterial color="#0ea5e9" transparent opacity={0.5} />
+        </mesh>
+        {/* Equipment box (rear, where ladder mounts) */}
+        <mesh position={[0.7, 0.55, 0]}>
+          <boxGeometry args={[1.5, 0.4, 1.15]} />
+          <meshStandardMaterial color="#7f1d1d" />
+        </mesh>
+        {/* White stripe down the side */}
+        <mesh position={[0, 0.18, 0.61]}>
+          <boxGeometry args={[3.2, 0.18, 0.02]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        <mesh position={[0, 0.18, -0.61]}>
+          <boxGeometry args={[3.2, 0.18, 0.02]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        {/* Light bar */}
+        <mesh position={[-1.0, 1.0, 0]}>
+          <boxGeometry args={[0.85, 0.1, 0.45]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[-1.0, 1.06, 0.18]}>
+          <sphereGeometry args={[0.07, 8, 8]} />
+          <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={1.8} toneMapped={false} />
+        </mesh>
+        <mesh position={[-1.0, 1.06, -0.18]}>
+          <sphereGeometry args={[0.07, 8, 8]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#f59e0b" emissiveIntensity={1.8} toneMapped={false} />
+        </mesh>
+        {/* Wheels — 6 total (big rig) */}
+        {[
+          [-1.1, -0.45, 0.62],
+          [-1.1, -0.45, -0.62],
+          [0.5, -0.45, 0.62],
+          [0.5, -0.45, -0.62],
+          [1.1, -0.45, 0.62],
+          [1.1, -0.45, -0.62],
+        ].map(([wx, wy, wz], i) => (
+          <mesh key={`f-wheel-${i}`} position={[wx, wy, wz]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.28, 0.28, 0.22, 12]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+        ))}
+        {/* Aerial ladder pivot (mounted on equipment box). Ladder is a
+              white lattice angled upward 35° by default, slowly swept
+              by ladderPivot ref above. */}
+        <group ref={ladderPivot} position={[0.7, 0.85, 0]}>
+          <group rotation={[0, 0, Math.PI / 5]}>
+            {/* Two side rails */}
+            <mesh position={[1.5, 0, 0.18]}>
+              <boxGeometry args={[3.4, 0.06, 0.06]} />
+              <meshStandardMaterial color="#f1f5f9" />
+            </mesh>
+            <mesh position={[1.5, 0, -0.18]}>
+              <boxGeometry args={[3.4, 0.06, 0.06]} />
+              <meshStandardMaterial color="#f1f5f9" />
+            </mesh>
+            {/* Rungs */}
+            {[0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8].map((d, i) => (
+              <mesh key={`rung-${i}`} position={[d, 0, 0]}>
+                <boxGeometry args={[0.04, 0.05, 0.4]} />
+                <meshStandardMaterial color="#fef3c7" />
+              </mesh>
+            ))}
+          </group>
+        </group>
+        {/* "FIRE DEPT 1" decal */}
+        <Text
+          position={[0, 0.18, 0.62]}
+          fontSize={0.14}
+          color="#fbbf24"
+          anchorX="center"
+          anchorY="middle"
+        >
+          FIRE DEPT 1
+        </Text>
+      </group>
+
+      {/* Yellow fire hydrant at the SE corner of the plaza */}
+      <group position={[63, 0, -78]}>
+        <mesh position={[0, 0.18, 0]}>
+          <cylinderGeometry args={[0.15, 0.18, 0.36, 10]} />
+          <meshStandardMaterial color="#fbbf24" />
+        </mesh>
+        <mesh position={[0, 0.42, 0]}>
+          <sphereGeometry args={[0.13, 12, 10]} />
+          <meshStandardMaterial color="#fbbf24" />
+        </mesh>
+        {/* Two side caps */}
+        <mesh position={[0.15, 0.28, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.06, 0.06, 0.08, 8]} />
+          <meshStandardMaterial color="#fbbf24" />
+        </mesh>
+        <mesh position={[-0.15, 0.28, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.06, 0.06, 0.08, 8]} />
+          <meshStandardMaterial color="#fbbf24" />
+        </mesh>
+        {/* Pulsing water test plume above the cap */}
+        <mesh ref={hydrantWater} position={[0, 0.4, 0]}>
+          <cylinderGeometry args={[0.1, 0.05, 1, 8]} />
+          <meshStandardMaterial color="#7dd3fc" transparent opacity={0} emissive="#38bdf8" emissiveIntensity={0.4} />
+        </mesh>
+      </group>
+
+      {/* Coiled fire hose rack — east side of station */}
+      <group position={[63, 0, -84]}>
+        <mesh position={[0, 0.5, 0]}>
+          <boxGeometry args={[0.6, 1.0, 0.2]} />
+          <meshStandardMaterial color="#7f1d1d" />
+        </mesh>
+        {[0.25, 0.55, 0.85].map((y, i) => (
+          <mesh key={`hose-${i}`} position={[0, y, 0.15]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.12, 0.04, 8, 16]} />
+            <meshStandardMaterial color="#f1f5f9" />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Dalmatian-statue mascot near garage door (just for fun) */}
+      <group position={[58, 0, -79.5]}>
+        <mesh position={[0, 0.18, 0]}>
+          <boxGeometry args={[0.4, 0.36, 0.7]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+        <mesh position={[0.05, 0.18, 0.1]}>
+          <sphereGeometry args={[0.05, 6, 6]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[-0.05, 0.18, -0.15]}>
+          <sphereGeometry args={[0.04, 6, 6]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[0.22, 0.45, -0.28]}>
+          <sphereGeometry args={[0.13, 10, 10]} />
+          <meshStandardMaterial color="#f1f5f9" />
+        </mesh>
+      </group>
     </group>
   );
 }

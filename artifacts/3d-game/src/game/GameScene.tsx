@@ -629,6 +629,36 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 4,
     emoji: "✏️",
   },
+  // ─── Civic safety complex @ z=-82 ─────────────────────────────────────
+  // BotPolice + BotFire paired in the empty corridor between BotHaus
+  // (9, -82.5, footprint x[6, 12]) and BotRocket (75, -75, footprint
+  // x[73, 77]). Police at (45, -82) → footprint x[42.5, 47.5] z[-84, -80].
+  // Fire at (60, -82) → footprint x[57.5, 62.5] z[-84, -80]. Gap between
+  // kiosks = 10u (shared plaza, see CityDistricts.CivicSafetyComplex).
+  // Clearances: police↔botcasino (52.5,-60) ~19u SE; fire↔botrocket
+  // (75,-75) ~13.5u NE. No road band on z=-82 (rings at ±72/±90).
+  {
+    id: "botpolice",
+    label: "BotPolice Precinct",
+    position: [45, 2.5, -82],
+    color: "#1e3a8a",
+    roofColor: "#94a3b8",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🚓",
+  },
+  {
+    id: "botfire",
+    label: "BotFire Station",
+    position: [60, 2.5, -82],
+    color: "#b91c1c",
+    roofColor: "#f8fafc",
+    width: 5,
+    depth: 4,
+    height: 5,
+    emoji: "🚒",
+  },
   // ─── BotGolf clubhouse @ (-62, 0, 75) ──────────────────────────────────
   // Clubhouse building. The fairway / greens / driving range are rendered
   // by CityDistricts.GolfCourse to the west and south of the clubhouse.

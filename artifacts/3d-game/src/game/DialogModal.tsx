@@ -40,6 +40,8 @@ const BUILDING_DOCS: Record<string, TaxDocument> = {
   botbasketball: { id: "1099nil", code: "1099-NEC", label: "NIL endorsement income", icon: "🏀", line: "Sch C" },
   botgallery: { id: "art-8283", code: "8283", label: "Noncash charitable contributions", icon: "🎨", line: "11" },
   botfashion: { id: "cogs", code: "COGS", label: "Inventory & cost of goods sold", icon: "👗", line: "Sch C" },
+  botpolice: { id: "salt-cap", code: "SALT", label: "State & local tax cap worksheet", icon: "🚓", line: "Sch A" },
+  botfire: { id: "casualty", code: "4684", label: "Casualty & disaster loss", icon: "🚒", line: "Sch A" },
   irs: { id: "1040", code: "1040", label: "Filed federal return", icon: "📋", line: "—" },
 };
 
@@ -124,6 +126,8 @@ export default function DialogModal() {
     high: "bothigh",
     golf: "botgolf",
     park: "botpark",
+    police: "botpolice",
+    fire: "botfire",
   };
 
   const handleAction = () => {
@@ -303,6 +307,8 @@ const ACTION_LABELS: Record<string, string> = {
   basketball: "Tip-off! 🏀",
   gallery: "View the Exhibit 🎨",
   fashion: "Runway Walk 👗",
+  police: "Case Closed 🚓",
+  fire: "All Clear 🚒",
 };
 
 function actionButtonLabel(action: string, income: number): string {

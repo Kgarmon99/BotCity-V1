@@ -56,7 +56,9 @@ export interface DialogContent {
     | "middle"
     | "high"
     | "golf"
-    | "park";
+    | "park"
+    | "police"
+    | "fire";
   amount?: number;
 }
 

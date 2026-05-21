@@ -14,6 +14,8 @@ const BUILDINGS = [
   // 🏛️  Civic core
   { id: "botcityhall", emoji: "🏛️", label: "BotCityHall" },
   { id: "irs", emoji: "📋", label: "IRS Office" },
+  { id: "botpolice", emoji: "🚓", label: "BotPolice Precinct" },
+  { id: "botfire", emoji: "🚒", label: "BotFire Station" },
 
   // 💼  Work & entity
   { id: "workcorp", emoji: "💼", label: "WorkCorp" },
