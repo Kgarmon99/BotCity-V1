@@ -590,15 +590,21 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   // Players already have BotU North/South (universities) and LittleBots
   // (daycare). These three fill the K-12 gap and form a visible "school
   // row" along the north edge of the map.
+  // Progressive sizing: Elementary (smallest) → Middle → High (largest),
+  // reflecting the K-12 grade progression. Footprints:
+  //   bothigh         9×6 h8 → x[17.5,26.5], z[72,78]
+  //   botmiddle       7×5 h6 → x[36.5,43.5], z[72.5,77.5]
+  //   botelementary   5×4 h4 → x[52.5,57.5], z[73,77]
+  // Gaps: High↔Middle 10u, Middle↔Elementary 9u (kiosk envelopes only).
   {
     id: "bothigh",
     label: "Bot High School",
-    position: [22, 3, 75],
+    position: [22, 4, 75],
     color: "#475569",
     roofColor: "#f59e0b",
-    width: 5,
-    depth: 4,
-    height: 6,
+    width: 9,
+    depth: 6,
+    height: 8,
     emoji: "🎓",
   },
   {
@@ -607,15 +613,15 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     position: [40, 3, 75],
     color: "#0ea5e9",
     roofColor: "#f87171",
-    width: 5,
-    depth: 4,
-    height: 5,
+    width: 7,
+    depth: 5,
+    height: 6,
     emoji: "🏫",
   },
   {
     id: "botelementary",
     label: "Bot Elementary",
-    position: [55, 3, 75],
+    position: [55, 2, 75],
     color: "#fde68a",
     roofColor: "#ef4444",
     width: 5,

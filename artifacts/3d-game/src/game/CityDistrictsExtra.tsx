@@ -5,12 +5,15 @@ import * as THREE from "three";
 
 // =====================================================================
 // EDUCATION ROW @ z=75 — three K-12 schools in a row along the north
-// edge of the city. Building kiosks live at:
-//   bothigh         (22, 75)  — 5×4 footprint, x[19.5..24.5]
-//   botmiddle       (40, 75)  — 5×4 footprint, x[37.5..42.5]
-//   botelementary   (55, 75)  — 5×4 footprint, x[52.5..57.5]
-// The components below add a shared playground/lawn strip plus
-// school-specific decorations (flagpole, scoreboard, swings, etc).
+// edge of the city. Buildings are sized PROGRESSIVELY (Elementary →
+// Middle → High) to reflect the K-12 progression:
+//   bothigh         (22, 75)  — 9×6 h8 footprint, x[17.5..26.5], z[72..78]
+//   botmiddle       (40, 75)  — 7×5 h6 footprint, x[36.5..43.5], z[72.5..77.5]
+//   botelementary   (55, 75)  — 5×4 h4 footprint, x[52.5..57.5], z[73..77]
+// The components below add school-specific yards (football field with
+// bleachers + scoreboard at High; basketball court + scoreboard at
+// Middle; playground + swings + bus at Elementary). All decor anchors
+// south of the building footprint to clear the larger buildings.
 // =====================================================================
 
 function SchoolBus({ position, color = "#fde047" }: { position: [number, number, number]; color?: string }) {
@@ -79,110 +82,192 @@ function Flagpole({ position }: { position: [number, number, number] }) {
 }
 
 function HighSchool() {
-  // Anchored at world (22, 0, 75). Building kiosk at x[19.5..24.5], z[73..77].
-  // Decor stays within x[15..28], z[70..80] to avoid Middle School (x=37.5+).
+  // Anchored at world (22, 0, 75). Largest school: building x[17.5..26.5],
+  // z[72..78]. Field anchored at local z=+8 (world z=83) — 5u south
+  // of building's south edge. Field 14×9 covers world z[78.5,87.5].
+  // All decor stays at local z>=+3.5 to clear the larger building.
+  const scoreboardRef = useRef<THREE.Mesh>(null!);
+  useFrame((s) => {
+    if (scoreboardRef.current) {
+      const mat = scoreboardRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 1.4 + Math.sin(s.clock.elapsedTime * 2.5) * 0.4;
+    }
+  });
   return (
     <group position={[22, 0, 75]}>
-      {/* Football-field lawn south of the building */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 4.5]}>
-        <planeGeometry args={[10, 5]} />
+      {/* Football-field lawn — much bigger (14×9), south of the building */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 8]} receiveShadow>
+        <planeGeometry args={[14, 9]} />
         <meshStandardMaterial color="#16a34a" roughness={0.9} />
       </mesh>
-      {/* Yard lines on the field */}
-      {[-3, -1.5, 0, 1.5, 3].map((zx) => (
+      {/* Yard lines on the field (8 lines across the 9-deep field) */}
+      {[-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5].map((zx) => (
         <mesh
           key={`yl-${zx}`}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[zx, 0.025, 4.5]}
+          position={[zx * 1.7, 0.025, 8]}
         >
-          <planeGeometry args={[0.1, 5]} />
+          <planeGeometry args={[0.12, 9]} />
           <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.2} />
         </mesh>
       ))}
+      {/* Midfield logo circle */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 8]}>
+        <ringGeometry args={[1.2, 1.35, 32]} />
+        <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.6} />
+      </mesh>
       {/* Goalposts (two H-frames at the field ends) */}
-      {[2.5, 6.5].map((z, i) => (
+      {[3.7, 12.3].map((z, i) => (
         <group key={`gp-${i}`} position={[0, 0, z]}>
-          <mesh position={[0, 1, 0]}>
-            <cylinderGeometry args={[0.05, 0.05, 2, 8]} />
+          <mesh position={[0, 1.4, 0]}>
+            <cylinderGeometry args={[0.07, 0.07, 2.8, 8]} />
             <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} />
           </mesh>
-          <mesh position={[0, 2, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.05, 0.05, 2, 8]} />
+          <mesh position={[0, 2.8, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.07, 0.07, 3, 8]} />
             <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} />
           </mesh>
-          {[-1, 1].map((x) => (
-            <mesh key={`u-${x}`} position={[x, 2.6, 0]}>
-              <cylinderGeometry args={[0.05, 0.05, 1.2, 8]} />
+          {[-1.5, 1.5].map((x) => (
+            <mesh key={`u-${x}`} position={[x, 3.6, 0]}>
+              <cylinderGeometry args={[0.07, 0.07, 1.6, 8]} />
               <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} />
             </mesh>
           ))}
         </group>
       ))}
-      {/* Flagpole + flag */}
-      <Flagpole position={[-3.5, 0, -1]} />
-      {/* Sign */}
+      {/* Bleachers — tiered benches along both sides of the field */}
+      {[-5.4, 5.4].map((bx, bi) => (
+        <group key={`bl-${bi}`} position={[bx, 0, 8]}>
+          {[0, 1, 2].map((tier) => (
+            <mesh key={`tier-${tier}`} position={[bi === 0 ? -tier * 0.35 : tier * 0.35, 0.4 + tier * 0.45, 0]}>
+              <boxGeometry args={[0.7, 0.12, 8]} />
+              <meshStandardMaterial color="#94a3b8" metalness={0.4} />
+            </mesh>
+          ))}
+          {/* Bleacher supports */}
+          {[-3, 0, 3].map((sz, j) => (
+            <mesh key={`bsup-${j}`} position={[0, 0.5, sz]}>
+              <boxGeometry args={[1.0, 1.0, 0.15]} />
+              <meshStandardMaterial color="#64748b" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* Scoreboard at the south end of the field */}
+      <group position={[0, 0, 13.5]}>
+        <mesh position={[0, 1.5, 0]}>
+          <boxGeometry args={[0.4, 3, 0.4]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        <mesh position={[-1.2, 1.5, 0]}>
+          <boxGeometry args={[0.4, 3, 0.4]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        <mesh position={[1.2, 1.5, 0]}>
+          <boxGeometry args={[0.4, 3, 0.4]} />
+          <meshStandardMaterial color="#1f2937" />
+        </mesh>
+        <mesh ref={scoreboardRef} position={[0, 3.6, 0]}>
+          <boxGeometry args={[3.4, 1.4, 0.25]} />
+          <meshStandardMaterial color="#0b1220" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
+        </mesh>
+        <Text position={[0, 3.7, 0.14]} fontSize={0.42} color="#fde047" anchorX="center" outlineWidth={0.04} outlineColor="#0b1220">
+          HOME 21 · AWAY 14
+        </Text>
+        <Text position={[0, 3.15, 0.14]} fontSize={0.16} color="#22d3ee" anchorX="center">
+          Q4 · 02:14
+        </Text>
+      </group>
+      {/* Flagpole + flag — SW corner of field, south of building */}
+      <Flagpole position={[-7, 0, 4]} />
+      {/* Sign — bigger to match a larger school */}
       <Text
-        position={[0, 4.5, 2.4]}
-        fontSize={0.45}
+        position={[0, 6.2, 3.1]}
+        fontSize={0.65}
         color="#f59e0b"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.04}
+        outlineWidth={0.05}
         outlineColor="#0b1220"
       >
         🎓 BOT HIGH
       </Text>
       <Text
-        position={[0, 3.9, 2.4]}
-        fontSize={0.2}
+        position={[0, 5.45, 3.1]}
+        fontSize={0.26}
         color="#f8fafc"
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.02}
         outlineColor="#0b1220"
       >
-        Home of the Compilers
+        Home of the Compilers · Grades 9-12
       </Text>
     </group>
   );
 }
 
 function MiddleSchool() {
-  // Anchored at world (40, 0, 75). x[37.5..42.5], z[73..77].
+  // Anchored at world (40, 0, 75). Mid-sized: building x[36.5..43.5],
+  // z[72.5..77.5]. Court anchored at local z=+6 (world z=81) — 3.5u
+  // south of building south edge. Court 7×5 covers world z[78.5,83.5].
+  // All decor stays at local z>=+3 to clear the larger building.
   return (
     <group position={[40, 0, 75]}>
-      {/* Basketball half-court south of the building */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 4]}>
-        <planeGeometry args={[5, 4]} />
+      {/* Basketball full court south of the building (bigger 7×5) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 6]} receiveShadow>
+        <planeGeometry args={[7, 5]} />
         <meshStandardMaterial color="#b45309" roughness={0.85} />
       </mesh>
-      {/* Court lines */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 4]}>
+      {/* Center circle */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 6]}>
         <ringGeometry args={[0.9, 1.0, 24]} />
         <meshStandardMaterial color="#f8fafc" side={THREE.DoubleSide} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 5.5]}>
-        <planeGeometry args={[5, 0.1]} />
+      {/* Halfcourt line */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 6]}>
+        <planeGeometry args={[7, 0.1]} />
         <meshStandardMaterial color="#f8fafc" />
       </mesh>
-      {/* Hoop */}
-      <group position={[0, 0, 2.4]}>
-        <mesh position={[0, 1.5, 0]}>
-          <cylinderGeometry args={[0.07, 0.07, 3, 8]} />
+      {/* Perimeter line (tightened so envelope stays south of building) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.024, 6]}>
+        <ringGeometry args={[2.9, 3.1, 4]} />
+        <meshStandardMaterial color="#f8fafc" side={THREE.DoubleSide} />
+      </mesh>
+      {/* Two hoops, one at each end */}
+      {[3.6, 8.4].map((hz, i) => (
+        <group key={`hoop-${i}`} position={[0, 0, hz]}>
+          <mesh position={[0, 1.5, 0]}>
+            <cylinderGeometry args={[0.07, 0.07, 3, 8]} />
+            <meshStandardMaterial color="#1f2937" />
+          </mesh>
+          <mesh position={[0, 2.9, i === 0 ? 0.25 : -0.25]}>
+            <boxGeometry args={[1.2, 0.7, 0.05]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          <mesh position={[0, 2.7, i === 0 ? 0.5 : -0.5]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.25, 0.04, 8, 24]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.4} />
+          </mesh>
+        </group>
+      ))}
+      {/* Mini scoreboard pole on west sideline */}
+      <group position={[-4, 0, 6]}>
+        <mesh position={[0, 1.4, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 2.8, 6]} />
           <meshStandardMaterial color="#1f2937" />
         </mesh>
-        <mesh position={[0, 2.9, 0.25]}>
-          <boxGeometry args={[1.2, 0.7, 0.05]} />
-          <meshStandardMaterial color="#f8fafc" />
+        <mesh position={[0, 2.6, 0]}>
+          <boxGeometry args={[1.4, 0.8, 0.18]} />
+          <meshStandardMaterial color="#0b1220" emissive="#22d3ee" emissiveIntensity={1.2} toneMapped={false} />
         </mesh>
-        <mesh position={[0, 2.7, 0.5]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.25, 0.04, 8, 24]} />
-          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.4} />
-        </mesh>
+        <Text position={[0, 2.6, 0.1]} fontSize={0.22} color="#fde047" anchorX="center" outlineWidth={0.02} outlineColor="#0b1220">
+          42 · 38
+        </Text>
       </group>
-      {/* Picnic tables */}
-      {[-2, 2].map((x) => (
-        <group key={`pt-${x}`} position={[x, 0, -1.5]}>
+      {/* Picnic tables — south of court, clear of enlarged building */}
+      {[-2.5, 0, 2.5].map((x) => (
+        <group key={`pt-${x}`} position={[x, 0, 10]}>
           <mesh position={[0, 0.5, 0]}>
             <boxGeometry args={[1.2, 0.1, 0.6]} />
             <meshStandardMaterial color="#92400e" />
@@ -195,10 +280,21 @@ function MiddleSchool() {
           ))}
         </group>
       ))}
-      {/* Sign */}
+      {/* Bike rack — south of court */}
+      <group position={[3.2, 0, 10]}>
+        {[-0.5, 0, 0.5].map((bx, i) => (
+          <mesh key={`bk-${i}`} position={[bx, 0.35, 0]} rotation={[0, 0, 0]}>
+            <torusGeometry args={[0.3, 0.04, 6, 16, Math.PI]} />
+            <meshStandardMaterial color="#94a3b8" metalness={0.6} />
+          </mesh>
+        ))}
+      </group>
+      {/* Flagpole — west of court, south of building */}
+      <Flagpole position={[-5, 0, 9]} />
+      {/* Sign — sized between Elementary and High */}
       <Text
-        position={[0, 4, 2.4]}
-        fontSize={0.42}
+        position={[0, 5, 2.7]}
+        fontSize={0.5}
         color="#f87171"
         anchorX="center"
         anchorY="middle"
@@ -208,8 +304,8 @@ function MiddleSchool() {
         🏫 BOT MIDDLE
       </Text>
       <Text
-        position={[0, 3.5, 2.4]}
-        fontSize={0.18}
+        position={[0, 4.45, 2.7]}
+        fontSize={0.21}
         color="#f8fafc"
         anchorX="center"
         anchorY="middle"
