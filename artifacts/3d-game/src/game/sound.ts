@@ -204,28 +204,42 @@ class SoundManager {
 
   /**
    * Set rocket roar intensity (0..1). Lazily creates a low-pass filtered
-   * noise bed + sub-bass sawtooth on first call; subsequent calls just
+   * noise bed + sub-bass triangle on first call; subsequent calls just
    * ramp the gain. Passing 0 fades out and tears down the nodes.
+   *
+   * Tuned to read as a distant rumble, not a sub-bass buzz: triangle
+   * (not sawtooth) at 70Hz, attenuated before the master bus, with a
+   * peak overall gain of ~0.055.
    */
   setRocket(intensity: number) {
     const t = Math.max(0, Math.min(1, intensity));
     const ctx = this.ensure();
     if (!ctx || !this.master) return;
     if (t > 0.001 && !this.rocketNodes) {
+      // Noise bed: low-passed white noise gives the "roar" body.
+      // We add a SECOND high-shelf cut so the bandpass-y resonance from
+      // the sub-bass oscillator's harmonics doesn't ring out as buzz.
       const src = ctx.createBufferSource();
       src.buffer = this.getNoise(ctx);
       src.loop = true;
       const filter = ctx.createBiquadFilter();
       filter.type = "lowpass";
-      filter.frequency.value = 420;
-      filter.Q.value = 0.5;
+      filter.frequency.value = 380;
+      filter.Q.value = 0.4;
+      // Sub-bass rumble: TRIANGLE (not sawtooth) at 70Hz. Triangle has
+      // far fewer audible harmonics than sawtooth — gives the "deep
+      // boom" feel without the harsh metallic buzz that sawtooth+sub
+      // produces.  Also keep it considerably quieter than the noise so
+      // the body is the noise bed, not the tone.
       const osc = ctx.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.value = 48;
+      osc.type = "triangle";
+      osc.frequency.value = 70;
+      const subGain = ctx.createGain();
+      subGain.gain.value = 0.35; // attenuate the sub before it hits master
       const g = ctx.createGain();
       g.gain.value = 0;
       src.connect(filter).connect(g);
-      osc.connect(g);
+      osc.connect(subGain).connect(g);
       g.connect(this.master);
       src.start();
       osc.start();
@@ -233,9 +247,16 @@ class SoundManager {
     }
     if (this.rocketNodes) {
       const now = ctx.currentTime;
-      const target = t * 0.14;
-      this.rocketNodes.gain.gain.cancelScheduledValues(now);
-      this.rocketNodes.gain.gain.linearRampToValueAtTime(target, now + 0.12);
+      // Lowered peak gain from 0.14 → 0.055 so the rocket reads as
+      // "distant rumble" instead of "buzz in your headphones".
+      const target = t * 0.055;
+      const g = this.rocketNodes.gain.gain;
+      // Anchor the current value before ramping so cancelScheduledValues
+      // followed by linearRampToValueAtTime always has a valid start
+      // point (matches the pattern used in setJetpack).
+      g.cancelScheduledValues(now);
+      g.setValueAtTime(g.value, now);
+      g.linearRampToValueAtTime(target, now + 0.12);
       if (t <= 0.001) {
         const { src, osc } = this.rocketNodes;
         this.rocketNodes = null;
