@@ -11,33 +11,65 @@ import { sound } from "./sound";
 // Removed fillers: (±27, ∓23) and (±23, ∓27) in CityBuildings.tsx.
 // ─────────────────────────────────────────────────────────────────────
 
-// ===== Stadium @ (-27, 0, -27) =======================================
+// ===== BotStadium @ (-40.5, 0, -40.5) ================================
+// MEGA dome stadium. Outer envelope radius 8.2 (vs prev 5.5) — kept under
+// the 8.85u limit set by the botstadium kiosk at world (-40.5, -30.75)
+// whose ~1.8u depth + Building stoop reaches back to ~z=-31.74. With max
+// radius 8.2 the north shell edge sits at world z=-32.3, a 0.56u gap.
+//   • two-tier circular stands (outer wall 8.2, inner seats 7.0/7.4, field 5.8)
+//   • 8 floodlight pylons in a ring at r=8.2 with triple-lamp fixtures
+//   • 4-sided jumbotron suspended over midfield
+//   • spectator dots ringing the upper deck for crowd feel
+//   • entrance archway with team-color banners flanking the south sign
 function Stadium() {
-  const lightRef = useRef<THREE.Mesh>(null!);
+  const jumboRefs = useRef<Array<THREE.Mesh | null>>([]);
+  const bannerRefs = useRef<Array<THREE.Mesh | null>>([]);
   useFrame((s) => {
-    if (lightRef.current) {
-      const t = s.clock.elapsedTime;
-      const mat = lightRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.6 + Math.sin(t * 5) * 0.6;
-    }
+    const t = s.clock.elapsedTime;
+    jumboRefs.current.forEach((m, i) => {
+      if (m) {
+        const mat = m.material as THREE.MeshStandardMaterial;
+        mat.emissiveIntensity = 1.6 + Math.sin(t * 5 + i * 0.7) * 0.6;
+      }
+    });
+    bannerRefs.current.forEach((m, i) => {
+      if (m) m.rotation.z = Math.sin(t * 1.2 + i) * 0.08;
+    });
   });
+  // 8-fold floodlight angle ring, slightly inside outer wall
+  const flAngles = [0, 45, 90, 135, 180, 225, 270, 315].map((d) => (d * Math.PI) / 180);
+  // 4 jumbotron face offsets (N, E, S, W)
+  const jumboFaces: Array<[number, number, number]> = [
+    [0, 0, -1.6],
+    [1.6, 0, 0],
+    [0, 0, 1.6],
+    [-1.6, 0, 0],
+  ];
   return (
     <group position={[-40.5, 0, -40.5]}>
-      {/* Outer ring of stands — open-topped cylinder shell */}
-      <mesh position={[0, 1.6, 0]} castShadow>
-        <cylinderGeometry args={[5, 5.5, 3.2, 32, 1, true]} />
+      {/* Concrete plaza apron — half-ring on south side ONLY, away from
+          the kiosk to the north. Spans angles 0..π (south semicircle). */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <ringGeometry args={[8.2, 9.2, 32, 1, 0, Math.PI]} />
+        <meshStandardMaterial color="#334155" roughness={0.85} />
+      </mesh>
+      {/* Outer wall of stands — tall cylinder shell. Top r=8.0, bottom
+          r=8.2 (was 8.4/9.0). North bottom edge world z=-32.3, kiosk
+          extends back to ~z=-31.74 → 0.56u gap. */}
+      <mesh position={[0, 2.5, 0]} castShadow>
+        <cylinderGeometry args={[8.0, 8.2, 5.0, 48, 1, true]} />
         <meshStandardMaterial
           color="#1e293b"
           emissive="#3b82f6"
-          emissiveIntensity={0.3}
-          metalness={0.55}
-          roughness={0.5}
+          emissiveIntensity={0.32}
+          metalness={0.6}
+          roughness={0.45}
           side={THREE.DoubleSide}
         />
       </mesh>
-      {/* Inner seats ring */}
-      <mesh position={[0, 1.05, 0]}>
-        <cylinderGeometry args={[4.2, 4.5, 2.1, 32, 1, true]} />
+      {/* Inner lower-tier seats (red bowl) */}
+      <mesh position={[0, 1.4, 0]}>
+        <cylinderGeometry args={[7.0, 7.4, 2.8, 48, 1, true]} />
         <meshStandardMaterial
           color="#dc2626"
           emissive="#dc2626"
@@ -45,60 +77,179 @@ function Stadium() {
           side={THREE.DoubleSide}
         />
       </mesh>
-      {/* Green field */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
-        <circleGeometry args={[4, 32]} />
-        <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.45} />
-      </mesh>
-      {/* Center circle */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
-        <ringGeometry args={[0.9, 1, 32]} />
-        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.4} toneMapped={false} />
-      </mesh>
-      {/* Floodlight pylons at 4 corners */}
-      {[[-4.2, -4.2], [4.2, -4.2], [-4.2, 4.2], [4.2, 4.2]].map(([x, z], i) => (
-        <group key={`fl-${i}`} position={[x, 0, z]}>
-          <mesh position={[0, 4, 0]} castShadow>
-            <cylinderGeometry args={[0.1, 0.16, 8, 8]} />
-            <meshStandardMaterial color="#0b1220" metalness={0.8} />
-          </mesh>
-          <mesh position={[0, 8.2, 0]}>
-            <boxGeometry args={[0.85, 0.45, 0.35]} />
-            <meshStandardMaterial
-              color="#fef3c7"
-              emissive="#fbbf24"
-              emissiveIntensity={2.4}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
-      ))}
-      {/* Jumbotron suspended over center */}
-      <mesh position={[0, 6.5, 0]}>
-        <boxGeometry args={[2.6, 1.6, 2.6]} />
-        <meshStandardMaterial color="#0b1220" emissive="#22c55e" emissiveIntensity={0.5} />
-      </mesh>
-      <mesh ref={lightRef} position={[0, 6.5, 1.31]}>
-        <planeGeometry args={[2.3, 1.3]} />
+      {/* Inner upper-tier seats (yellow) — visually distinct band above lower */}
+      <mesh position={[0, 3.7, 0]}>
+        <cylinderGeometry args={[7.4, 7.2, 1.8, 48, 1, true]} />
         <meshStandardMaterial
-          color="#22c55e"
-          emissive="#22c55e"
-          emissiveIntensity={1.8}
-          toneMapped={false}
+          color="#facc15"
+          emissive="#facc15"
+          emissiveIntensity={0.45}
           side={THREE.DoubleSide}
         />
       </mesh>
+      {/* Top emissive trim ring — "stadium glow" line */}
+      <mesh position={[0, 5.05, 0]}>
+        <torusGeometry args={[8.0, 0.12, 8, 48]} />
+        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.8} toneMapped={false} />
+      </mesh>
+      {/* Crowd dots — 24 tiny spheres around the upper deck */}
+      {Array.from({ length: 24 }).map((_, i) => {
+        const a = (i / 24) * Math.PI * 2;
+        const r = 7.3;
+        return (
+          <mesh key={`crowd-${i}`} position={[Math.cos(a) * r, 4.4, Math.sin(a) * r]}>
+            <sphereGeometry args={[0.12, 6, 6]} />
+            <meshStandardMaterial
+              color={i % 3 === 0 ? "#fde047" : i % 3 === 1 ? "#f8fafc" : "#22d3ee"}
+              emissive={i % 3 === 0 ? "#fde047" : i % 3 === 1 ? "#f8fafc" : "#22d3ee"}
+              emissiveIntensity={0.6}
+            />
+          </mesh>
+        );
+      })}
+      {/* Green field */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+        <circleGeometry args={[5.8, 48]} />
+        <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.45} />
+      </mesh>
+      {/* Mowed-stripe overlays — alternating darker bands across the field */}
+      {[-3.5, -1.2, 1.2, 3.5].map((zOff, i) => (
+        <mesh key={`stripe-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, zOff]}>
+          <planeGeometry args={[10, 1.0]} />
+          <meshStandardMaterial color="#166534" transparent opacity={0.55} />
+        </mesh>
+      ))}
+      {/* Center circle */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+        <ringGeometry args={[1.5, 1.7, 48]} />
+        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.4} toneMapped={false} />
+      </mesh>
+      {/* Center dot */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+        <circleGeometry args={[0.2, 16]} />
+        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.6} toneMapped={false} />
+      </mesh>
+      {/* 8 floodlight pylons ringing the stadium — r=8.2 keeps the north
+          pylon at world z=-32.3 (0.56u clear of kiosk) */}
+      {flAngles.map((a, i) => {
+        const r = 8.2;
+        return (
+          <group key={`fl-${i}`} position={[Math.cos(a) * r, 0, Math.sin(a) * r]} rotation={[0, -a + Math.PI / 2, 0]}>
+            <mesh position={[0, 5.5, 0]} castShadow>
+              <cylinderGeometry args={[0.14, 0.22, 11, 8]} />
+              <meshStandardMaterial color="#0b1220" metalness={0.85} />
+            </mesh>
+            {/* Light bank — 3 lamps side-by-side */}
+            {[-0.45, 0, 0.45].map((dx, j) => (
+              <mesh key={`lamp-${j}`} position={[dx, 11.2, -0.1]}>
+                <boxGeometry args={[0.38, 0.42, 0.3]} />
+                <meshStandardMaterial
+                  color="#fef3c7"
+                  emissive="#fbbf24"
+                  emissiveIntensity={2.6}
+                  toneMapped={false}
+                />
+              </mesh>
+            ))}
+          </group>
+        );
+      })}
+      {/* 4 suspension cables anchoring the jumbotron */}
+      {[[-4, -4], [4, -4], [-4, 4], [4, 4]].map(([x, z], i) => (
+        <mesh
+          key={`cable-${i}`}
+          position={[x / 2, 7.5, z / 2]}
+          rotation={[Math.atan2(z, x), 0, Math.atan2(Math.hypot(x, z), 4.5)]}
+        >
+          <cylinderGeometry args={[0.025, 0.025, Math.hypot(x, z, 3), 4]} />
+          <meshStandardMaterial color="#475569" metalness={0.8} />
+        </mesh>
+      ))}
+      {/* Jumbotron — 4-sided box suspended over center, each face a screen */}
+      <mesh position={[0, 8.6, 0]} castShadow>
+        <boxGeometry args={[3.2, 2.0, 3.2]} />
+        <meshStandardMaterial color="#0b1220" metalness={0.6} />
+      </mesh>
+      {jumboFaces.map(([fx, fy, fz], i) => {
+        const isZ = fz !== 0;
+        return (
+          <mesh
+            key={`face-${i}`}
+            ref={(m) => { jumboRefs.current[i] = m; }}
+            position={[fx * 1.005, 8.6 + fy, fz * 1.005]}
+            rotation={[0, isZ ? (fz > 0 ? 0 : Math.PI) : (fx > 0 ? Math.PI / 2 : -Math.PI / 2), 0]}
+          >
+            <planeGeometry args={[2.9, 1.7]} />
+            <meshStandardMaterial
+              color={i % 2 === 0 ? "#22c55e" : "#3b82f6"}
+              emissive={i % 2 === 0 ? "#22c55e" : "#3b82f6"}
+              emissiveIntensity={1.8}
+              toneMapped={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        );
+      })}
+      {/* Crown beacon on top of the jumbotron */}
+      <mesh position={[0, 10.0, 0]}>
+        <sphereGeometry args={[0.32, 16, 12]} />
+        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={2.2} toneMapped={false} />
+      </mesh>
+      {/* Entrance archway at the south edge (toward the kiosk) — note the
+          kiosk is to the NORTH so "south" here is positive z relative to
+          stadium center, free of nearby buildings. */}
+      <group position={[0, 0, 8.0]}>
+        {/* Arch posts */}
+        {[-1.6, 1.6].map((x) => (
+          <mesh key={`arch-${x}`} position={[x, 1.8, 0]} castShadow>
+            <boxGeometry args={[0.35, 3.6, 0.35]} />
+            <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.4} />
+          </mesh>
+        ))}
+        {/* Arch crossbar */}
+        <mesh position={[0, 3.7, 0]} castShadow>
+          <boxGeometry args={[3.6, 0.4, 0.35]} />
+          <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.6} toneMapped={false} />
+        </mesh>
+      </group>
+      {/* Two team banners flapping in the breeze — flanking the south entrance */}
+      {[-2.4, 2.4].map((x, i) => (
+        <mesh
+          key={`banner-${i}`}
+          ref={(m) => { bannerRefs.current[i] = m; }}
+          position={[x, 2.4, 7.8]}
+        >
+          <planeGeometry args={[1.2, 2.6]} />
+          <meshStandardMaterial
+            color={i === 0 ? "#dc2626" : "#3b82f6"}
+            emissive={i === 0 ? "#dc2626" : "#3b82f6"}
+            emissiveIntensity={0.55}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
       {/* Stadium sign over the south entrance */}
       <Text
-        position={[0, 4.4, 5.6]}
-        fontSize={0.5}
+        position={[0, 5.6, 8.1]}
+        fontSize={0.78}
         color="#fde047"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.04}
+        outlineWidth={0.06}
         outlineColor="#dc2626"
       >
         🏟️ BOTSTADIUM
+      </Text>
+      <Text
+        position={[0, 4.85, 8.1]}
+        fontSize={0.28}
+        color="#fef3c7"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.03}
+        outlineColor="#0b1220"
+      >
+        Home of the Bot Bytes · Cap 88,888
       </Text>
     </group>
   );
@@ -2031,231 +2182,479 @@ function Zoo() {
   );
 }
 
-// ===== Soccer Stadium @ (-27, 0, -55) ================================
-// Pitch 12x7 + grandstands on long sides + corner floodlight pylons +
-// jumbotron. Center moved to x=-27 (block interior) so envelope clears
-// both x=-36 and x=-18 road bands (±1.1u). South stand south edge at
-// world z=-49.5; botsoccer kiosk at z=-48 sits just south with 0.6u gap.
+// ===== BotSoccer Stadium @ (-40.5, 0, -82.5) =========================
+// MEGA pitch 22x7 (vs prev 12x7 — width nearly doubled), 4-sided
+// grandstands with covered roofs, 4 corner floodlight pylons (4 lamps
+// each = 16 total lamps), dual end-zone jumbotrons. Depth kept tight
+// because botsoccer kiosk + Building stoop reaches back to ~z=-77.0
+// (1.7u south of kiosk center) and z=-90 road band starts at z=-88.9.
+// Envelope after re-tuning:
+//   • pitch x[-51.5..-29.5], z[-86..-79]
+//   • grandstand roof outer faces z[-87.6..-77.4] → 0.4u clear of kiosk
+//     to the N, 1.3u clear of road band to the S
+//   • pylons at corners x[±11.5], z[±5] from center → x[-52..-29],
+//     z[-87.5..-77.5]
 function SoccerStadium() {
-  const jumboRef = useRef<THREE.Mesh>(null!);
+  const jumboRefs = useRef<Array<THREE.Mesh | null>>([]);
+  const flagRefs = useRef<Array<THREE.Mesh | null>>([]);
   useFrame((s) => {
-    if (jumboRef.current) {
-      const mat = jumboRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.4 + Math.sin(s.clock.elapsedTime * 4) * 0.5;
-    }
+    const t = s.clock.elapsedTime;
+    jumboRefs.current.forEach((m, i) => {
+      if (m) {
+        const mat = m.material as THREE.MeshStandardMaterial;
+        mat.emissiveIntensity = 1.4 + Math.sin(t * 4 + i) * 0.5;
+      }
+    });
+    flagRefs.current.forEach((m, i) => {
+      if (m) m.rotation.y = Math.sin(t * 1.8 + i) * 0.5;
+    });
   });
   return (
     <group position={[-40.5, 0, -82.5]}>
-      {/* Pitch — green grass rectangle (12 wide x 7 deep) */}
+      {/* Pitch — bigger green grass rectangle (22 wide x 7 deep) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
-        <planeGeometry args={[12, 7]} />
+        <planeGeometry args={[22, 7]} />
         <meshStandardMaterial color="#15803d" emissive="#22c55e" emissiveIntensity={0.4} />
       </mesh>
+      {/* Mowed stripes — alternating darker bands along the length */}
+      {[-2.8, -1.8, -0.6, 0.6, 1.8, 2.8].map((z, i) => (
+        <mesh key={`mow-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.045, z]}>
+          <planeGeometry args={[22, 0.95]} />
+          <meshStandardMaterial color={i % 2 === 0 ? "#166534" : "#15803d"} transparent opacity={0.5} />
+        </mesh>
+      ))}
       {/* Center circle */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
-        <ringGeometry args={[0.9, 1.0, 24]} />
+        <ringGeometry args={[1.3, 1.45, 32]} />
         <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      {/* Center spot */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.065, 0]}>
+        <circleGeometry args={[0.15, 12]} />
+        <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.4} toneMapped={false} />
       </mesh>
       {/* Halfway line */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.055, 0]}>
-        <planeGeometry args={[0.1, 7]} />
+        <planeGeometry args={[0.14, 7]} />
         <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1} toneMapped={false} />
       </mesh>
-      {/* Goals — chunky white box frames at both ends */}
-      {[-6, 6].map((gx) => (
+      {/* Pitch perimeter line */}
+      {[
+        [0, -3.5, 22, 0.14],
+        [0, 3.5, 22, 0.14],
+        [-11, 0, 0.14, 7],
+        [11, 0, 0.14, 7],
+      ].map(([px, pz, pw, pd], i) => (
+        <mesh key={`peri-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[px, 0.05, pz]}>
+          <planeGeometry args={[pw, pd]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.9} toneMapped={false} />
+        </mesh>
+      ))}
+      {/* Penalty boxes at both ends — outer 4.0 wide x 2.6 deep */}
+      {[-1, 1].map((dir) => (
+        <group key={`pen-${dir}`}>
+          {[
+            [dir * 9.7, -2.0, 0.1, 4.0],
+            [dir * 9.7, 2.0, 0.1, 4.0],
+            [dir * 8.4, 0, 2.6, 0.1],
+          ].map(([px, pz, pw, pd], i) => (
+            <mesh key={`pl-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[px, 0.05, pz]}>
+              <planeGeometry args={[pw, pd]} />
+              <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.9} toneMapped={false} />
+            </mesh>
+          ))}
+          {/* Penalty spot */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[dir * 8.5, 0.065, 0]}>
+            <circleGeometry args={[0.12, 10]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.4} toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+      {/* Goals — bigger frames at both ends */}
+      {[-11, 11].map((gx) => (
         <group key={`goal-${gx}`} position={[gx, 0, 0]}>
           {/* Posts */}
-          {[-1.2, 1.2].map((pz) => (
-            <mesh key={`post-${pz}`} position={[0, 0.8, pz]} castShadow>
-              <cylinderGeometry args={[0.08, 0.08, 1.6, 6]} />
-              <meshStandardMaterial color="#f8fafc" />
+          {[-1.5, 1.5].map((pz) => (
+            <mesh key={`post-${pz}`} position={[0, 1.1, pz]} castShadow>
+              <cylinderGeometry args={[0.1, 0.1, 2.2, 8]} />
+              <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.4} />
             </mesh>
           ))}
           {/* Crossbar */}
-          <mesh position={[0, 1.6, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.08, 2.4, 6]} />
-            <meshStandardMaterial color="#f8fafc" />
+          <mesh position={[0, 2.2, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 3.0, 8]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.4} />
           </mesh>
           {/* Net — translucent plane behind goal, tilted back */}
           <mesh
-            position={[gx > 0 ? 0.5 : -0.5, 0.8, 0]}
-            rotation={[0, gx > 0 ? -0.35 : 0.35, 0]}
+            position={[gx > 0 ? 0.75 : -0.75, 1.1, 0]}
+            rotation={[0, gx > 0 ? -0.4 : 0.4, 0]}
           >
-            <planeGeometry args={[2.4, 1.6]} />
+            <planeGeometry args={[3.0, 2.2]} />
+            <meshStandardMaterial color="#e5e7eb" transparent opacity={0.4} side={THREE.DoubleSide} />
+          </mesh>
+          {/* Net top — sloped roof of the net cage */}
+          <mesh
+            position={[gx > 0 ? 0.45 : -0.45, 2.3, 0]}
+            rotation={[gx > 0 ? -Math.PI / 5 : Math.PI / 5, 0, gx > 0 ? Math.PI / 2 : -Math.PI / 2]}
+          >
+            <planeGeometry args={[3.0, 1.4]} />
             <meshStandardMaterial color="#e5e7eb" transparent opacity={0.35} side={THREE.DoubleSide} />
           </mesh>
         </group>
       ))}
-      {/* Grandstands — boxes on N and S sidelines, width 13 (env x[-33.5..-20.5]) */}
+      {/* Corner flags — 4 corners */}
+      {[[-10.7, -3.3], [10.7, -3.3], [-10.7, 3.3], [10.7, 3.3]].map(([fx, fz], i) => (
+        <group key={`flag-${i}`} position={[fx, 0, fz]}>
+          <mesh position={[0, 0.7, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 1.4, 6]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+          <mesh
+            ref={(m) => { flagRefs.current[i] = m; }}
+            position={[0.18, 1.25, 0]}
+          >
+            <planeGeometry args={[0.36, 0.24]} />
+            <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={0.9} side={THREE.DoubleSide} />
+          </mesh>
+        </group>
+      ))}
+      {/* North & South grandstands — long sides, width 23. Stands center
+          at z=±4.2, roof set back to ±4.2 (no extra offset); roof depth
+          1.8 → outer face at z=±5.1 = world z[-87.6..-77.4]. */}
       {[-1, 1].map((dir) => (
-        <group key={`stand-${dir}`} position={[0, 0, dir * 4.5]}>
+        <group key={`stand-${dir}`} position={[0, 0, dir * 4.2]}>
           {/* Lower tier */}
-          <mesh position={[0, 0.6, 0]} castShadow>
-            <boxGeometry args={[13, 1.2, 1.2]} />
+          <mesh position={[0, 0.8, 0]} castShadow>
+            <boxGeometry args={[23, 1.6, 1.2]} />
             <meshStandardMaterial color="#1e293b" emissive="#3b82f6" emissiveIntensity={0.35} />
           </mesh>
-          {/* Upper tier (set back) */}
-          <mesh position={[0, 1.8, dir * 0.4]} castShadow>
-            <boxGeometry args={[13, 1.2, 1.0]} />
+          {/* Upper tier (set back outward) */}
+          <mesh position={[0, 2.4, dir * 0.3]} castShadow>
+            <boxGeometry args={[23, 1.6, 1.0]} />
             <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.55} />
           </mesh>
           {/* Roof canopy */}
-          <mesh position={[0, 2.8, dir * 0.45]} castShadow>
-            <boxGeometry args={[13.4, 0.18, 1.4]} />
+          <mesh position={[0, 3.8, dir * 0.35]} castShadow>
+            <boxGeometry args={[23.4, 0.25, 1.4]} />
+            <meshStandardMaterial color="#0b1220" metalness={0.5} />
+          </mesh>
+          {/* Roof emissive trim line */}
+          <mesh position={[0, 3.95, dir * 1.05]}>
+            <boxGeometry args={[23.4, 0.05, 0.05]} />
+            <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={2.0} toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+      {/* East & West end stands — shorter, behind the goals. Depth 8
+          (z[-4..+4]) matches the narrower pitch envelope. */}
+      {[-1, 1].map((dir) => (
+        <group key={`endstand-${dir}`} position={[dir * 12.4, 0, 0]}>
+          <mesh position={[0, 0.8, 0]} castShadow>
+            <boxGeometry args={[1.2, 1.6, 8]} />
+            <meshStandardMaterial color="#1e293b" emissive="#3b82f6" emissiveIntensity={0.35} />
+          </mesh>
+          <mesh position={[dir * 0.4, 2.4, 0]} castShadow>
+            <boxGeometry args={[1.0, 1.6, 8]} />
+            <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.5} />
+          </mesh>
+          <mesh position={[dir * 0.45, 3.8, 0]} castShadow>
+            <boxGeometry args={[1.4, 0.22, 8.4]} />
             <meshStandardMaterial color="#0b1220" metalness={0.5} />
           </mesh>
         </group>
       ))}
-      {/* Floodlight pylons at 4 corners (env x[-33.5..-20.5]) */}
-      {[[-6.5, -5.5], [6.5, -5.5], [-6.5, 5.5], [6.5, 5.5]].map(([x, z], i) => (
+      {/* Floodlight pylons at 4 corners — pulled in to z=±5 so north
+          pylon at world z=-77.5 stays 0.5u clear of kiosk south face. */}
+      {[[-11.5, -5], [11.5, -5], [-11.5, 5], [11.5, 5]].map(([x, z], i) => (
         <group key={`fl-${i}`} position={[x, 0, z]}>
-          <mesh position={[0, 4.5, 0]} castShadow>
-            <cylinderGeometry args={[0.12, 0.2, 9, 8]} />
+          <mesh position={[0, 6, 0]} castShadow>
+            <cylinderGeometry args={[0.16, 0.26, 12, 8]} />
             <meshStandardMaterial color="#0b1220" metalness={0.8} />
           </mesh>
-          <mesh position={[0, 9.3, 0]}>
-            <boxGeometry args={[1.1, 0.5, 0.4]} />
+          {/* Light bank — 4 lamps in a square */}
+          {[[-0.5, -0.25], [0.5, -0.25], [-0.5, 0.25], [0.5, 0.25]].map(([lx, ly], j) => (
+            <mesh key={`lamp-${j}`} position={[lx, 12.1 + ly * 0.6, 0]}>
+              <boxGeometry args={[0.42, 0.42, 0.32]} />
+              <meshStandardMaterial
+                color="#fef3c7"
+                emissive="#fde047"
+                emissiveIntensity={2.8}
+                toneMapped={false}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* End jumbotrons — one behind each goal */}
+      {[-1, 1].map((dir, i) => (
+        <group key={`jumbo-${i}`} position={[dir * 11.5, 5.0, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.4, 2.4, 4.0]} />
+            <meshStandardMaterial color="#0b1220" />
+          </mesh>
+          <mesh
+            ref={(m) => { jumboRefs.current[i] = m; }}
+            position={[dir * 0.22, 0, 0]}
+            rotation={[0, dir > 0 ? -Math.PI / 2 : Math.PI / 2, 0]}
+          >
+            <planeGeometry args={[3.6, 2.0]} />
             <meshStandardMaterial
-              color="#fef3c7"
-              emissive="#fde047"
-              emissiveIntensity={2.6}
+              color={dir > 0 ? "#22c55e" : "#3b82f6"}
+              emissive={dir > 0 ? "#22c55e" : "#3b82f6"}
+              emissiveIntensity={1.6}
               toneMapped={false}
+              side={THREE.DoubleSide}
             />
           </mesh>
         </group>
       ))}
-      {/* Jumbotron suspended at the north end */}
-      <mesh position={[0, 5.5, -6.2]} castShadow>
-        <boxGeometry args={[3.4, 2, 0.4]} />
-        <meshStandardMaterial color="#0b1220" />
-      </mesh>
-      <mesh ref={jumboRef} position={[0, 5.5, -5.98]}>
-        <planeGeometry args={[3.1, 1.7]} />
-        <meshStandardMaterial
-          color="#22c55e"
-          emissive="#22c55e"
-          emissiveIntensity={1.6}
-          toneMapped={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      {/* Stadium name sign over the south entrance (toward the kiosk at z=-48) */}
+      {/* Stadium name sign over the south entrance (sign anchors south,
+          away from the kiosk to the north). */}
       <Text
-        position={[0, 4.6, 6.2]}
-        fontSize={0.5}
+        position={[0, 5.4, 5.4]}
+        fontSize={0.78}
         color="#bbf7d0"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.04}
+        outlineWidth={0.06}
         outlineColor="#15803d"
       >
         ⚽ BOTSOCCER STADIUM
+      </Text>
+      <Text
+        position={[0, 4.7, 5.4]}
+        fontSize={0.26}
+        color="#dcfce7"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.03}
+        outlineColor="#0b1220"
+      >
+        Home of the Bot Strikers · Cap 54,321
       </Text>
     </group>
   );
 }
 
-// ===== Basketball Arena @ (27, 0, 27) ================================
-// Domed indoor arena: tapered cylinder shell + glowing emissive dome cap +
-// glass entrance + a small outdoor practice half-court tucked beside the
-// south entrance so players can SEE basketball even though the arena
-// interior is implicit. Footprint dome radius 5 → envelope ~10x10 plus
-// the half-court strip extending ~3u south.
+// ===== BotHoops Arena @ (40.5, 0, 45) ================================
+// MEGA domed indoor arena. Center SHIFTED 4.5u north (was z=40.5) to
+// enable a larger dome while keeping the botbasketball kiosk at z=34
+// (kiosk + stoop reaches to ~z=35.8) outside the south footprint.
+//   • dome radius 7.2 (was 5) — north edge world z=52.2 → 0.7u clear of
+//     z=54 road band z[52.9..55.1]
+//   • wall bottom radius 7.4 → north edge z=52.4 → 0.5u road clearance
+//   • south-only plaza apron r=7.9 → south edge z=37.1 → 1.3u clear of
+//     kiosk stoop at z=35.8
+//   • outdoor full court at world x[24..32], z[41..49] — well clear of
+//     x=36 road band (4u gap) and z=54 road (5u gap)
 function BasketballArena() {
   const domeRef = useRef<THREE.Mesh>(null!);
+  const beamRef = useRef<THREE.Mesh>(null!);
+  const ballRef = useRef<THREE.Mesh>(null!);
   useFrame((s) => {
+    const t = s.clock.elapsedTime;
     if (domeRef.current) {
       const mat = domeRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 0.5 + Math.sin(s.clock.elapsedTime * 1.4) * 0.18;
+      mat.emissiveIntensity = 0.55 + Math.sin(t * 1.4) * 0.2;
+    }
+    if (beamRef.current) beamRef.current.rotation.y = t * 0.6;
+    if (ballRef.current) {
+      ballRef.current.position.y = 0.3 + Math.abs(Math.sin(t * 2.4)) * 0.55;
+      ballRef.current.rotation.x = t * 3;
+      ballRef.current.rotation.z = t * 2;
     }
   });
   return (
-    <group position={[40.5, 0, 40.5]}>
-      {/* Cylindrical arena wall */}
-      <mesh position={[0, 2, 0]} castShadow>
-        <cylinderGeometry args={[5, 5.3, 4, 28]} />
-        <meshStandardMaterial color="#7c2d12" emissive="#f97316" emissiveIntensity={0.35} metalness={0.4} roughness={0.55} />
+    <group position={[40.5, 0, 45]}>
+      {/* Concrete plaza apron — half-ring on south side only (away from
+          z=54 road), so it doesn't push the envelope into the road band. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <ringGeometry args={[7.4, 7.9, 32, 1, 0, Math.PI]} />
+        <meshStandardMaterial color="#3f3f46" roughness={0.85} />
+      </mesh>
+      {/* Cylindrical arena wall — taller. Top r=7.2, bottom r=7.4. */}
+      <mesh position={[0, 2.8, 0]} castShadow>
+        <cylinderGeometry args={[7.2, 7.4, 5.6, 40]} />
+        <meshStandardMaterial color="#7c2d12" emissive="#f97316" emissiveIntensity={0.38} metalness={0.45} roughness={0.5} />
+      </mesh>
+      {/* Concourse trim — emissive ring at wall top */}
+      <mesh position={[0, 5.65, 0]}>
+        <torusGeometry args={[7.2, 0.14, 8, 48]} />
+        <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.6} toneMapped={false} />
       </mesh>
       {/* Glowing geodesic-feel dome (half-sphere) */}
-      <mesh ref={domeRef} position={[0, 4, 0]} castShadow>
-        <sphereGeometry args={[5, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+      <mesh ref={domeRef} position={[0, 5.6, 0]} castShadow>
+        <sphereGeometry args={[7.2, 32, 18, 0, Math.PI * 2, 0, Math.PI / 2]} />
         <meshStandardMaterial
           color="#f97316"
           emissive="#fb923c"
-          emissiveIntensity={0.55}
+          emissiveIntensity={0.6}
           metalness={0.7}
           roughness={0.3}
         />
       </mesh>
-      {/* Dome seam rings — three thin emissive bands for that arena look */}
-      {[1.4, 2.7, 3.8].map((y, i) => (
-        <mesh key={`band-${i}`} position={[0, 4 + y, 0]}>
-          <torusGeometry args={[Math.sqrt(Math.max(0.01, 25 - y * y)), 0.06, 8, 32]} />
+      {/* Dome seam rings — six thin emissive bands (inscribed in r=7.2) */}
+      {[1.5, 3.0, 4.5, 5.6, 6.4, 6.9].map((y, i) => (
+        <mesh key={`band-${i}`} position={[0, 5.6 + y * 0.7, 0]}>
+          <torusGeometry args={[Math.sqrt(Math.max(0.05, 51.84 - (y * 0.95) ** 2)), 0.08, 8, 40]} />
           <meshStandardMaterial color="#fde047" emissive="#fde047" emissiveIntensity={1.4} toneMapped={false} />
         </mesh>
       ))}
-      {/* Glass entrance facing south (toward the kiosk at z=20.5) */}
-      <mesh position={[0, 1.4, 5.05]}>
-        <boxGeometry args={[2.4, 2.8, 0.15]} />
+      {/* Vertical dome ribs — 6 meridian arcs */}
+      {[0, 30, 60, 90, 120, 150].map((deg, i) => (
+        <mesh key={`rib-${i}`} position={[0, 5.6, 0]} rotation={[Math.PI / 2, 0, (deg * Math.PI) / 180]}>
+          <torusGeometry args={[7.25, 0.05, 6, 32, Math.PI]} />
+          <meshStandardMaterial color="#facc15" emissive="#facc15" emissiveIntensity={0.9} toneMapped={false} />
+        </mesh>
+      ))}
+      {/* Glass entrance facing south (toward the kiosk at world z=34).
+          Kiosk is south of the arena (lower world z), so "toward kiosk"
+          = local NEGATIVE z. All entrance elements live at -z. */}
+      <mesh position={[0, 2.0, -7.25]}>
+        <boxGeometry args={[4.4, 4.0, 0.2]} />
         <meshStandardMaterial
           color="#0ea5e9"
           emissive="#22d3ee"
-          emissiveIntensity={1.2}
+          emissiveIntensity={1.3}
           metalness={0.5}
           roughness={0.2}
           transparent
           opacity={0.7}
         />
       </mesh>
-      {/* Top finial — basketball-orange sphere with a thin seam ring */}
-      <mesh position={[0, 9.2, 0]}>
-        <sphereGeometry args={[0.45, 16, 12]} />
-        <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={1.1} toneMapped={false} />
+      {/* Entrance frame columns */}
+      {[-2.4, 2.4].map((x) => (
+        <mesh key={`col-${x}`} position={[x, 2.0, -7.35]} castShadow>
+          <boxGeometry args={[0.35, 4.2, 0.4]} />
+          <meshStandardMaterial color="#0b1220" metalness={0.7} />
+        </mesh>
+      ))}
+      {/* Marquee canopy over entrance — local z=-7.7, depth 1.4, so
+          world z[36.3..37.7], 0.5u clear of kiosk stoop at z=35.8. */}
+      <mesh position={[0, 4.3, -7.7]} castShadow>
+        <boxGeometry args={[5.2, 0.3, 1.4]} />
+        <meshStandardMaterial color="#7c2d12" emissive="#f97316" emissiveIntensity={0.55} />
       </mesh>
-      {/* Outdoor half-court tucked SW of the arena entrance */}
-      <group position={[-5, 0, 5.5]}>
-        {/* Court surface */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
-          <planeGeometry args={[4.5, 3.2]} />
-          <meshStandardMaterial color="#b45309" emissive="#f97316" emissiveIntensity={0.25} />
-        </mesh>
-        {/* Free-throw line */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, -0.4]}>
-          <planeGeometry args={[2, 0.06]} />
-          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1} toneMapped={false} />
-        </mesh>
-        {/* Hoop pole + backboard + rim */}
-        <group position={[0, 0, -1.4]}>
-          <mesh position={[0, 1.5, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.1, 3, 6]} />
-            <meshStandardMaterial color="#1e293b" metalness={0.8} />
+      {/* Top finial — giant basketball */}
+      <mesh position={[0, 13.0, 0]} castShadow>
+        <sphereGeometry args={[0.85, 24, 16]} />
+        <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      {/* Basketball seam lines on the finial */}
+      <mesh position={[0, 13.0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.85, 0.03, 6, 24]} />
+        <meshStandardMaterial color="#0b1220" />
+      </mesh>
+      <mesh position={[0, 13.0, 0]}>
+        <torusGeometry args={[0.85, 0.03, 6, 24]} />
+        <meshStandardMaterial color="#0b1220" />
+      </mesh>
+      {/* Rotating spotlight beam from the apex */}
+      <mesh ref={beamRef} position={[0, 12.8, 0]}>
+        <coneGeometry args={[1.6, 4.2, 16, 1, true]} />
+        <meshStandardMaterial
+          color="#fde047"
+          emissive="#fde047"
+          emissiveIntensity={0.55}
+          transparent
+          opacity={0.18}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* 4 exterior floodlights at the corners of an inscribed square
+          (inscribed in r=7.2 → ±5.0 fits with margin) */}
+      {[[-5, -5], [5, -5], [-5, 5], [5, 5]].map(([x, z], i) => (
+        <group key={`fl-${i}`} position={[x, 0, z]}>
+          <mesh position={[0, 4, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.18, 8, 8]} />
+            <meshStandardMaterial color="#0b1220" metalness={0.8} />
           </mesh>
-          <mesh position={[0, 2.9, 0.18]} castShadow>
-            <boxGeometry args={[1.2, 0.8, 0.06]} />
-            <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.6} />
-          </mesh>
-          <mesh position={[0, 2.55, 0.45]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.2, 0.03, 6, 16]} />
-            <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={1.4} toneMapped={false} />
+          <mesh position={[0, 8.2, 0]}>
+            <boxGeometry args={[0.7, 0.4, 0.3]} />
+            <meshStandardMaterial
+              color="#fef3c7"
+              emissive="#fbbf24"
+              emissiveIntensity={2.4}
+              toneMapped={false}
+            />
           </mesh>
         </group>
-        {/* Basketball on the court */}
-        <mesh position={[0.5, 0.25, 0.6]} castShadow>
-          <sphereGeometry args={[0.22, 14, 10]} />
-          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.5} roughness={0.6} />
+      ))}
+      {/* Outdoor full-length practice court tucked WEST of the arena
+          (local x=-13.5, z=-1 → world x[24..32], z[41..49]) — 2.9u clear
+          of x=36 road band and 5u clear of z=54 road band. */}
+      <group position={[-13.5, 0, -1]}>
+        {/* Court surface — wider */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
+          <planeGeometry args={[6, 8]} />
+          <meshStandardMaterial color="#b45309" emissive="#f97316" emissiveIntensity={0.25} />
+        </mesh>
+        {/* Center line */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+          <planeGeometry args={[6, 0.08]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.9} toneMapped={false} />
+        </mesh>
+        {/* Center circle */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+          <ringGeometry args={[0.8, 0.88, 24]} />
+          <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={1.0} toneMapped={false} />
+        </mesh>
+        {/* Free-throw arcs at both ends */}
+        {[-1, 1].map((dir) => (
+          <mesh key={`ft-${dir}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, dir * 2.4]}>
+            <ringGeometry args={[1.0, 1.08, 20]} />
+            <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.9} toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Two hoops, one at each end */}
+        {[-1, 1].map((dir) => (
+          <group key={`hoop-${dir}`} position={[0, 0, dir * 3.7]}>
+            <mesh position={[0, 1.7, 0]} castShadow>
+              <cylinderGeometry args={[0.09, 0.11, 3.4, 6]} />
+              <meshStandardMaterial color="#1e293b" metalness={0.8} />
+            </mesh>
+            <mesh position={[0, 3.3, dir * 0.22]} castShadow>
+              <boxGeometry args={[1.6, 1.0, 0.08]} />
+              <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.6} />
+            </mesh>
+            <mesh position={[0, 2.95, dir * 0.55]} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.24, 0.04, 8, 20]} />
+              <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={1.4} toneMapped={false} />
+            </mesh>
+          </group>
+        ))}
+        {/* Animated bouncing basketball */}
+        <mesh ref={ballRef} position={[0.5, 0.3, 0.6]} castShadow>
+          <sphereGeometry args={[0.26, 16, 12]} />
+          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.55} roughness={0.55} />
         </mesh>
       </group>
-      {/* Arena name sign over the south entrance */}
+      {/* Arena name sign over the south entrance (kiosk-facing) */}
       <Text
-        position={[0, 5.8, 5.2]}
-        fontSize={0.5}
+        position={[0, 7.4, -7.4]}
+        rotation={[0, Math.PI, 0]}
+        fontSize={0.78}
         color="#fed7aa"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.04}
+        outlineWidth={0.06}
         outlineColor="#7c2d12"
       >
         🏀 BOTHOOPS ARENA
+      </Text>
+      <Text
+        position={[0, 6.65, -7.4]}
+        rotation={[0, Math.PI, 0]}
+        fontSize={0.28}
+        color="#fef3c7"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.03}
+        outlineColor="#0b1220"
+      >
+        Home of the Bot Dunkers · Cap 22,222
       </Text>
     </group>
   );
