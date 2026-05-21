@@ -421,25 +421,30 @@ function ElementarySchool() {
 }
 
 // =====================================================================
-// GOLF COURSE @ (-58, 0, -85) — clubhouse + driving range + 18 holes
-// Footprint envelope: world x[-64..-24], z[-103..-87]
-// NW-quadrant location near BotFarm; see GolfCourse() header for the
+// GOLF COURSE @ (-46, 0, -97) — clubhouse + driving range + 18 holes
+// Footprint envelope: world x[-78..-26], z[-117..-97]
+// SW-quadrant location south of BotFarm; see GolfCourse() header for the
 // full clearance breakdown.
 // =====================================================================
 
 function GolfCourse() {
-  // Expanded BotGolf Country Club. Anchor world (-38, 0, -85).
-  // Decor envelope: world x[-64..-24], z[-103..-87].
-  // Relocated to the NW quadrant near BotFarm (-60,-61.5), out of the
-  // BotPlane airport footprint entirely. Conflict checks:
-  //   • BotFarm (-60,-61.5) → 25u north of CC envelope z=-87. clear.
-  //   • BotMine (-75,-37.5) → far north. clear.
-  //   • BotPark visitor center (-92,-78) + decor (lake ~(-85,-84),
-  //     mountains z<-94) → CC envelope x_min=-64 is 19u east of lake;
-  //     mountains all south of z=-94 → CC north edge z=-87 has 7u gap.
-  //   • BotSoccer kiosk (-40.5,-76), stadium center (-27,-55) → kiosk
-  //     z=-76 sits 11u north of CC; stadium decor far NE.
-  // Clubhouse building lives at world (-58, -85); its sign sits over it
+  // Expanded BotGolf Country Club. Anchor world (-46, 0, -97) — moved
+  // 12u south and 8u west of the original (-38,-85), with the fairway
+  // grown from 40×16 to 52×20 (~63% larger).
+  // Decor envelope: world x[-78..-26], z[-117..-97].
+  // Conflict checks:
+  //   • BotNational Park (expanded, x[-118,-80], z[-114,-68]) → CC west
+  //     edge x=-78 sits 2u east of park east edge x=-80. clear.
+  //   • Foundations cluster (centered (-13,-91), W kiosk x=-21.9) → CC
+  //     east edge x=-26 has 4.1u gap. clear.
+  //   • Inner ring road z=-120 (width 2.6 → z=-118.7..-121.3) → CC south
+  //     edge z=-117 has 1.7u gap to road. clear.
+  //   • BotFarm (-60,-61.5) → 35u north of CC envelope z=-97. clear.
+  //   • BotSoccer kiosk (-40.5,-76) → 21u north of CC. clear.
+  //   • BotGolf kiosk (-58,-85), the clubhouse marker, sits just NORTH
+  //     of the expanded fairway (z=-97 north edge); the kiosk and decor
+  //     intentionally adjoin so it reads as the clubhouse entrance.
+  // Clubhouse building lives at world (-66, -97); its sign sits over it
   // via local x=-20. Amenities fan out across the strip:
   //   • 18 numbered holes scattered across a 40×16 fairway
   //   • Members pool with deck, diving board, lounge chairs, umbrella
@@ -502,19 +507,19 @@ function GolfCourse() {
   ];
 
   return (
-    <group position={[-38, 0, -85]}>
-      {/* ─── Main fairway (40×16) ─── */}
+    <group position={[-46, 0, -97]}>
+      {/* ─── Main fairway (52×20) — expanded from 40×16 ─── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.02, -10]} receiveShadow>
-        <planeGeometry args={[40, 16]} />
+        <planeGeometry args={[52, 20]} />
         <meshStandardMaterial color="#16a34a" roughness={0.95} />
       </mesh>
-      {/* Darker rough strips */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.024, -2.5]}>
-        <planeGeometry args={[40, 1]} />
+      {/* Darker rough strips — extended to match new fairway width */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.024, -0.5]}>
+        <planeGeometry args={[52, 1]} />
         <meshStandardMaterial color="#15803d" />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.024, -17.5]}>
-        <planeGeometry args={[40, 1]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.024, -19.5]}>
+        <planeGeometry args={[52, 1]} />
         <meshStandardMaterial color="#15803d" />
       </mesh>
 
