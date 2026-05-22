@@ -1,236 +1,253 @@
-import { useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { BUILDING_DEFS } from "./GameScene";
 
-const messages = [
-  "💰 PAY YOUR\n  TAXES",
-  "📈 BotCity\nINVESTS!",
-  "🤖 BE A\nGOOD BOT",
-  "💵 W-2 = YOUR\n  INCOME",
-  "🏦 BANK\n  ON IT",
-  "⚡ TAX SEASON\n IS NOW",
+// ════════════════════════════════════════════════════════════════════
+// Billboards — animated roadside cross-promo signs that cycle ads for
+// every kiosk in BUILDING_DEFS. Four billboards sit just outside the
+// inner ring road (±54) at the cardinal city entries, facing incoming
+// traffic. Each cycles independently with a staggered start index +
+// slightly different cycle period so the four signs never sync up.
+//
+// Per ad swap: panel emissive flashes brightly for ~0.45s, LED border
+// pulses continuously. Text (emoji + label + tagline) re-renders only
+// on swap (every ~5s), so cost is minimal vs. one useFrame per sign.
+//
+// Note: imports BUILDING_DEFS from GameScene. The reference is read
+// inside useMemo (after module init), so the cycle is fine in ESM.
+// ════════════════════════════════════════════════════════════════════
+
+interface Ad {
+  emoji: string;
+  label: string;
+  color: string;
+}
+
+// Accent palette fallback for kiosks in BUILDING_DEFS without an explicit
+// `color` field (most of the original big-building entries).
+const ACCENT_FALLBACK = [
+  "#06b6d4", "#22c55e", "#f59e0b", "#ec4899",
+  "#a855f7", "#3b82f6", "#ef4444", "#14b8a6",
+];
+
+const TAGLINES = [
+  "★ NOW OPEN ★",
+  "★ VISIT TODAY ★",
+  "★ FEATURED ★",
+  "★ BOT-APPROVED ★",
+  "★ FAN FAVORITE ★",
+  "★ TRY IT FREE ★",
+  "★ HOT SPOT ★",
+  "★ DON'T MISS OUT ★",
 ];
 
 interface BillboardProps {
-  position: [number, number, number];
-  rotation: [number, number, number];
-  color: string;
-  msgIndex: number;
+  pos: [number, number, number];
+  rotY: number;
+  startIndex?: number;
+  cycleSeconds?: number;
 }
 
-function Billboard({ position, rotation, color, msgIndex }: BillboardProps) {
-  const [currentMsg, setCurrentMsg] = useState(msgIndex % messages.length);
-  const frameRef = useRef<THREE.Mesh>(null!);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setCurrentMsg((c) => (c + 1) % messages.length);
-    }, 3500 + (msgIndex % 3) * 700);
-    return () => clearInterval(id);
-  }, [msgIndex]);
-
-  useFrame((state) => {
-    if (frameRef.current) {
-      const mat = frameRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.2 + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.5;
-    }
-  });
-
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Post */}
-      <mesh position={[0, -2, 0]} castShadow>
-        <cylinderGeometry args={[0.12, 0.12, 4, 8]} />
-        <meshStandardMaterial color="#0f172a" metalness={0.8} />
-      </mesh>
-      {/* Frame */}
-      <mesh ref={frameRef} position={[0, 0, 0]}>
-        <boxGeometry args={[3.5, 2.2, 0.15]} />
-        <meshStandardMaterial color="#052e16" emissive={color} emissiveIntensity={1.2} metalness={0.5} />
-      </mesh>
-      {/* Inner glowing panel */}
-      <mesh position={[0, 0, 0.09]}>
-        <boxGeometry args={[3.2, 1.9, 0.02]} />
-        <meshStandardMaterial color="#020617" emissive={color} emissiveIntensity={0.4} />
-      </mesh>
-      {/* Text */}
-      <Text
-        position={[0, 0, 0.12]}
-        fontSize={0.32}
-        color={color}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.02}
-        outlineColor="#000000"
-        maxWidth={3}
-        textAlign="center"
-      >
-        {messages[currentMsg]}
-      </Text>
-    </group>
+function Billboard({ pos, rotY, startIndex = 0, cycleSeconds = 4.5 }: BillboardProps) {
+  const ads = useMemo<Ad[]>(
+    () =>
+      BUILDING_DEFS.map((b, i) => ({
+        emoji: b.emoji,
+        label: b.label,
+        // Inline-defined newer kiosks include a `color` field; older defs
+        // don't, so fall back to a deterministic palette index.
+        color: (b as { color?: string }).color ?? ACCENT_FALLBACK[i % ACCENT_FALLBACK.length],
+      })),
+    [],
   );
-}
 
-const billboards: BillboardProps[] = [
-  { position: [-18, 3, -18], rotation: [0, Math.PI / 4, 0], color: "#4ade80", msgIndex: 0 },
-  { position: [18, 3, -18], rotation: [0, -Math.PI / 4, 0], color: "#fbbf24", msgIndex: 1 },
-  { position: [-18, 3, 18], rotation: [0, (3 * Math.PI) / 4, 0], color: "#22c55e", msgIndex: 2 },
-  { position: [18, 3, 18], rotation: [0, -(3 * Math.PI) / 4, 0], color: "#86efac", msgIndex: 3 },
-  { position: [0, 3, -30], rotation: [0, 0, 0], color: "#4ade80", msgIndex: 4 },
-  { position: [0, 3, 30], rotation: [0, Math.PI, 0], color: "#fbbf24", msgIndex: 5 },
-];
+  const [idx, setIdx] = useState(() => startIndex % Math.max(1, ads.length));
+  const tRef = useRef(0);
+  const panelRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const ledRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
 
-// ─── GetMoneyBot.com brand billboards ────────────────────────────────
-// Larger purple/cyan-glow billboards at the 4 cardinal edges, in the
-// 7.9-unit gap between the outer ring street (±36) and the world bound
-// (±45). They face inward toward the city center so they're visible from
-// the main avenues. Taglines cycle through GMB brand copy.
-
-const GMB_TAGLINES = [
-  "TAX HACKS\n  DAILY",
-  "FREE FILING\n  TOOLS",
-  "JOIN 1M+ BOTS\n  ALREADY",
-  "MAX YOUR\n  REFUND",
-  "DEDUCTION\nFINDER AI",
-];
-
-interface GmbBillboardProps {
-  position: [number, number, number];
-  rotation: [number, number, number];
-  seed: number;
-}
-
-function GmbBillboard({ position, rotation, seed }: GmbBillboardProps) {
-  const [tagIdx, setTagIdx] = useState(seed % GMB_TAGLINES.length);
-  const frameRef = useRef<THREE.Mesh>(null!);
-  const scanRef = useRef<THREE.Mesh>(null!);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setTagIdx((c) => (c + 1) % GMB_TAGLINES.length);
-    }, 4200 + (seed % 4) * 500);
-    return () => clearInterval(id);
-  }, [seed]);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (frameRef.current) {
-      const mat = frameRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.4 + Math.sin(t * 2.5 + seed) * 0.6;
+  useFrame((_, dt) => {
+    tRef.current += dt;
+    if (tRef.current >= cycleSeconds) {
+      tRef.current -= cycleSeconds;
+      setIdx((i) => (i + 1) % ads.length);
     }
-    // Scanline drifts vertically across the panel
-    if (scanRef.current) {
-      const y = ((t * 0.8 + seed * 0.3) % 2.6) - 1.3;
-      scanRef.current.position.y = y;
+    // Brief panel flash on swap, then ease back to base glow.
+    const flash = Math.max(0, 1 - tRef.current / 0.45);
+    if (panelRef.current) {
+      panelRef.current.emissiveIntensity = 0.55 + flash * 1.8;
+    }
+    // LED border twinkles at ~6Hz.
+    const ledPulse = 1.1 + Math.sin(tRef.current * 6) * 0.45;
+    for (const m of ledRefs.current) {
+      if (m) m.emissiveIntensity = ledPulse;
     }
   });
 
+  const ad = ads[idx];
+  const tagline = TAGLINES[idx % TAGLINES.length];
+
   return (
-    <group position={position} rotation={rotation}>
-      {/* Twin posts for the wide billboard */}
-      <mesh position={[-1.8, -3, 0]} castShadow>
-        <cylinderGeometry args={[0.14, 0.14, 6, 8]} />
-        <meshStandardMaterial color="#0f172a" metalness={0.85} />
+    <group position={pos} rotation={[0, rotY, 0]}>
+      {/* Twin support poles — 4u tall, panel mounts above */}
+      {[-3.5, 3.5].map((px) => (
+        <group key={`pole-${px}`} position={[px, 0, 0]}>
+          {/* Concrete footing */}
+          <mesh position={[0, 0.18, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.85, 0.35, 0.85]} />
+            <meshStandardMaterial color="#1f2937" roughness={0.85} />
+          </mesh>
+          {/* Steel pole */}
+          <mesh position={[0, 2.1, 0]} castShadow>
+            <cylinderGeometry args={[0.18, 0.22, 4.0, 10]} />
+            <meshStandardMaterial color="#3f3f46" metalness={0.55} roughness={0.45} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Panel back / frame (dark) — gives the sign body depth */}
+      <mesh position={[0, 5.5, -0.12]} castShadow receiveShadow>
+        <boxGeometry args={[8.6, 4.0, 0.25]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.7} />
       </mesh>
-      <mesh position={[1.8, -3, 0]} castShadow>
-        <cylinderGeometry args={[0.14, 0.14, 6, 8]} />
-        <meshStandardMaterial color="#0f172a" metalness={0.85} />
-      </mesh>
-      {/* Outer glowing frame (cyan) */}
-      <mesh ref={frameRef} position={[0, 0, 0]}>
-        <boxGeometry args={[5.4, 3.2, 0.2]} />
+
+      {/* Panel face — tinted by current ad color (the cycling element) */}
+      <mesh position={[0, 5.5, 0.02]}>
+        <planeGeometry args={[8.2, 3.6]} />
         <meshStandardMaterial
-          color="#1e1b4b"
-          emissive="#22d3ee"
-          emissiveIntensity={1.5}
-          metalness={0.55}
-        />
-      </mesh>
-      {/* Inner panel (deep purple) */}
-      <mesh position={[0, 0, 0.11]}>
-        <boxGeometry args={[5.05, 2.85, 0.02]} />
-        <meshStandardMaterial color="#0b0823" emissive="#7c3aed" emissiveIntensity={0.5} />
-      </mesh>
-      {/* Drifting scanline */}
-      <mesh ref={scanRef} position={[0, 0, 0.13]}>
-        <planeGeometry args={[5.0, 0.12]} />
-        <meshStandardMaterial
-          color="#22d3ee"
-          emissive="#22d3ee"
-          emissiveIntensity={1.4}
-          transparent
-          opacity={0.35}
+          ref={panelRef}
+          color={ad.color}
+          emissive={ad.color}
+          emissiveIntensity={0.55}
           toneMapped={false}
         />
       </mesh>
-      {/* Brand mark (top) */}
+
+      {/* LED border — 4 thin emissive bars around the panel */}
+      <mesh position={[0, 7.4, 0.05]}>
+        <planeGeometry args={[8.2, 0.18]} />
+        <meshStandardMaterial
+          ref={(el) => { ledRefs.current[0] = el; }}
+          color="#fde047"
+          emissive="#fde047"
+          emissiveIntensity={1.2}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[0, 3.6, 0.05]}>
+        <planeGeometry args={[8.2, 0.18]} />
+        <meshStandardMaterial
+          ref={(el) => { ledRefs.current[1] = el; }}
+          color="#fde047"
+          emissive="#fde047"
+          emissiveIntensity={1.2}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[-4.01, 5.5, 0.05]}>
+        <planeGeometry args={[0.18, 3.8]} />
+        <meshStandardMaterial
+          ref={(el) => { ledRefs.current[2] = el; }}
+          color="#fde047"
+          emissive="#fde047"
+          emissiveIntensity={1.2}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[4.01, 5.5, 0.05]}>
+        <planeGeometry args={[0.18, 3.8]} />
+        <meshStandardMaterial
+          ref={(el) => { ledRefs.current[3] = el; }}
+          color="#fde047"
+          emissive="#fde047"
+          emissiveIntensity={1.2}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* AD CONTENT — keyed by idx so Text remounts cleanly each cycle */}
+      {/* Big emoji on the left */}
       <Text
-        position={[0, 1.0, 0.16]}
-        fontSize={0.42}
-        color="#22d3ee"
+        key={`emoji-${idx}`}
+        position={[-2.7, 5.7, 0.08]}
+        fontSize={1.85}
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.035}
-        outlineColor="#0b0823"
-        maxWidth={5}
+        outlineWidth={0.05}
+        outlineColor="#0b1220"
+      >
+        {ad.emoji}
+      </Text>
+      {/* Kiosk name on the right — wraps if long */}
+      <Text
+        key={`label-${idx}`}
+        position={[0.9, 6.15, 0.08]}
+        fontSize={0.6}
+        color="#fef3c7"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={4.8}
+        outlineWidth={0.05}
+        outlineColor="#0b1220"
         textAlign="center"
       >
-        💰 GETMONEYBOT
+        {ad.label.toUpperCase()}
       </Text>
-      {/* URL (small, under brand) */}
+      {/* Tagline */}
       <Text
-        position={[0, 0.55, 0.16]}
-        fontSize={0.2}
-        color="#f9a8d4"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.018}
-        outlineColor="#0b0823"
-      >
-        .COM
-      </Text>
-      {/* Rotating tagline (center/bottom) */}
-      <Text
-        position={[0, -0.4, 0.16]}
+        key={`tag-${idx}`}
+        position={[0.9, 5.05, 0.08]}
         fontSize={0.34}
         color="#fde047"
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.03}
-        outlineColor="#7c3aed"
-        maxWidth={4.8}
-        textAlign="center"
+        outlineColor="#0b1220"
       >
-        {GMB_TAGLINES[tagIdx]}
+        {tagline}
+      </Text>
+      {/* Footer line — fixed, identifies the network */}
+      <Text
+        position={[0.9, 4.25, 0.08]}
+        fontSize={0.18}
+        color="#fef3c7"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor="#0b1220"
+      >
+        ★ BOTCITY CROSS-PROMO NETWORK ★
       </Text>
     </group>
   );
 }
 
-// 4 cardinal billboards in the 7.9-unit outer ring → world edge gap.
-// Each post bases sit at y=-3 below billboard center y=5, so post bottoms
-// touch ground (y=0..6 vertical span). All clear of road bands.
-const gmbBillboards: GmbBillboardProps[] = [
-  // North edge — facing south (toward city center)
-  { position: [0, 5, -60], rotation: [0, 0, 0], seed: 0 },
-  // South edge — facing north
-  { position: [0, 5, 60], rotation: [0, Math.PI, 0], seed: 1 },
-  // West edge — facing east
-  { position: [-60, 5, 0], rotation: [0, Math.PI / 2, 0], seed: 2 },
-  // East edge — facing west
-  { position: [60, 5, 0], rotation: [0, -Math.PI / 2, 0], seed: 3 },
-];
-
 export default function Billboards() {
+  // Positions: 6u outside the inner ring road (z=±54 / x=±54) on each
+  // cardinal axis. Each face points OUTWARD so incoming traffic sees
+  // the ad before crossing into the city core.
+  //
+  // Collision-checked vs BUILDING_DEFS:
+  //   • (0,-60) N: 5u south of BotFactory edge (z=-65); x∈[-3.5,3.5]
+  //     clears factory footprint x[-22,-8]. ✓
+  //   • (0, 60) S: closest kiosks BotKids (-9,82.5) 23u, BotRetirement
+  //     (-7.5,40.5) 20u. ✓
+  //   • (60, 0) E: closest BotCrypto (40.5,-7.5) 21u, BotBroker
+  //     (82.5,-9) 24u. ✓
+  //   • (-60, 0) W: closest BotGallery (-75,-10) 18u, BotGigs
+  //     (-82.5,9) 24u. ✓
+  //
+  // Each billboard has a unique startIndex (spread across the ~70-kiosk
+  // list) and a slightly different cycleSeconds so they never desync
+  // into matching frames.
   return (
     <group>
-      {billboards.map((b, i) => (
-        <Billboard key={`bb-${i}`} {...b} />
-      ))}
-      {gmbBillboards.map((b, i) => (
-        <GmbBillboard key={`gmb-${i}`} {...b} />
-      ))}
+      <Billboard pos={[0,   0, -60]} rotY={Math.PI}     startIndex={0}  cycleSeconds={4.5} />
+      <Billboard pos={[0,   0,  60]} rotY={0}           startIndex={17} cycleSeconds={5.1} />
+      <Billboard pos={[60,  0,   0]} rotY={Math.PI / 2} startIndex={34} cycleSeconds={4.8} />
+      <Billboard pos={[-60, 0,   0]} rotY={-Math.PI / 2} startIndex={51} cycleSeconds={5.4} />
     </group>
   );
 }
