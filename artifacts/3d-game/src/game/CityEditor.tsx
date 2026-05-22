@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree, ThreeEvent } from "@react-three/fiber";
-import { OrthographicCamera } from "@react-three/drei";
+import { PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameStore } from "./gameStore";
 import { BUILDING_DEFS } from "./GameScene";
@@ -8,15 +8,15 @@ import { snap, effectiveXZ } from "./buildingLayout";
 
 const GROUND_HALF = 200;
 
-// Ortho camera tuning. Zoom = pixels-per-world-unit; we clamp between a
-// fully zoomed-in single-lot view and a fully zoomed-out whole-city view.
-// City spans ±200u (400u total) so ZOOM_DEFAULT≈2 fits it on a 720-tall canvas.
-const ZOOM_MIN = 1.5;   // whole 400u city visible with margin
-const ZOOM_MAX = 30;    // 1u ≈ 30px — close-in editing of a single lot
-const ZOOM_DEFAULT = 2; // initial framing — whole city in view
-const ZOOM_STEP = 1.15; // wheel zoom multiplier per notch
-const PAN_SPEED = 70;   // world units per second at full zoom-out
-const CAM_Y = 180;      // high enough to stay above the tallest building
+// Top-down perspective camera tuning. Altitude doubles as zoom: lower y
+// = closer view, higher y = wider view. The camera always points straight
+// down (with a tiny Z offset to avoid lookAt singularity).
+const CAM_FOV = 60;
+const CAM_Y_MIN = 60;      // closest editing altitude
+const CAM_Y_MAX = 450;     // furthest pulled-back view (whole city + margin)
+const CAM_Y_DEFAULT = 360; // initial framing: ~415u visible at fov 60
+const ZOOM_STEP = 1.15;    // wheel altitude multiplier per notch
+const PAN_SPEED = 70;      // world units per second baseline
 
 /**
  * Mounted inside the R3F Canvas. While `editMode` is on:
@@ -38,19 +38,19 @@ export default function CityEditor() {
   const setSelectedBuildingId = useGameStore((s) => s.setSelectedBuildingId);
 
   const ringRef = useRef<THREE.Mesh>(null!);
-  const camRef = useRef<THREE.OrthographicCamera>(null!);
+  const camRef = useRef<THREE.PerspectiveCamera>(null!);
   const { gl } = useThree();
 
-  // Camera pan/zoom state (refs so updates don't trigger React re-renders).
+  // Camera pan/altitude state (refs so updates don't trigger React re-renders).
   const panRef = useRef<[number, number]>([0, 0]);
-  const zoomRef = useRef<number>(ZOOM_DEFAULT);
+  const altRef = useRef<number>(CAM_Y_DEFAULT);
   const keysRef = useRef<Set<string>>(new Set());
 
   // Reset framing every time edit mode is (re)entered.
   useEffect(() => {
     if (editMode) {
       panRef.current = [0, 0];
-      zoomRef.current = ZOOM_DEFAULT;
+      altRef.current = CAM_Y_DEFAULT;
       keysRef.current.clear();
     }
   }, [editMode]);
@@ -87,8 +87,9 @@ export default function CityEditor() {
     const el = gl.domElement;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const dir = e.deltaY > 0 ? 1 / ZOOM_STEP : ZOOM_STEP;
-      zoomRef.current = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomRef.current * dir));
+      // Wheel up zooms in (lower altitude); wheel down zooms out.
+      const dir = e.deltaY > 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+      altRef.current = Math.min(CAM_Y_MAX, Math.max(CAM_Y_MIN, altRef.current * dir));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
@@ -107,24 +108,19 @@ export default function CityEditor() {
       if (k.has("d") || k.has("arrowright")) dx += 1;
       if (dx !== 0 || dz !== 0) {
         const len = Math.hypot(dx, dz);
-        // Scale pan speed inversely with zoom so it feels constant in pixels.
-        const speed = (PAN_SPEED * dt * ZOOM_DEFAULT) / zoomRef.current;
+        // Scale pan speed with altitude so panning feels constant on screen.
+        const speed = (PAN_SPEED * dt * altRef.current) / CAM_Y_DEFAULT;
         const [px, pz] = panRef.current;
         const nx = Math.max(-GROUND_HALF, Math.min(GROUND_HALF, px + (dx / len) * speed));
         const nz = Math.max(-GROUND_HALF, Math.min(GROUND_HALF, pz + (dz / len) * speed));
         panRef.current = [nx, nz];
       }
       const [px, pz] = panRef.current;
-      camRef.current.position.set(px, CAM_Y, pz);
-      // Rotation is fixed straight-down via the rotation prop below — do
-      // NOT call lookAt() here. lookAt with a vertical view direction is
-      // singular against the default up=(0,1,0) vector and produces a NaN
-      // view matrix (visible as a "green screen" — only the clear color
-      // remains because nothing projects correctly).
-      if (camRef.current.zoom !== zoomRef.current) {
-        camRef.current.zoom = zoomRef.current;
-        camRef.current.updateProjectionMatrix();
-      }
+      // Sit the camera with a tiny +Z offset so lookAt's view direction
+      // isn't exactly vertical (which would collide with the default
+      // up=(0,1,0) and produce a NaN view matrix — the old "green screen").
+      camRef.current.position.set(px, altRef.current, pz + 0.0001);
+      camRef.current.lookAt(px, 0, pz);
     }
     if (ringRef.current && selectedBuildingId) {
       const t = clock.elapsedTime;
@@ -164,17 +160,17 @@ export default function CityEditor() {
 
   return (
     <group>
-      {/* High top-down ortho camera — makeDefault swaps it in as the active
-          camera while edit mode is on. FollowCamera bails on its useFrame
-          when editMode is true so it doesn't fight this one. */}
-      <OrthographicCamera
+      {/* High top-down perspective camera — makeDefault swaps it in while
+          edit mode is on. FollowCamera bails inside its useFrame when
+          editMode is true so it doesn't fight this one. Far plane covers
+          ground at y=0 from CAM_Y_MAX altitude with room to spare. */}
+      <PerspectiveCamera
         ref={camRef}
         makeDefault
-        position={[0, CAM_Y, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        zoom={ZOOM_DEFAULT}
-        near={0.1}
-        far={500}
+        fov={CAM_FOV}
+        position={[0, CAM_Y_DEFAULT, 0.0001]}
+        near={1}
+        far={1000}
       />
 
       {/* Snap grid — faint neon overlay so the player can see snap cells.
