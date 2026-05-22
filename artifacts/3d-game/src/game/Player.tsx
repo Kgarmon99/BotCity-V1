@@ -468,53 +468,102 @@ function JetpackFlame({
       shockMatRef.current.opacity = groundEffect * (0.55 + Math.sin(t * 12) * 0.18);
     }
 
-    // Trailing smoke: 4 puffs cycling phases, drifting down and fading.
+    // Trailing smoke: 4 puffs cycling phases, drifting down and BEHIND the
+    // player (-Z) so they trail the body instead of puffing through it.
     smokeRefs.forEach((ref, i) => {
       if (!ref.current) return;
       const phase = ((t * 1.8 + i * 0.25) % 1);
-      const xSide = i % 2 === 0 ? -0.3 : 0.3;
-      ref.current.position.x = xSide + Math.sin(t * 3 + i) * 0.08;
-      ref.current.position.y = -0.7 - phase * 1.6;
-      ref.current.position.z = -0.2 + Math.cos(t * 2.5 + i) * 0.06;
-      const ss = thrusting ? 0.22 + phase * 0.55 : 0.08;
+      const xSide = i % 2 === 0 ? -0.28 : 0.28;
+      ref.current.position.x = xSide + Math.sin(t * 3 + i) * 0.07;
+      ref.current.position.y = -0.15 - phase * 1.7;
+      ref.current.position.z = -0.55 + Math.cos(t * 2.5 + i) * 0.05;
+      const ss = thrusting ? 0.2 + phase * 0.55 : 0.06;
       ref.current.scale.set(ss, ss, ss);
       const mat = ref.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = thrusting ? (1 - phase) * 0.45 : 0;
+      mat.opacity = thrusting ? (1 - phase) * 0.4 : 0;
     });
   });
 
+  // ── Geometry layout notes ────────────────────────────────────────────
+  // MoneyBot faces local +Z, so the BACK of the player is -Z. To stop
+  // the jetpack from clipping into his torso we mount the whole rig at
+  // z = -0.42 (behind the spine) with the backpack housing covering his
+  // upper back and the twin nozzles sitting just below the housing.
+  // Flames emerge DOWNWARD AND SLIGHTLY BACK so they never intersect
+  // his legs. depthWrite={false} stays off (transparent flames need it)
+  // but separation in space prevents the bleed-through artifacts.
+  const BACK_Z = -0.42;
+  const POD_X = 0.28;
+  const POD_Y = 0.55; // upper-back / shoulder height
+  const FLAME_Y = 0.05; // below the nozzle, clear of the torso
   return (
     <group position={[0, 0.15, 0]}>
-      {/* Jet-pod housings (black with hot orange glow) */}
-      {[-0.3, 0.3].map((xOff, i) => (
-        <group key={`pod-${i}`} position={[xOff, 0.1, -0.25]}>
-          <mesh>
-            <cylinderGeometry args={[0.16, 0.2, 0.45, 12]} />
+      {/* Backpack housing — sits flush against MoneyBot's upper back */}
+      <group position={[0, 0.7, BACK_Z]}>
+        {/* Main body */}
+        <mesh castShadow>
+          <boxGeometry args={[0.7, 0.85, 0.32]} />
+          <meshStandardMaterial
+            color="#1e293b"
+            metalness={0.7}
+            roughness={0.35}
+            emissive="#f97316"
+            emissiveIntensity={0.18}
+          />
+        </mesh>
+        {/* Yellow "MONEYBOT" warning stripe on the back */}
+        <mesh position={[0, 0.05, -0.165]}>
+          <boxGeometry args={[0.55, 0.12, 0.02]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} toneMapped={false} />
+        </mesh>
+        {/* Two glowing fuel indicator dots */}
+        {[-0.18, 0.18].map((xOff, i) => (
+          <mesh key={`fuel-${i}`} position={[xOff, -0.25, -0.17]}>
+            <sphereGeometry args={[0.04, 8, 8]} />
+            <meshBasicMaterial color="#22c55e" toneMapped={false} />
+          </mesh>
+        ))}
+        {/* Shoulder straps wrapping forward over the shoulders */}
+        {[-0.22, 0.22].map((xOff, i) => (
+          <mesh key={`strap-${i}`} position={[xOff, 0.15, 0.2]} rotation={[0.15, 0, 0]}>
+            <boxGeometry args={[0.1, 0.55, 0.05]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.4} roughness={0.6} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Jet-pod housings — mounted below the backpack, nozzles down */}
+      {[-POD_X, POD_X].map((xOff, i) => (
+        <group key={`pod-${i}`} position={[xOff, POD_Y, BACK_Z]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.13, 0.17, 0.5, 14]} />
             <meshStandardMaterial
               color="#0f172a"
-              metalness={0.85}
-              roughness={0.3}
+              metalness={0.9}
+              roughness={0.25}
               emissive="#f97316"
               emissiveIntensity={0.6}
             />
           </mesh>
-          {/* Glow ring at the nozzle */}
-          <mesh position={[0, -0.23, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.18, 0.04, 8, 16]} />
+          {/* Glowing nozzle ring at the bottom of each pod */}
+          <mesh position={[0, -0.26, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.16, 0.035, 8, 18]} />
             <meshBasicMaterial color="#fbbf24" toneMapped={false} />
           </mesh>
         </group>
       ))}
 
-      {/* Outer orange/yellow flames */}
-      {[-0.3, 0.3].map((xOff, i) => (
+      {/* Outer orange/yellow flames — emerge below the nozzles, angled
+          slightly back so they trail BEHIND the legs, not through them. */}
+      {[-POD_X, POD_X].map((xOff, i) => (
         <mesh
           key={`flame-${i}`}
           ref={xOff < 0 ? leftRef : rightRef}
-          position={[xOff, -0.5, -0.25]}
-          rotation={[Math.PI, 0, 0]}
+          position={[xOff, FLAME_Y, BACK_Z]}
+          rotation={[Math.PI - 0.15, 0, 0]}
+          renderOrder={2}
         >
-          <coneGeometry args={[0.24, 1.4, 14, 1, true]} />
+          <coneGeometry args={[0.22, 1.4, 14, 1, true]} />
           <meshStandardMaterial
             color="#fde047"
             emissive="#f97316"
@@ -529,14 +578,15 @@ function JetpackFlame({
       ))}
 
       {/* Inner blue/white plasma core */}
-      {[-0.3, 0.3].map((xOff, i) => (
+      {[-POD_X, POD_X].map((xOff, i) => (
         <mesh
           key={`core-${i}`}
           ref={xOff < 0 ? leftCoreRef : rightCoreRef}
-          position={[xOff, -0.45, -0.25]}
-          rotation={[Math.PI, 0, 0]}
+          position={[xOff, FLAME_Y + 0.04, BACK_Z]}
+          rotation={[Math.PI - 0.15, 0, 0]}
+          renderOrder={3}
         >
-          <coneGeometry args={[0.11, 0.95, 10, 1, true]} />
+          <coneGeometry args={[0.1, 0.95, 10, 1, true]} />
           <meshBasicMaterial
             color="#e0f2fe"
             transparent
@@ -548,9 +598,9 @@ function JetpackFlame({
         </mesh>
       ))}
 
-      {/* Trailing smoke puffs */}
+      {/* Trailing smoke puffs (animation positions them at z ≈ -0.55) */}
       {smokeRefs.map((ref, i) => (
-        <mesh key={`smoke-${i}`} ref={ref} position={[0, -0.8, -0.2]}>
+        <mesh key={`smoke-${i}`} ref={ref} position={[0, -0.15, -0.55]} renderOrder={1}>
           <sphereGeometry args={[0.32, 8, 8]} />
           <meshBasicMaterial
             color="#cbd5e1"
@@ -576,7 +626,7 @@ function JetpackFlame({
         />
       </mesh>
 
-      <pointLight ref={lightRef} position={[0, -0.3, 0]} color="#f97316" distance={9} intensity={1.2} />
+      <pointLight ref={lightRef} position={[0, 0, BACK_Z - 0.2]} color="#f97316" distance={9} intensity={1.2} />
     </group>
   );
 }
