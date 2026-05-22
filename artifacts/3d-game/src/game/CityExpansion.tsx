@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { useLinkedOffset } from "./buildingLayout";
 
 // ─────────────────────────────────────────────────────────────────────
 // Train station addons: tracks + parked train cars next to BotTrain.
@@ -473,6 +474,7 @@ function Runway() {
 // itself is at world (-75, 3, 67.5) with footprint x[-80,-70] z[64.5,70.5].
 // ═════════════════════════════════════════════════════════════════════
 function AirportExpansion() {
+  const off = useLinkedOffset("botplane");
   const radarRef = useRef<THREE.Group>(null!);
   const heloBladeRef = useRef<THREE.Group>(null!);
   const heloTailRef = useRef<THREE.Group>(null!);
@@ -541,7 +543,7 @@ function AirportExpansion() {
   return (
     <group>
       {/* ────────── EXTENDED TERMINAL CONCOURSE — east of main terminal ────────── */}
-      <group position={[-58, 0, 67.5]}>
+      <group position={[-58 + off[0], 0, 67.5 + off[2]]}>
         {/* Long glass concourse */}
         <mesh position={[0, 2, 0]} castShadow>
           <boxGeometry args={[14, 4, 5]} />

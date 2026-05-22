@@ -22,6 +22,7 @@ import { useLinkedOffset } from "./buildingLayout";
 // "ON AIR" beacon, and a wrap-around scrolling news ticker.
 // ──────────────────────────────────────────────────────────────────
 function MoneyBotNews() {
+  const off = useLinkedOffset("moneybotnews");
   const dishRef = useRef<THREE.Group>(null!);
   const onAirRef = useRef<THREE.MeshStandardMaterial>(null!);
   const tickerRef = useRef<THREE.Group>(null!);
@@ -39,7 +40,7 @@ function MoneyBotNews() {
   });
 
   return (
-    <group position={[90, 0, -10]}>
+    <group position={[90 + off[0], 0, -10 + off[2]]}>
       {/* Plaza pavers */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[12, 10]} />
@@ -141,6 +142,7 @@ function MoneyBotNews() {
 // crowned by a pulsing red beacon and animated concentric "wave" rings.
 // ──────────────────────────────────────────────────────────────────
 function MoneyBotRadio() {
+  const off = useLinkedOffset("moneybotradio");
   const beaconRef = useRef<THREE.MeshStandardMaterial>(null!);
   const wave1 = useRef<THREE.Mesh>(null!);
   const wave2 = useRef<THREE.Mesh>(null!);
@@ -163,7 +165,7 @@ function MoneyBotRadio() {
   });
 
   return (
-    <group position={[90, 0, -85]}>
+    <group position={[90 + off[0], 0, -85 + off[2]]}>
       {/* Plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[14, 12]} />
@@ -276,6 +278,7 @@ function MoneyBotRadio() {
 // big speech-bubble signage, and POW/BAM thought callouts on the wall.
 // ──────────────────────────────────────────────────────────────────
 function MoneyBotComic() {
+  const off = useLinkedOffset("moneybotcomic");
   const bubbleRef = useRef<THREE.Group>(null!);
   const powRef = useRef<THREE.Group>(null!);
   const bamRef = useRef<THREE.Group>(null!);
@@ -288,7 +291,7 @@ function MoneyBotComic() {
   });
 
   return (
-    <group position={[90, 0, -65]}>
+    <group position={[90 + off[0], 0, -65 + off[2]]}>
       {/* Plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[11, 9]} />

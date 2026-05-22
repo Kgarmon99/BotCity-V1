@@ -466,6 +466,7 @@ function Surfboard({ x, z, color, rot = 0 }: { x: number; z: number; color: stri
 }
 
 function Beach() {
+  const off = useLinkedOffset("botbeach");
   // Sand strip footprint: x[37..52], z[5..65]. Pavilion (botbeach kiosk)
   // sits inside this at (44, 25).
   return (
@@ -517,7 +518,7 @@ function Beach() {
         </mesh>
       ))}
       {/* Sandcastle near the center of the beach */}
-      <group position={[68, 0, 55]}>
+      <group position={[68 + off[0], 0, 55 + off[2]]}>
         <mesh position={[0, 0.35, 0]} castShadow>
           <cylinderGeometry args={[0.5, 0.7, 0.7, 8]} />
           <meshStandardMaterial color="#fcd34d" roughness={0.95} />
@@ -3234,6 +3235,7 @@ function Farm() {
 //   world z ∈ [-16.5, -9.5] inside secondary streets at ±18 / ±16.9)
 // → local x ∈ [-3.5, +3.5], local z ∈ [-3.5, +3.5]
 function MoneyBotTowers() {
+  const off = useLinkedOffset("moneybottowers");
   const ringRef = useRef<THREE.Group>(null!);
   const bridgeRef = useRef<THREE.Mesh>(null!);
 
@@ -3249,7 +3251,7 @@ function MoneyBotTowers() {
   });
 
   return (
-    <group position={[19.5, 0, -19.5]}>
+    <group position={[19.5 + off[0], 0, -19.5 + off[2]]}>
       {/* ── Plaza tiles around the towers (6×7 dark glass) ─────────── */}
       {/* Center local (+0.7, 0, -0.2), size 6×7 → world x[10.7,16.7] ✓
           (clears workcorp east edge at 10.5 by 0.2u), z[-16.7,-9.7] ✓
@@ -5864,6 +5866,7 @@ function FashionDistrict() {
 // the library hall + fountain quad. Compact 7×7 envelopes around each
 // kiosk, bounded by secondary roads at ±18 / ±27.
 function UniversityCampus() {
+  const off = useLinkedOffset("botusouth");
   const bellRef = useRef<THREE.Mesh>(null!);
   const flagN1 = useRef<THREE.Mesh>(null!);
   const flagN2 = useRef<THREE.Mesh>(null!);
@@ -5890,7 +5893,7 @@ function UniversityCampus() {
           Envelope: world x[-26.5,-18.5], z[-26.5,-18.5]. Kiosk fills the
           x[-23.5,-18.5],z[-23.5,-18.5] square. Decor goes NW of kiosk.
           ═══════════════════════════════════════════════════════════════ */}
-      <group position={[-21, 0, -21]}>
+      <group position={[-21 + off[0], 0, -21 + off[2]]}>
         {/* Grand quad lawn — north strip (z=-3 to z=-5) and west strip */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-1.5, 0.03, -4]} receiveShadow>
           <planeGeometry args={[5, 3]} />
@@ -6234,6 +6237,10 @@ function UniversityCampus() {
 // floor, grand entry steps, flanking columns, themed sculpture, and
 // banners — making them feel like real cultural institutions.
 function MuseumPlaza() {
+  const offHist = useLinkedOffset("bothistory");
+  const offEdu = useLinkedOffset("eduhistory");
+  const offFin = useLinkedOffset("finhistory");
+  const museumOffsets: Array<[number, number, number]> = [offHist, offEdu, offFin];
   // (originX, originZ, themeColor for accents, label, plazaFacing)
   // plazaFacing: which direction the entry stairs face (toward the city center)
   const museums: Array<{
@@ -6281,8 +6288,9 @@ function MuseumPlaza() {
         // toward city center along facingZ direction.
         const stairZ = facingZ * 3.0; // local z position of entry stairs
         const sculptureZ = facingZ * 5.0;
+        const moff = museumOffsets[idx];
         return (
-          <group key={`museum-${idx}`} position={[px, 0, pz]}>
+          <group key={`museum-${idx}`} position={[px + moff[0], 0, pz + moff[2]]}>
             {/* Marble plaza floor (9 wide × 8 deep — narrowed to clear ±27 roads) */}
             <mesh
               rotation={[-Math.PI / 2, 0, 0]}
@@ -6551,6 +6559,7 @@ export default function CityDistricts() {
 // x∈[34, 71], z∈[-92, -72]. Avoids the rocket launch pad's flame plume
 // to the NE.
 function CivicSafetyComplex() {
+  const off = useLinkedOffset("botpolice");
   const sirenA = useRef<THREE.Group>(null!);
   const sirenB = useRef<THREE.Group>(null!);
   const beaconR = useRef<THREE.Mesh>(null!);
@@ -6607,7 +6616,7 @@ function CivicSafetyComplex() {
     // 20×14→20×8 below: post-translation z[-51,-43] clears z=-54 sidewalk
     // (z[-52.5,-51.7], 0.7u gap) and EduHistory floor z[-42.5,-34.5]
     // (0.5u gap south).
-    <group position={[-12, 0, 35]}>
+    <group position={[-12 + off[0], 0, 35 + off[2]]}>
       {/* ── Shared plaza pavement (asphalt with painted civic crest) ── */}
       <mesh position={[PLAZA_X, 0.02, PLAZA_Z]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 8]} />
@@ -7034,6 +7043,7 @@ function CivicSafetyComplex() {
 // z=-27 (secondary), and by neighbors botdealer (x=-13.5, west, edge
 // x=-11) and botcityhall (x=19.5, east, footprint ~x[17..22]).
 function HospitalDistrict() {
+  const off = useLinkedOffset("bothospital");
   const rotorRef = useRef<THREE.Group>(null!);
   const beaconRef = useRef<THREE.Mesh>(null!);
   const padRef = useRef<THREE.MeshStandardMaterial>(null!);
@@ -7083,7 +7093,7 @@ function HospitalDistrict() {
     if (wheelchairRef.current) wheelchairRef.current.position.y = Math.sin(t * 1.2) * 0.03;
   });
   return (
-    <group position={[7.5, 0, -40.5]}>
+    <group position={[7.5 + off[0], 0, -40.5 + off[2]]}>
       {/* ── Helipad (north of hospital, world (7.5, -47.5)) ─────────── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -7]} receiveShadow>
         <circleGeometry args={[3.2, 28]} />
@@ -7883,6 +7893,7 @@ function HospitalDistrict() {
 // ledge signs on the north and south building faces.
 //   local x ∈ [-2.5, +2.5], local z ∈ [-2.1, +2.1], y ∈ [10, 13.3]
 function GamingHQCrown() {
+  const off = useLinkedOffset("moneybotgaminghq");
   const beaconRef = useRef<THREE.Mesh>(null!);
   useFrame((state) => {
     if (beaconRef.current) {
@@ -7893,7 +7904,7 @@ function GamingHQCrown() {
     }
   });
   return (
-    <group position={[-40.5, 0, -7.5]}>
+    <group position={[-40.5 + off[0], 0, -7.5 + off[2]]}>
       {/* Antenna pole rising from rooftop */}
       <mesh position={[0, 11.5, 0]} castShadow>
         <cylinderGeometry args={[0.06, 0.1, 3, 6]} />

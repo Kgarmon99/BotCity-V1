@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { useLinkedOffset } from "./buildingLayout";
 
 // =====================================================================
 // EDUCATION ROW @ z=75 — three K-12 schools in a row along the north
@@ -82,6 +83,7 @@ function Flagpole({ position }: { position: [number, number, number] }) {
 }
 
 function HighSchool() {
+  const off = useLinkedOffset("bothigh");
   // Anchored at world (22, 0, 75). Largest school: building x[17.5..26.5],
   // z[72..78]. Field anchored at local z=+8 (world z=83) — 5u south
   // of building's south edge. Field 14×9 covers world z[78.5,87.5].
@@ -94,7 +96,7 @@ function HighSchool() {
     }
   });
   return (
-    <group position={[22, 0, 75]}>
+    <group position={[22 + off[0], 0, 75 + off[2]]}>
       {/* Football-field lawn — much bigger (14×9), south of the building */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 8]} receiveShadow>
         <planeGeometry args={[14, 9]} />
@@ -208,12 +210,13 @@ function HighSchool() {
 }
 
 function MiddleSchool() {
+  const off = useLinkedOffset("botmiddle");
   // Anchored at world (40, 0, 75). Mid-sized: building x[36.5..43.5],
   // z[72.5..77.5]. Court anchored at local z=+6 (world z=81) — 3.5u
   // south of building south edge. Court 7×5 covers world z[78.5,83.5].
   // All decor stays at local z>=+3 to clear the larger building.
   return (
-    <group position={[40, 0, 75]}>
+    <group position={[40 + off[0], 0, 75 + off[2]]}>
       {/* Basketball full court south of the building (bigger 7×5) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 6]} receiveShadow>
         <planeGeometry args={[7, 5]} />
@@ -319,6 +322,7 @@ function MiddleSchool() {
 }
 
 function ElementarySchool() {
+  const off = useLinkedOffset("botelementary");
   // Anchored at world (55, 0, 75). x[52.5..57.5], z[73..77].
   const swingRef = useRef<THREE.Group>(null!);
   useFrame((s) => {
@@ -327,7 +331,7 @@ function ElementarySchool() {
     }
   });
   return (
-    <group position={[55, 0, 75]}>
+    <group position={[55 + off[0], 0, 75 + off[2]]}>
       {/* Bright playground turf — pushed south to z=4.5 so its north edge
           (z=2.25) clears the building's south face (z=2.0) by 0.25u. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 4.5]}>
@@ -428,6 +432,7 @@ function ElementarySchool() {
 // =====================================================================
 
 function GolfCourse() {
+  const off = useLinkedOffset("botgolf");
   // Expanded BotGolf Country Club. Anchor world (-46, 0, -97) — moved
   // 12u south and 8u west of the original (-38,-85), with the fairway
   // grown from 40×16 to 52×20 (~63% larger).
@@ -507,7 +512,7 @@ function GolfCourse() {
   ];
 
   return (
-    <group position={[-46, 0, -97]}>
+    <group position={[-46 + off[0], 0, -97 + off[2]]}>
       {/* ─── Main fairway (52×20) — expanded from 40×16 ─── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-6, 0.02, -10]} receiveShadow>
         <planeGeometry args={[52, 20]} />
@@ -1341,6 +1346,7 @@ function Stream({ pts }: { pts: Array<[number, number]> }) {
 }
 
 function NationalPark() {
+  const off = useLinkedOffset("botpark");
   const lakeRef = useRef<THREE.MeshStandardMaterial>(null!);
   useFrame((s) => {
     if (lakeRef.current) {
@@ -1360,7 +1366,7 @@ function NationalPark() {
   //   • Player bound north z=-160 → 28u north buffer beyond z=-132
   //   • Park crosses inner ring road x=-120 (already did at 1× scale)
   return (
-    <group position={[-92, 0, -78]} scale={1.5}>
+    <group position={[-92 + off[0], 0, -78 + off[2]]} scale={1.5}>
       {/* Pine-forest floor — dark green meadow tinting the corner */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-7, 0.018, -13]}>
         <planeGeometry args={[38, 46]} />
