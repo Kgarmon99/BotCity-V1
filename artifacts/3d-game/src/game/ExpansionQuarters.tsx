@@ -5,82 +5,46 @@ import * as THREE from "three";
 import { QUARTERS, RESERVED_LOTS, LOT_SIZE } from "./cityConstants";
 
 // ════════════════════════════════════════════════════════════════════
-// ExpansionQuarters — renders the 6 outer-ring quarters carved out by
-// Task #1. Each quarter ships with a signpost at its inner-corner edge
-// and ~5 subtle paved lots that Task #2 will replace with kiosks.
+// ExpansionQuarters — renders the 6 outer-ring financial-ed quarters.
+// Each quarter ships with a glowing signpost at its inner-corner edge
+// plus 5 themed paved plinths that the kiosks sit on.
 //
-// The lots intentionally look placeholdery (dark paved square + corner
-// posts + a tiny ID label) so it's obvious during playtest that this
-// land is "reserved" rather than just empty.
+// The lots used to be obvious "reserved / coming soon" placeholders
+// (corner posts + floating ID label). Now that every lot has a real
+// kiosk built on top, the plinths just provide quarter-color paving
+// + a faint emissive accent ring around each kiosk's footprint.
 // ════════════════════════════════════════════════════════════════════
 
 function ReservedLot({
   position,
   color,
-  id,
 }: {
   position: [number, number];
   color: string;
-  id: string;
 }) {
   const [x, z] = position;
   const half = LOT_SIZE / 2;
   return (
     <group position={[x, 0, z]}>
-      {/* Paved square */}
+      {/* Themed paving — slightly darker tint of the quarter color so the
+          kiosk on top reads as belonging to its district. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[LOT_SIZE, LOT_SIZE]} />
-        <meshStandardMaterial color="#1e293b" roughness={0.85} metalness={0.1} />
+        <meshStandardMaterial color="#0b1220" roughness={0.9} metalness={0.05} />
       </mesh>
-      {/* Accent border ring */}
+      {/* Faint emissive border ring — subtle district color halo. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
-        <ringGeometry args={[half - 0.25, half - 0.05, 4, 1]} />
+        <ringGeometry args={[half - 0.3, half - 0.1, 4, 1]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={0.6}
+          emissiveIntensity={0.5}
           side={THREE.DoubleSide}
           toneMapped={false}
           transparent
-          opacity={0.55}
+          opacity={0.35}
         />
       </mesh>
-      {/* Four corner posts — short emissive cylinders */}
-      {[
-        [-half + 0.5, -half + 0.5],
-        [half - 0.5, -half + 0.5],
-        [-half + 0.5, half - 0.5],
-        [half - 0.5, half - 0.5],
-      ].map(([cx, cz], i) => (
-        <group key={i} position={[cx, 0, cz]}>
-          <mesh position={[0, 0.5, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.1, 1.0, 6]} />
-            <meshStandardMaterial color="#0f172a" metalness={0.6} roughness={0.4} />
-          </mesh>
-          <mesh position={[0, 1.05, 0]}>
-            <sphereGeometry args={[0.12, 8, 8]} />
-            <meshStandardMaterial
-              color={color}
-              emissive={color}
-              emissiveIntensity={1.4}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
-      ))}
-      {/* Tiny floating ID label — helps planners see which lot is which */}
-      <Text
-        position={[0, 0.06, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        fontSize={0.55}
-        color={color}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.04}
-        outlineColor="#0b1220"
-      >
-        {id.toUpperCase()}
-      </Text>
     </group>
   );
 }
@@ -175,7 +139,6 @@ export default function ExpansionQuarters() {
           key={lot.id}
           position={lot.position}
           color={lot.color}
-          id={lot.id}
         />
       ))}
       {QUARTERS.map((q) => (

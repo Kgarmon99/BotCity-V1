@@ -82,13 +82,16 @@ function plusLots(cx: number, cz: number, prefix: string): Quarter["lots"] {
   ];
 }
 
-// Strip x-positions: avoid sidewalk bands at x∈{0,±27,±54}±1.1.
-// Lots at x ∈ {-95, -40, -13, 40, 95}, fp width 8 → all clear by ≥3.9u.
-function stripLotsX(z: number, prefix: string): Quarter["lots"] {
-  return [-95, -40, -13, 40, 95].map((x, i) => ({
-    id: `${prefix}-${i + 1}`,
-    position: [x, z] as [number, number],
-  }));
+// Strip-quarter lots: positions must match each quarter's actual built
+// kiosks in GameScene.BUILDING_DEFS so every kiosk sits on its themed
+// plinth. A few entries in Consumer & Macro had to drift off the strip
+// midline to avoid colliding with inner-city districts (BotEnergy,
+// BotFactory, Foundations plus-pattern); the lot list mirrors that.
+function explicitLots(
+  prefix: string,
+  positions: ReadonlyArray<[number, number]>,
+): Quarter["lots"] {
+  return positions.map((p, i) => ({ id: `${prefix}-${i + 1}`, position: p }));
 }
 
 export const QUARTERS: Quarter[] = [
@@ -146,7 +149,13 @@ export const QUARTERS: Quarter[] = [
     color: "#34d399",
     signpost: [0, 0, -117],
     signpostRotY: Math.PI, // faces south (toward center)
-    lots: stripLotsX(-103, "csm"),
+    lots: explicitLots("csm", [
+      [-95, -103], // botconsumer
+      [-13, -103], // botthrift
+      [40, -103],  // botgiving
+      [95, -103],  // botfintech
+      [3, -91],    // botads (drifted north onto Foundations row to avoid BotFactory)
+    ]),
   },
   {
     id: "macro",
@@ -156,7 +165,13 @@ export const QUARTERS: Quarter[] = [
     color: "#fb923c",
     signpost: [0, 0, 117],
     signpostRotY: 0, // faces north (toward center)
-    lots: stripLotsX(103, "mac"),
+    lots: explicitLots("mac", [
+      [-40, 103],  // botforex
+      [-13, 103],  // bottrade
+      [22, 103],   // botinflation (shifted from 40 — BotEnergy collision)
+      [95, 103],   // botpolicy
+      [70, -103],  // botecon (relocated to opposite strip to avoid landmark crowding)
+    ]),
   },
 ];
 
