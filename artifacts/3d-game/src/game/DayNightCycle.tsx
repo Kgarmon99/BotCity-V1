@@ -12,7 +12,24 @@ import { PLAYER_BOUND } from "./cityConstants";
 // Hoisted Color/Vector constants are reused every frame; no useFrame
 // callback allocates.
 
-const PERIOD = 180; // seconds per full day/night cycle
+// Phase is derived from the player's wall-clock so the in-game sky matches
+// the real time of day: 6am → sunrise (sun in east), noon → sun overhead,
+// 6pm → sunset (sun in west), midnight → sun below the city.
+//
+// Exported so other systems (e.g. Particles' fireflies) can gate effects
+// on real-time day vs. night without re-deriving the formula.
+export function getRealTimePhase(now: Date = new Date()): number {
+  const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+  return ((hours - 6) / 24) * Math.PI * 2;
+}
+
+export function getDayFactor(now?: Date): number {
+  return Math.max(0, Math.sin(getRealTimePhase(now)));
+}
+
+export function getNightFactor(now?: Date): number {
+  return Math.max(0, -Math.sin(getRealTimePhase(now)));
+}
 
 const tmpColor = new THREE.Color();
 const dayAmbient = new THREE.Color("#86efac");
@@ -33,9 +50,8 @@ export default function DayNightCycle() {
   const sunRef = useRef<THREE.Mesh>(null!);
   const sunGlowRef = useRef<THREE.Mesh>(null!);
 
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    const phase = (t / PERIOD) * Math.PI * 2;
+  useFrame(() => {
+    const phase = getRealTimePhase();
     const sx = Math.cos(phase) * 60;
     const sy = Math.sin(phase) * 60;
     const sz = Math.sin(phase * 0.5) * 20;

@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { getNightFactor } from "./DayNightCycle";
 
 // ════════════════════════════════════════════════════════════════════
 // Particles — ambient atmosphere effects rendered as THREE.Points.
@@ -12,18 +13,10 @@ import * as THREE from "three";
 //     BotFactory's conveyor + open shop door.
 //
 // All three systems use a single Points draw per emitter, animating
-// the position buffer in useFrame. No per-frame allocations. The
-// firefly night gating matches DayNightCycle's PERIOD so darkness
-// and bug glow stay in sync.
+// the position buffer in useFrame. No per-frame allocations. Fireflies
+// gate visibility on DayNightCycle.getNightFactor() so they appear
+// only when the player's wall-clock is in real-world night.
 // ════════════════════════════════════════════════════════════════════
-
-const DAY_PERIOD = 180; // mirror DayNightCycle.PERIOD
-
-function nightFactor(t: number): number {
-  // DayNightCycle.dayFactor = max(0, sin(phase)). Night is its inverse.
-  const phase = (t / DAY_PERIOD) * Math.PI * 2;
-  return Math.max(0, -Math.sin(phase));
-}
 
 // ─── Fireflies ──────────────────────────────────────────────────────
 interface FireflySwarmProps {
@@ -69,7 +62,7 @@ function FireflySwarm({
 
   useFrame((s) => {
     const t = s.clock.elapsedTime;
-    const nf = nightFactor(t);
+    const nf = getNightFactor();
     if (matRef.current) {
       // Whole-swarm glow pulse layered onto night gating.
       const pulse = 0.7 + Math.sin(t * pulseSpeed) * 0.3;
