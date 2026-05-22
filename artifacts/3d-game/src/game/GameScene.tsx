@@ -941,7 +941,14 @@ export default function GameScene() {
   const playerMoving = useRef(false);
   const [nearBuilding, setNearBuilding] = useState<string | null>(null);
   const { visitedBuildings, openDialog, income, deductions, withheld, dialog, weather } = useGameStore();
+  const editMode = useGameStore((s) => s.editMode);
   const fogParams = fogForWeather(weather);
+  // In Build Mode the camera sits high above the city (y≈360). The normal
+  // fog far plane (110u) would swallow everything, so push fog way out and
+  // clear the sky tint so the user can actually see the whole city.
+  const sceneFog = editMode
+    ? { color: "#0b1220", near: 200, far: 900, background: "#0b1220" }
+    : fogParams;
 
   const cityLayout = useGameStore((s) => s.cityLayout);
   const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
@@ -1013,8 +1020,8 @@ export default function GameScene() {
           camera={{ position: [0, 10, 14], fov: 55 }}
           gl={{ antialias: true }}
         >
-          <color attach="background" args={[fogParams.background]} />
-          <fog attach="fog" args={[fogParams.color, fogParams.near, fogParams.far]} />
+          <color attach="background" args={[sceneFog.background]} />
+          <fog attach="fog" args={[sceneFog.color, sceneFog.near, sceneFog.far]} />
 
           {/* Day/night cycle owns ambient, directional, and hemisphere
               lights so they can be interpolated by sun phase. */}

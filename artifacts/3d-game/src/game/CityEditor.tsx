@@ -95,6 +95,61 @@ export default function CityEditor() {
     return () => el.removeEventListener("wheel", onWheel);
   }, [editMode, gl]);
 
+  // Mouse-drag panning — middle-click OR right-click drag pans the camera.
+  // Left-click is reserved for pickup / drop / context menu cancel.
+  useEffect(() => {
+    if (!editMode) return;
+    const el = gl.domElement;
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    const onDown = (e: PointerEvent) => {
+      // Buttons: 0=left, 1=middle, 2=right.
+      if (e.button !== 1 && e.button !== 2) return;
+      dragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      el.setPointerCapture?.(e.pointerId);
+      el.style.cursor = "grabbing";
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      // Convert screen-pixel delta to world units. At altitude alt with
+      // FOV CAM_FOV, one screen pixel ≈ (2*alt*tan(fov/2))/canvasH units.
+      const canvasH = el.clientHeight || 720;
+      const worldPerPx = (2 * altRef.current * Math.tan((CAM_FOV * Math.PI) / 360)) / canvasH;
+      const [px, pz] = panRef.current;
+      const nx = Math.max(-GROUND_HALF, Math.min(GROUND_HALF, px - dx * worldPerPx));
+      const nz = Math.max(-GROUND_HALF, Math.min(GROUND_HALF, pz - dy * worldPerPx));
+      panRef.current = [nx, nz];
+    };
+    const onUp = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      el.releasePointerCapture?.(e.pointerId);
+      el.style.cursor = "";
+    };
+    // Suppress the native context menu so right-click drag works cleanly.
+    const onCtx = (e: MouseEvent) => e.preventDefault();
+    el.addEventListener("pointerdown", onDown);
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
+    el.addEventListener("contextmenu", onCtx);
+    return () => {
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("contextmenu", onCtx);
+      el.style.cursor = "";
+    };
+  }, [editMode, gl]);
+
   // Per-frame: apply pan keys, push pan + zoom to the camera, pulse drop ring.
   useFrame(({ clock }, dt) => {
     if (editMode && camRef.current) {

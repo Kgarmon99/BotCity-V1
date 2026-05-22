@@ -67,8 +67,8 @@ function CityEditorBanner() {
     <div className="pointer-events-none fixed top-20 left-1/2 -translate-x-1/2 z-20">
       <div className="bg-cyan-500/95 text-slate-950 rounded-full px-5 py-2 text-sm font-semibold border border-cyan-200 shadow-[0_0_30px_-6px_rgba(34,211,238,0.9)] backdrop-blur">
         {selectedBuildingId
-          ? `🏗️ Carrying ${selectedBuildingId} — click to drop · WASD pan · Scroll zoom · Esc cancel`
-          : "🏗️ Build Mode — WASD pan · Scroll zoom · Click a building to pick it up · B or Esc to exit"}
+          ? `🏗️ Carrying ${selectedBuildingId} — click to drop · WASD/drag pan · Scroll zoom · Esc cancel`
+          : "🏗️ Build Mode — WASD or right-drag pan · Scroll zoom · Click a building to pick it up · B/Esc to exit"}
       </div>
     </div>
   );
