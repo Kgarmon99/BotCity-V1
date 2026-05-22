@@ -459,6 +459,315 @@ function BotFactory() {
   );
 }
 
+// ===== BotStock Exchange @ (-75, 0, 35) ===============================
+// NYSE-style trading pavilion. Marble Greek-revival façade with 8 grand
+// columns, triangular pediment with "BSE" emblem, charging bull statue
+// on the south plaza, opening-bell tower on the rooftop, animated
+// ticker-tape strip wrapping the building, and two large stock-chart
+// display screens flanking the entry.
+//
+// Footprint x[-82, -68] z[30, 40] (14×10). Kiosk sits at south face
+// (-75, 1.5, 41). Clear of BotZoo (-75,-10), BotPlane airport
+// (-58,67.5; concourse x[-65,-51] is 3u east), and BotMine (-60,-61.5).
+function StockExchange() {
+  const off = useLinkedOffset("botstockex");
+  const bellRef = useRef<THREE.Group>(null!);
+  const tickerRef = useRef<THREE.Group>(null!);
+  const beaconRef = useRef<THREE.MeshStandardMaterial>(null!);
+  const chartARef = useRef<THREE.Mesh>(null!);
+  const chartBRef = useRef<THREE.Mesh>(null!);
+  const bullEyeRef = useRef<THREE.MeshStandardMaterial>(null!);
+
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    if (bellRef.current) bellRef.current.rotation.z = Math.sin(t * 2.4) * 0.25;
+    if (tickerRef.current) tickerRef.current.position.x = ((t * 1.2) % 14) - 7;
+    if (beaconRef.current) beaconRef.current.emissiveIntensity = 1.0 + Math.sin(t * 3) * 0.7;
+    const scrollUv = (m: THREE.Mesh | null, speed: number) => {
+      if (!m) return;
+      const mat = m.material as THREE.MeshStandardMaterial;
+      if (mat && mat.emissiveIntensity !== undefined) {
+        mat.emissiveIntensity = 0.9 + Math.sin(t * speed) * 0.35;
+      }
+    };
+    scrollUv(chartARef.current, 2.1);
+    scrollUv(chartBRef.current, 2.8);
+    if (bullEyeRef.current) bullEyeRef.current.emissiveIntensity = 1.4 + Math.sin(t * 4) * 0.5;
+  });
+
+  return (
+    <group position={[-75 + off[0], 0, 35 + off[2]]}>
+      {/* ── Marble plaza ground (14×10) ──────────────────────────── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+        <planeGeometry args={[14, 10]} />
+        <meshStandardMaterial color="#e2e8f0" roughness={0.7} metalness={0.1} />
+      </mesh>
+      {/* Gold inlay seal in front of building */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 3]}>
+        <ringGeometry args={[1.4, 1.6, 40]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.7} toneMapped={false} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 3]}>
+        <circleGeometry args={[1.35, 32]} />
+        <meshStandardMaterial color="#1c1917" roughness={0.5} />
+      </mesh>
+      <Text position={[0, 0.03, 3]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.5} color="#fbbf24" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#0f172a">
+        BSE
+      </Text>
+
+      {/* ── Stepped marble base (3 steps facing south) ───────────── */}
+      {[0, 0.3, 0.6].map((h, i) => (
+        <mesh key={`step-${i}`} position={[0, h + 0.15, 1.5 - i * 0.5]} castShadow receiveShadow>
+          <boxGeometry args={[12 - i * 0.8, 0.3, 1]} />
+          <meshStandardMaterial color="#f1f5f9" roughness={0.7} />
+        </mesh>
+      ))}
+
+      {/* ── Main building body (12×8, marble white) ─────────────── */}
+      <mesh position={[0, 4, -2]} castShadow receiveShadow>
+        <boxGeometry args={[12, 7, 6]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.55} metalness={0.05} />
+      </mesh>
+      {/* Gold trim along base */}
+      <mesh position={[0, 0.65, -2]}>
+        <boxGeometry args={[12.2, 0.15, 6.2]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.7} metalness={0.8} />
+      </mesh>
+      {/* Gold cornice along top */}
+      <mesh position={[0, 7.55, -2]}>
+        <boxGeometry args={[12.4, 0.25, 6.4]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} metalness={0.8} />
+      </mesh>
+
+      {/* ── 8 grand classical columns across south face ─────────── */}
+      {[-5.25, -3.75, -2.25, -0.75, 0.75, 2.25, 3.75, 5.25].map((cx) => (
+        <group key={`col-${cx}`} position={[cx, 0, 1.05]}>
+          {/* Base */}
+          <mesh position={[0, 0.85, 0]} castShadow>
+            <cylinderGeometry args={[0.42, 0.46, 0.3, 12]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.3} metalness={0.7} />
+          </mesh>
+          {/* Shaft (fluted look — slightly tapered) */}
+          <mesh position={[0, 4.05, 0]} castShadow>
+            <cylinderGeometry args={[0.32, 0.36, 6.1, 16]} />
+            <meshStandardMaterial color="#f1f5f9" roughness={0.6} />
+          </mesh>
+          {/* Capital */}
+          <mesh position={[0, 7.2, 0]} castShadow>
+            <cylinderGeometry args={[0.48, 0.4, 0.3, 12]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.35} metalness={0.7} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── Triangular pediment ──────────────────────────────────── */}
+      <mesh position={[0, 8.4, 1]} rotation={[0, 0, 0]} castShadow>
+        <coneGeometry args={[6.5, 2, 4]} />
+        <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.35} metalness={0.7} />
+      </mesh>
+      {/* "BOTSTOCK EXCHANGE" sign across the architrave */}
+      <Text
+        position={[0, 7.95, 1.4]}
+        fontSize={0.55}
+        color="#0f172a"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.025}
+        outlineColor="#fbbf24"
+      >
+        BOTSTOCK EXCHANGE
+      </Text>
+
+      {/* ── Opening-bell tower on rooftop ────────────────────────── */}
+      <group position={[0, 7.7, -2]}>
+        {/* Tower base */}
+        <mesh position={[0, 1, 0]} castShadow>
+          <boxGeometry args={[1.8, 2, 1.8]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.5} metalness={0.6} />
+        </mesh>
+        {/* Four open-arched columns supporting the bell housing */}
+        {[[-0.7, -0.7], [0.7, -0.7], [-0.7, 0.7], [0.7, 0.7]].map(([px, pz], i) => (
+          <mesh key={`belcol-${i}`} position={[px!, 2.5, pz!]}>
+            <cylinderGeometry args={[0.08, 0.08, 1, 8]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} metalness={0.8} />
+          </mesh>
+        ))}
+        {/* Roof cap */}
+        <mesh position={[0, 3.3, 0]} castShadow>
+          <coneGeometry args={[1.1, 0.7, 4]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} metalness={0.8} />
+        </mesh>
+        {/* The bell (swings) */}
+        <group ref={bellRef} position={[0, 3, 0]}>
+          <mesh position={[0, -0.45, 0]} castShadow>
+            <cylinderGeometry args={[0.32, 0.42, 0.6, 12]} />
+            <meshStandardMaterial color="#b45309" emissive="#fbbf24" emissiveIntensity={0.4} metalness={0.9} roughness={0.3} />
+          </mesh>
+          {/* Clapper */}
+          <mesh position={[0, -0.75, 0]}>
+            <sphereGeometry args={[0.07, 8, 8]} />
+            <meshStandardMaterial color="#1c1917" metalness={0.9} />
+          </mesh>
+        </group>
+        {/* Beacon on the spire */}
+        <mesh position={[0, 3.85, 0]}>
+          <sphereGeometry args={[0.18, 12, 12]} />
+          <meshStandardMaterial ref={beaconRef} color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1.2} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* ── Two stock-chart display screens flanking the entry ──── */}
+      {[-4.2, 4.2].map((sx, i) => (
+        <group key={`screen-${i}`} position={[sx, 3.5, 1.1]}>
+          {/* Screen frame */}
+          <mesh>
+            <boxGeometry args={[1.6, 1.1, 0.15]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.7} />
+          </mesh>
+          {/* Screen face (animated glow) */}
+          <mesh ref={i === 0 ? chartARef : chartBRef} position={[0, 0, 0.09]}>
+            <planeGeometry args={[1.45, 0.95]} />
+            <meshStandardMaterial color="#022c22" emissive="#22c55e" emissiveIntensity={1} toneMapped={false} />
+          </mesh>
+          {/* Sparkline — green ascending zig-zag */}
+          {[-0.6, -0.3, 0, 0.3, 0.6].map((zx, j) => {
+            const ys = [-0.25, -0.1, 0.05, -0.05, 0.25];
+            return (
+              <mesh key={`tick-${j}`} position={[zx, ys[j], 0.11]}>
+                <boxGeometry args={[0.04, 0.04, 0.02]} />
+                <meshStandardMaterial color="#86efac" emissive="#86efac" emissiveIntensity={1.6} toneMapped={false} />
+              </mesh>
+            );
+          })}
+          {/* Up arrow */}
+          <Text position={[0.55, 0.35, 0.12]} fontSize={0.18} color="#22c55e" anchorX="center" anchorY="middle">
+            ▲
+          </Text>
+        </group>
+      ))}
+
+      {/* ── Ticker-tape strip wrapping around south face ────────── */}
+      <group position={[0, 0.95, 1.6]}>
+        <mesh>
+          <boxGeometry args={[12, 0.5, 0.1]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.6} />
+        </mesh>
+        {/* Scrolling text inside the strip (animated x position) */}
+        <group ref={tickerRef}>
+          <Text position={[0, 0, 0.06]} fontSize={0.32} color="#22c55e" anchorX="center" anchorY="middle" outlineWidth={0.01} outlineColor="#022c22">
+            BOT +2.4%  CITY +1.1%  COIN +3.7%  IRS -0.4%  TAX +5.0%  BULL +∞
+          </Text>
+        </group>
+      </group>
+
+      {/* ── CHARGING BULL STATUE — south plaza centerpiece ──────── */}
+      <group position={[0, 0, 4.5]} rotation={[0, Math.PI / 2, 0]}>
+        {/* Granite pedestal */}
+        <mesh position={[0, 0.25, 0]} castShadow>
+          <boxGeometry args={[2.4, 0.5, 1.4]} />
+          <meshStandardMaterial color="#1c1917" roughness={0.5} metalness={0.4} />
+        </mesh>
+        <mesh position={[0, 0.55, 0]}>
+          <boxGeometry args={[2.5, 0.06, 1.5]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.5} metalness={0.9} />
+        </mesh>
+        {/* Bull body — bronze, charging pose */}
+        <group position={[0, 1.05, 0]} rotation={[0, 0, -0.08]}>
+          {/* Torso */}
+          <mesh castShadow>
+            <boxGeometry args={[1.8, 0.85, 0.8]} />
+            <meshStandardMaterial color="#92400e" metalness={0.85} roughness={0.35} emissive="#7c2d12" emissiveIntensity={0.2} />
+          </mesh>
+          {/* Hump (shoulders) */}
+          <mesh position={[-0.55, 0.5, 0]} castShadow>
+            <sphereGeometry args={[0.38, 12, 8]} />
+            <meshStandardMaterial color="#92400e" metalness={0.85} roughness={0.35} />
+          </mesh>
+          {/* Head — leaning forward */}
+          <group position={[-1.05, 0.05, 0]} rotation={[0, 0, -0.35]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.7, 0.55, 0.55]} />
+              <meshStandardMaterial color="#92400e" metalness={0.85} roughness={0.35} />
+            </mesh>
+            {/* Snout */}
+            <mesh position={[-0.35, -0.1, 0]} castShadow>
+              <boxGeometry args={[0.3, 0.35, 0.4]} />
+              <meshStandardMaterial color="#7c2d12" metalness={0.85} roughness={0.4} />
+            </mesh>
+            {/* Two horns curving forward */}
+            {[-0.18, 0.18].map((hz, i) => (
+              <group key={`horn-${i}`} position={[-0.1, 0.3, hz]} rotation={[0, 0, 0.6]}>
+                <mesh castShadow>
+                  <coneGeometry args={[0.06, 0.45, 6]} />
+                  <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={0.3} metalness={0.95} roughness={0.2} />
+                </mesh>
+              </group>
+            ))}
+            {/* Eyes — glowing */}
+            {[-0.15, 0.15].map((ez, i) => (
+              <mesh key={`eye-${i}`} position={[-0.2, 0.05, ez]}>
+                <sphereGeometry args={[0.05, 8, 8]} />
+                <meshStandardMaterial ref={i === 0 ? bullEyeRef : undefined} color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1.4} toneMapped={false} />
+              </mesh>
+            ))}
+            {/* Nose ring */}
+            <mesh position={[-0.5, -0.18, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.06, 0.018, 6, 12]} />
+              <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.5} metalness={0.95} />
+            </mesh>
+          </group>
+          {/* 4 legs */}
+          {[[-0.65, 0.32], [-0.65, -0.32], [0.65, 0.32], [0.65, -0.32]].map(([lx, lz], i) => (
+            <mesh key={`leg-${i}`} position={[lx!, -0.65, lz!]} castShadow>
+              <boxGeometry args={[0.2, 0.85, 0.2]} />
+              <meshStandardMaterial color="#92400e" metalness={0.85} roughness={0.35} />
+            </mesh>
+          ))}
+          {/* Tail (raised mid-charge) */}
+          <mesh position={[0.95, 0.25, 0]} rotation={[0, 0, 0.7]} castShadow>
+            <cylinderGeometry args={[0.05, 0.08, 0.6, 6]} />
+            <meshStandardMaterial color="#92400e" metalness={0.85} roughness={0.4} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* ── Twin flagpoles flanking the entry steps ─────────────── */}
+      {[-5.5, 5.5].map((fx, i) => (
+        <group key={`flag-${i}`} position={[fx, 0, 2.5]}>
+          <mesh position={[0, 2.5, 0]} castShadow>
+            <cylinderGeometry args={[0.06, 0.07, 5, 8]} />
+            <meshStandardMaterial color="#94a3b8" metalness={0.85} />
+          </mesh>
+          {/* Flag */}
+          <mesh position={[0.55, 4.4, 0]} castShadow>
+            <planeGeometry args={[1.1, 0.7]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.4} side={THREE.DoubleSide} />
+          </mesh>
+          {/* Gold finial */}
+          <mesh position={[0, 5.05, 0]}>
+            <sphereGeometry args={[0.1, 10, 10]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} metalness={0.95} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── 4 bollards at plaza corners ─────────────────────────── */}
+      {[[-6.5, 4.5], [6.5, 4.5], [-6.5, -4.5], [6.5, -4.5]].map(([bx, bz], i) => (
+        <group key={`bol-${i}`} position={[bx!, 0, bz!]}>
+          <mesh position={[0, 0.4, 0]} castShadow>
+            <cylinderGeometry args={[0.18, 0.22, 0.8, 10]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.6} />
+          </mesh>
+          <mesh position={[0, 0.82, 0]}>
+            <sphereGeometry args={[0.18, 10, 10]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} metalness={0.9} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
 export default function NewDistricts() {
   return (
     <group>
@@ -466,6 +775,7 @@ export default function NewDistricts() {
       <BotInsurance />
       <BotEnergy />
       <BotFactory />
+      <StockExchange />
     </group>
   );
 }

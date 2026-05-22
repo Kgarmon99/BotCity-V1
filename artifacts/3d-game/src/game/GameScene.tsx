@@ -826,6 +826,22 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
     height: 3,
     emoji: "🏭",
   },
+  // ─── BotStock Exchange kiosk @ (-75, 0, 41) ─────────────────────────
+  // South-gate kiosk for the NYSE-style trading pavilion. Pavilion
+  // anchor sits at (-75, 0, 35) with footprint x[-82,-68] z[30,40];
+  // kiosk placed 1u south of the pavilion's south face. Scenery in
+  // NewDistricts.StockExchange().
+  {
+    id: "botstockex",
+    label: "BotStock Exchange",
+    position: [-75, 1.5, 41],
+    color: "#fbbf24",
+    roofColor: "#0f172a",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "🐂",
+  },
   // ════════════════════════════════════════════════════════════════════
   // Task #2 — outer-ring financial-ed kiosks. 30 entries, 5 per quarter.
   // Positions match reserved lots in cityConstants.QUARTERS so each kiosk

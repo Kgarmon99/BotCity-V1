@@ -105,6 +105,7 @@ const BUILDING_SECTIONS: BuildingSection[] = [
       { id: "firstbank", emoji: "🏦", label: "First Bank" },
       { id: "botbroker", emoji: "📈", label: "BotBroker" },
       { id: "botcrypto", emoji: "₿", label: "BotCrypto" },
+      { id: "botstockex", emoji: "🐂", label: "BotStock Exchange" },
     ],
   },
   {
