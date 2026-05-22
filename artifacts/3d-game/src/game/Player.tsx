@@ -27,10 +27,14 @@ interface PlayerProps {
 const WALK_SPEED = 9;
 const RIDE_SPEED = 22; // BotMobile boost (~2.4x walking)
 const VETTE_SPEED = 42; // BotVette boost (~4.7x walking) — held with V
-const JETPACK_THRUST = 28; // upward accel when Shift held (m/s²)
+const JETPACK_THRUST = 32; // upward accel when Shift held (m/s²)
+const JETPACK_TAKEOFF_IMPULSE = 9; // instant vertical kick on jet press near ground
+const JETPACK_AIR_BOOST = 1.4; // horizontal-speed multiplier while jetting airborne
+const SOFT_CEILING = 45; // start tapering thrust here for smooth approach
 const GRAVITY = 22; // downward accel (m/s²)
 const MAX_ALTITUDE = 55; // ceiling so we don't fly off the skybox
 const TERMINAL_FALL = -30; // clamp downward velocity
+const LANDING_THUD_VEL = -12; // |vy| above this on landing → louder thud
 
 export default function Player({ onPositionChange, onInteract, isMoving }: PlayerProps) {
   const groupRef = useRef<THREE.Group>(null!);
@@ -47,6 +51,13 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   // transitions, not 60x/sec from useFrame. Belt-and-suspenders alongside
   // sound.ts's own idempotency check.
   const lastJetSound = useRef(false);
+  // Per-frame ref for JetpackFlame to read (avoids stale-prop bug where
+  // Player doesn't re-render every time the jet key transitions while
+  // already airborne).
+  const thrustingRef = useRef(false);
+  // Wrapper around MoneyBotModel for banking/pitch tilt while flying or
+  // running. Separate from groupRef so we don't fight the yaw lerp.
+  const tiltRef = useRef<THREE.Group>(null!);
   // Footstep cadence: accumulate horizontal distance moved on the ground and
   // fire a step thud every STEP_DISTANCE units. Alternates left/right pitch.
   const stepDistAccum = useRef(0);
@@ -227,7 +238,12 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
     // Cap magnitude at 1 so analog joystick + keyboard combo never moves
     // faster than the speed limit.
     if (dir.length() > 1) dir.normalize();
-    const speed = vetteRef.current ? VETTE_SPEED : ridingRef.current ? RIDE_SPEED : WALK_SPEED;
+    // While airborne with the jetpack active, give horizontal movement a
+    // boost so flying actually feels like flying instead of slow drifting.
+    const yNow = groupRef.current ? groupRef.current.position.y : 0;
+    const jetHeldNow = (keys.current.jet || touchInput.jetHeld) && !ridingRef.current;
+    const airBoost = yNow > 0.5 && jetHeldNow ? JETPACK_AIR_BOOST : 1;
+    const speed = (vetteRef.current ? VETTE_SPEED : ridingRef.current ? RIDE_SPEED : WALK_SPEED) * airBoost;
     dir.multiplyScalar(speed * delta);
     velocity.current.lerp(dir, 0.3);
 
@@ -238,17 +254,37 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       // ── Jetpack: Shift (or on-screen button) adds upward thrust; gravity
       // pulls back down. Disabled while riding the BotMobile (cars don't fly).
       const jetActive = (keys.current.jet || touchInput.jetHeld) && !ridingRef.current;
-      // Drive the jetpack whoosh sound only on transitions. The sound
-      // module is also idempotent, but skipping the call on steady-state
-      // frames avoids any chance of stacking scheduled WebAudio events.
+      thrustingRef.current = jetActive;
+      // Drive the jetpack whoosh sound + apply a takeoff impulse only on
+      // transitions. The takeoff impulse gives an instant felt kick on
+      // jet press from (near) the ground instead of waiting for thrust
+      // to overcome gravity over several frames.
       if (jetActive !== lastJetSound.current) {
+        if (jetActive && groupRef.current.position.y < 0.6) {
+          verticalVel.current = Math.max(verticalVel.current, JETPACK_TAKEOFF_IMPULSE);
+        }
         lastJetSound.current = jetActive;
         sound.setJetpack(jetActive);
       }
-      const accel = (jetActive ? JETPACK_THRUST : 0) - GRAVITY;
+      // Soft ceiling: linearly taper UPWARD thrust as we approach the
+      // skybox cap so the player eases into hover instead of slamming
+      // into an invisible wall.
+      const yPos = groupRef.current.position.y;
+      const ceilingTaper =
+        yPos > SOFT_CEILING
+          ? Math.max(0, 1 - (yPos - SOFT_CEILING) / (MAX_ALTITUDE - SOFT_CEILING))
+          : 1;
+      const thrust = jetActive ? JETPACK_THRUST * ceilingTaper : 0;
+      const accel = thrust - GRAVITY;
       verticalVel.current = Math.max(TERMINAL_FALL, verticalVel.current + accel * delta);
       groupRef.current.position.y += verticalVel.current * delta;
       if (groupRef.current.position.y <= 0) {
+        // Landing: trigger a thud if we hit the ground with significant
+        // downward speed (felt like a real landing, not a feather touch).
+        if (verticalVel.current < LANDING_THUD_VEL) {
+          sound.step(false);
+          sound.step(true);
+        }
         groupRef.current.position.y = 0;
         if (verticalVel.current < 0) verticalVel.current = 0;
       }
@@ -308,6 +344,22 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
         );
       }
 
+      // ── Banking / pitch tilt on the model wrapper. Pitch nose-up while
+      // climbing, nose-down while diving; small forward lean when sprinting
+      // on the ground. Lives on tiltRef so it doesn't fight the yaw lerp.
+      if (tiltRef.current) {
+        const targetPitch = isAirborne
+          ? THREE.MathUtils.clamp(-verticalVel.current * 0.022, -0.55, 0.4)
+          : isMoving.current
+            ? 0.18
+            : 0;
+        tiltRef.current.rotation.x = THREE.MathUtils.lerp(
+          tiltRef.current.rotation.x,
+          targetPitch,
+          0.16,
+        );
+      }
+
       // Mirror the position into the shared tracker so out-of-Canvas UI
       // (MiniMap) can read it without subscribing to React state.
       playerTracker.x = groupRef.current.position.x;
@@ -322,7 +374,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
     <group ref={groupRef} position={[0, 0, 0]}>
       <PlayerIndicator />
       {jetting && !riding && (
-        <JetpackFlame thrusting={keys.current.jet || touchInput.jetHeld} />
+        <JetpackFlame thrustingRef={thrustingRef} playerRef={groupRef} />
       )}
       {riding ? (
         // BotMobile/BotVette headlights are along local +X. Rotating by -π/2
@@ -336,50 +388,195 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
           )}
         </group>
       ) : (
-        <MoneyBotModel scale={0.4} animation={anim} />
+        <group ref={tiltRef}>
+          <MoneyBotModel scale={0.4} animation={anim} />
+        </group>
       )}
     </group>
   );
 }
 
-// Twin jetpack flames under the player. `thrusting` flickers the flame
-// brighter & longer while Shift is held; otherwise a small idle plume shows
-// during the fall back to ground.
-function JetpackFlame({ thrusting }: { thrusting: boolean }) {
+// Twin jetpack flames under the player. Reads thrust + altitude through
+// refs every frame so visuals never go stale even when the parent doesn't
+// re-render (e.g. when toggling Shift mid-air).
+//
+// Layers (back to front):
+//   • Black jet-pod housings with hot orange glow rims.
+//   • Wide orange/yellow flame cones (flicker scale).
+//   • Blue-white plasma core cones (inner, narrower, brighter).
+//   • Trailing grey smoke puffs that drift downward + fade.
+//   • Ground shockwave ring that pulses when hovering close to the ground.
+//   • Dynamic point light that brightens with thrust.
+function JetpackFlame({
+  thrustingRef,
+  playerRef,
+}: {
+  thrustingRef: React.MutableRefObject<boolean>;
+  playerRef: React.MutableRefObject<THREE.Group | null>;
+}) {
   const leftRef = useRef<THREE.Mesh>(null!);
   const rightRef = useRef<THREE.Mesh>(null!);
+  const leftCoreRef = useRef<THREE.Mesh>(null!);
+  const rightCoreRef = useRef<THREE.Mesh>(null!);
   const lightRef = useRef<THREE.PointLight>(null!);
+  const shockRef = useRef<THREE.Mesh>(null!);
+  const shockMatRef = useRef<THREE.MeshBasicMaterial>(null!);
+  const smoke0 = useRef<THREE.Mesh>(null!);
+  const smoke1 = useRef<THREE.Mesh>(null!);
+  const smoke2 = useRef<THREE.Mesh>(null!);
+  const smoke3 = useRef<THREE.Mesh>(null!);
+  const smokeRefs = [smoke0, smoke1, smoke2, smoke3];
+
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    const base = thrusting ? 1 : 0.35;
-    const flicker = base + Math.sin(t * 40) * 0.18 + Math.cos(t * 31) * 0.12;
+    const thrusting = thrustingRef.current;
+    const altitude = playerRef.current?.position.y ?? 0;
+
+    // Outer cones flicker more violently under thrust; idle plume is small.
+    const base = thrusting ? 1 : 0.3;
+    const flicker = base + Math.sin(t * 40) * 0.2 + Math.cos(t * 31) * 0.13;
     const s = Math.max(0.15, flicker);
-    if (leftRef.current) leftRef.current.scale.set(0.7, s * 1.6, 0.7);
-    if (rightRef.current) rightRef.current.scale.set(0.7, s * 1.6, 0.7);
-    if (lightRef.current) lightRef.current.intensity = thrusting ? 4 + Math.sin(t * 30) * 1 : 1;
+    const wob1 = 0.78 + Math.sin(t * 22) * 0.08;
+    const wob2 = 0.78 + Math.cos(t * 24) * 0.08;
+    if (leftRef.current) leftRef.current.scale.set(wob1, s * 1.85, wob1);
+    if (rightRef.current) rightRef.current.scale.set(wob2, s * 1.85, wob2);
+    // Inner plasma core — slightly tighter timing for a hotter look.
+    const coreS = Math.max(0.1, base * 1.05 + Math.sin(t * 55) * 0.18);
+    if (leftCoreRef.current) leftCoreRef.current.scale.set(0.45, coreS * 1.5, 0.45);
+    if (rightCoreRef.current) rightCoreRef.current.scale.set(0.45, coreS * 1.5, 0.45);
+
+    if (lightRef.current) {
+      lightRef.current.intensity = thrusting ? 5.5 + Math.sin(t * 30) * 1.3 : 1.2;
+      lightRef.current.color.setHex(thrusting ? 0xfb923c : 0xf59e0b);
+    }
+
+    // Ground shockwave ring: fades in as we hover close to the ground
+    // while thrusting (heat exhaust kicking up dust). At y > 7 the
+    // effect is fully off so it doesn't show in mid-air.
+    const groundProximity = Math.max(0, 1 - altitude / 6);
+    const groundEffect = thrusting ? groundProximity : 0;
+    if (shockRef.current) {
+      const ringScale = 0.7 + (1 - groundProximity) * 0.6 + Math.sin(t * 9) * 0.07;
+      shockRef.current.scale.set(ringScale, ringScale, ringScale);
+      // Plant the ring at world Y ~= 0.08 regardless of player altitude
+      // (player group sits at altitude → subtract it back out, plus the
+      // [0, 0.15, 0] group offset of this JetpackFlame parent → net y in
+      // local space is -altitude - 0.07 to land at world 0.08).
+      shockRef.current.position.y = -altitude - 0.07;
+    }
+    if (shockMatRef.current) {
+      shockMatRef.current.opacity = groundEffect * (0.55 + Math.sin(t * 12) * 0.18);
+    }
+
+    // Trailing smoke: 4 puffs cycling phases, drifting down and fading.
+    smokeRefs.forEach((ref, i) => {
+      if (!ref.current) return;
+      const phase = ((t * 1.8 + i * 0.25) % 1);
+      const xSide = i % 2 === 0 ? -0.3 : 0.3;
+      ref.current.position.x = xSide + Math.sin(t * 3 + i) * 0.08;
+      ref.current.position.y = -0.7 - phase * 1.6;
+      ref.current.position.z = -0.2 + Math.cos(t * 2.5 + i) * 0.06;
+      const ss = thrusting ? 0.22 + phase * 0.55 : 0.08;
+      ref.current.scale.set(ss, ss, ss);
+      const mat = ref.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = thrusting ? (1 - phase) * 0.45 : 0;
+    });
   });
+
   return (
     <group position={[0, 0.15, 0]}>
+      {/* Jet-pod housings (black with hot orange glow) */}
+      {[-0.3, 0.3].map((xOff, i) => (
+        <group key={`pod-${i}`} position={[xOff, 0.1, -0.25]}>
+          <mesh>
+            <cylinderGeometry args={[0.16, 0.2, 0.45, 12]} />
+            <meshStandardMaterial
+              color="#0f172a"
+              metalness={0.85}
+              roughness={0.3}
+              emissive="#f97316"
+              emissiveIntensity={0.6}
+            />
+          </mesh>
+          {/* Glow ring at the nozzle */}
+          <mesh position={[0, -0.23, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.18, 0.04, 8, 16]} />
+            <meshBasicMaterial color="#fbbf24" toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Outer orange/yellow flames */}
       {[-0.3, 0.3].map((xOff, i) => (
         <mesh
           key={`flame-${i}`}
           ref={xOff < 0 ? leftRef : rightRef}
-          position={[xOff, -0.4, -0.2]}
+          position={[xOff, -0.5, -0.25]}
           rotation={[Math.PI, 0, 0]}
         >
-          <coneGeometry args={[0.18, 1.1, 12, 1, true]} />
+          <coneGeometry args={[0.24, 1.4, 14, 1, true]} />
           <meshStandardMaterial
             color="#fde047"
             emissive="#f97316"
-            emissiveIntensity={3.5}
+            emissiveIntensity={4.5}
             transparent
-            opacity={0.9}
+            opacity={0.85}
             side={THREE.DoubleSide}
+            toneMapped={false}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+
+      {/* Inner blue/white plasma core */}
+      {[-0.3, 0.3].map((xOff, i) => (
+        <mesh
+          key={`core-${i}`}
+          ref={xOff < 0 ? leftCoreRef : rightCoreRef}
+          position={[xOff, -0.45, -0.25]}
+          rotation={[Math.PI, 0, 0]}
+        >
+          <coneGeometry args={[0.11, 0.95, 10, 1, true]} />
+          <meshBasicMaterial
+            color="#e0f2fe"
+            transparent
+            opacity={0.95}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+
+      {/* Trailing smoke puffs */}
+      {smokeRefs.map((ref, i) => (
+        <mesh key={`smoke-${i}`} ref={ref} position={[0, -0.8, -0.2]}>
+          <sphereGeometry args={[0.32, 8, 8]} />
+          <meshBasicMaterial
+            color="#cbd5e1"
+            transparent
+            opacity={0}
+            depthWrite={false}
             toneMapped={false}
           />
         </mesh>
       ))}
-      <pointLight ref={lightRef} position={[0, -0.2, 0]} color="#f97316" distance={6} intensity={1} />
+
+      {/* Ground shockwave ring (only visible when hovering low) */}
+      <mesh ref={shockRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.07, 0]}>
+        <ringGeometry args={[0.4, 1.3, 32]} />
+        <meshBasicMaterial
+          ref={shockMatRef}
+          color="#fbbf24"
+          transparent
+          opacity={0}
+          depthWrite={false}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      <pointLight ref={lightRef} position={[0, -0.3, 0]} color="#f97316" distance={9} intensity={1.2} />
     </group>
   );
 }
