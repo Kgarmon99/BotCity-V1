@@ -26,6 +26,7 @@ import NewDistricts from "./NewDistricts";
 import ExpansionQuarters from "./ExpansionQuarters";
 import KioskDecor from "./KioskDecor";
 import CityHallPlaza from "./CityHallPlaza";
+import CityMedia from "./CityMedia";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
 import Streetscape from "./Streetscape";
@@ -39,6 +40,59 @@ import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
 export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
+  // ─── Media district (east corridor at x=90, scenery in CityMedia.tsx) ───
+  // Stitched around BotCourt's plaza at (85,*,-42), footprint x[73,97]
+  // z[-52,-32]. News sits NORTH of BotCourt (well above z=-32), Comic and
+  // Radio sit SOUTH of it (well below z=-52, and clear of BotInsurance
+  // plaza x[65,85] z[-98,-82] by ≥7u since they live at x=90).
+  // Kiosks sit ~3u south of each building's plaza front for player access.
+  {
+    id: "moneybotnews",
+    label: "MoneyBot News",
+    position: [90, 1.5, -7],
+    color: "#ef4444",
+    roofColor: "#0f172a",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "📰",
+  },
+  {
+    id: "moneybotcomic",
+    label: "MoneyBot ComicShop",
+    position: [90, 1.5, -62],
+    color: "#facc15",
+    roofColor: "#dc2626",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "💥",
+  },
+  {
+    id: "moneybotradio",
+    label: "MoneyBot Radio",
+    position: [90, 1.5, -82],
+    color: "#ca8a04",
+    roofColor: "#7c2d12",
+    width: 1.8,
+    depth: 1.8,
+    height: 3,
+    emoji: "📻",
+  },
+  // ─── Anti-Broke Military Base (SW outer band, scenery in CityMedia.tsx) ───
+  // Kiosk sits at the south gate of the compound (compound center -105,-45;
+  // south wall at z=-45+12.5=-32.5; kiosk placed 1u south of the gate).
+  {
+    id: "militarybase",
+    label: "Anti-Broke Military Base",
+    position: [-105, 1.5, -31.5],
+    color: "#4d7c0f",
+    roofColor: "#1c1917",
+    width: 2,
+    depth: 2,
+    height: 3,
+    emoji: "🪖",
+  },
   {
     id: "workcorp",
     label: "WorkCorp",
@@ -964,6 +1018,7 @@ export default function GameScene() {
           <ObservationTower />
           <AmbientLife />
           <CityHallPlaza />
+          <CityMedia />
           <Blimp />
           <Statues />
           <Landmarks />

@@ -102,6 +102,22 @@ const BUILDING_SECTIONS: BuildingSection[] = [
     ],
   },
   {
+    title: "Media",
+    emoji: "📡",
+    items: [
+      { id: "moneybotnews", emoji: "📰", label: "MoneyBot News" },
+      { id: "moneybotradio", emoji: "📻", label: "MoneyBot Radio" },
+      { id: "moneybotcomic", emoji: "💥", label: "MoneyBot ComicShop" },
+    ],
+  },
+  {
+    title: "Defense",
+    emoji: "🪖",
+    items: [
+      { id: "militarybase", emoji: "🪖", label: "Anti-Broke Military Base" },
+    ],
+  },
+  {
     title: "Sports",
     emoji: "⚽",
     items: [
