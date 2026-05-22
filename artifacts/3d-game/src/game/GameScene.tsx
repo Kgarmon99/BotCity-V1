@@ -1034,7 +1034,15 @@ export default function GameScene() {
         <Canvas
           shadows
           camera={{ position: [0, 10, 14], fov: 55 }}
-          gl={{ antialias: true }}
+          gl={{ antialias: true, powerPreference: "high-performance" }}
+          dpr={[1, 1.75]}
+          performance={{ min: 0.5 }}
+          onCreated={({ gl }) => {
+            // Cap pixel ratio defensively on retina/4K displays where
+            // ~3000 draw calls × 4× pixel cost can crash the WebGL
+            // context.
+            gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+          }}
         >
           <color attach="background" args={[sceneFog.background]} />
           <fog attach="fog" args={[sceneFog.color, sceneFog.near, sceneFog.far]} />
