@@ -10,11 +10,26 @@ export interface PurchaseOption {
   category: string;
 }
 
+export interface TravelDestination {
+  /** Building id of the destination station (used to disable the current one). */
+  id: string;
+  /** Display label, e.g. "BotPlane International". */
+  label: string;
+  /** Single-glyph emoji shown on the button. */
+  emoji: string;
+  /** World-space arrival coordinates (player will be placed here at y=0). */
+  pos: [number, number, number];
+  /** One-line flavor / description. */
+  blurb: string;
+}
+
 export interface DialogContent {
   buildingId: string;
   title: string;
   body: string;
   options?: PurchaseOption[];
+  /** Optional fast-travel destinations rendered as a row of buttons. */
+  travel?: TravelDestination[];
   action?:
     | "earn"
     | "file"

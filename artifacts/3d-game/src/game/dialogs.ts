@@ -1,4 +1,34 @@
-import { DialogContent } from "./types";
+import { DialogContent, TravelDestination } from "./types";
+
+// Shared fast-travel network. Arrival positions are 6u clear of each station
+// kiosk so the player materializes on open ground, not inside the building.
+// Kiosk world positions (from BUILDING_DEFS in GameScene.tsx):
+//   bottrain  (21, 2.5, 18)    → arrive south at (21, 0, 24)
+//   botplane  (-85, 3, 107)    → arrive south at (-85, 0, 101)
+//   botrocket (75, 3, -75)     → arrive north at (75, 0, -68)
+const TRANSIT_HUBS: TravelDestination[] = [
+  {
+    id: "bottrain",
+    label: "BotTrain Station",
+    emoji: "🚆",
+    pos: [21, 0, 24],
+    blurb: "Downtown commuter rail (city center).",
+  },
+  {
+    id: "botplane",
+    label: "BotPlane International",
+    emoji: "✈️",
+    pos: [-85, 0, 101],
+    blurb: "Southwest airport (long-haul terminal).",
+  },
+  {
+    id: "botrocket",
+    label: "BotRocket Spaceport",
+    emoji: "🚀",
+    pos: [75, 0, -68],
+    blurb: "Northeast launch pad (orbital service).",
+  },
+];
 
 export const DIALOGS: Record<string, (state: { income: number; deductions: number; withheld: number; visitedBuildings: string[] }) => DialogContent> = {
   workcorp: ({ visitedBuildings }) => ({
@@ -88,8 +118,9 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
   bottrain: () => ({
     buildingId: "bottrain",
     title: "🚆 BotTrain Station — Commute vs Business Travel",
-    body: `All aboard! Today's lesson: not all train rides are tax-equal.\n\n📖 YOUR DAILY COMMUTE — NOT DEDUCTIBLE:\nThe ride between home and your regular workplace is "commuting" — even if it's expensive, even if it's far. The IRS considers it a personal expense.\n\n📖 BUSINESS TRAVEL — DEDUCTIBLE:\nTraveling to a client site, a conference, or a temporary work location (away from your tax home) IS deductible. Train tickets, taxis, mileage — keep the receipts.\n\n📖 PRE-TAX COMMUTER BENEFITS:\nMany employers offer a commuter benefits plan: you can use pre-tax dollars (up to $315/month in 2024) for transit passes and parking. It's not a deduction — it just lowers your taxable wages before they even hit your paycheck.\n\n💡 Lesson: Keep a log of business trips. Save the receipts. Your daily commute doesn't count — but that conference trip definitely does.`,
+    body: `All aboard! Today's lesson: not all train rides are tax-equal.\n\n📖 YOUR DAILY COMMUTE — NOT DEDUCTIBLE:\nThe ride between home and your regular workplace is "commuting" — even if it's expensive, even if it's far. The IRS considers it a personal expense.\n\n📖 BUSINESS TRAVEL — DEDUCTIBLE:\nTraveling to a client site, a conference, or a temporary work location (away from your tax home) IS deductible. Train tickets, taxis, mileage — keep the receipts.\n\n📖 PRE-TAX COMMUTER BENEFITS:\nMany employers offer a commuter benefits plan: you can use pre-tax dollars (up to $315/month in 2024) for transit passes and parking. It's not a deduction — it just lowers your taxable wages before they even hit your paycheck.\n\n💡 Lesson: Keep a log of business trips. Save the receipts. Your daily commute doesn't count — but that conference trip definitely does.\n\n🎫 Connecting service: pick a destination below to depart on the next train.`,
     action: "train",
+    travel: TRANSIT_HUBS,
   }),
 
   botstadium: () => ({
@@ -203,8 +234,9 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
   botplane: () => ({
     buildingId: "botplane",
     title: "✈️ BotPlane Airport — Business Travel Deductions",
-    body: `Welcome to BotPlane International! Time to learn what you can write off when you fly.\n\n📖 DEDUCTIBLE BUSINESS TRAVEL:\nFlights, hotels, baggage fees, rental cars, and ground transport for work trips are deductible (for self-employed and certain business travelers). The trip must have a clear business purpose and be "away from your tax home."\n\n📖 MEALS — THE 50% RULE:\nMeals while traveling for business are only 50% deductible. So a $40 dinner on a work trip → $20 write-off.\n\n📖 PER DIEM:\nInstead of tracking every receipt, the IRS publishes daily allowance rates by city. If your employer reimburses at or below per diem, the reimbursement is tax-free to you.\n\n📖 MIXING BUSINESS + PLEASURE:\nTacked a vacation onto a work trip? Only the business portion is deductible. You can't write off the extra days you spent at the beach.\n\n💡 Lesson: A business trip is a tax-deductible expense. A vacation is not. The IRS cares about the primary PURPOSE of the trip.`,
+    body: `Welcome to BotPlane International! Time to learn what you can write off when you fly.\n\n📖 DEDUCTIBLE BUSINESS TRAVEL:\nFlights, hotels, baggage fees, rental cars, and ground transport for work trips are deductible (for self-employed and certain business travelers). The trip must have a clear business purpose and be "away from your tax home."\n\n📖 MEALS — THE 50% RULE:\nMeals while traveling for business are only 50% deductible. So a $40 dinner on a work trip → $20 write-off.\n\n📖 PER DIEM:\nInstead of tracking every receipt, the IRS publishes daily allowance rates by city. If your employer reimburses at or below per diem, the reimbursement is tax-free to you.\n\n📖 MIXING BUSINESS + PLEASURE:\nTacked a vacation onto a work trip? Only the business portion is deductible. You can't write off the extra days you spent at the beach.\n\n💡 Lesson: A business trip is a tax-deductible expense. A vacation is not. The IRS cares about the primary PURPOSE of the trip.\n\n🛫 Now boarding: pick a destination below for an express flight.`,
     action: "plane",
+    travel: TRANSIT_HUBS,
   }),
 
   bothospital: () => ({
@@ -352,6 +384,7 @@ export const DIALOGS: Record<string, (state: { income: number; deductions: numbe
     title: "🚀 BotRocket Station — Watch a Launch",
     body: `Welcome to BotRocket Station, BotCity's commercial spaceport on the far NE edge of the map. A rocket lifts off from the pad every 28 seconds — and yes, even rocketry has tax consequences. Here's the rundown while you wait for the countdown.\n\n📖 A BRIEF HISTORY OF ROCKETRY:\n• Chinese fire arrows (~1232 CE) — first recorded military rockets, packed with gunpowder.\n• Konstantin Tsiolkovsky (1903) — derived the rocket equation; envisioned multi-stage rockets and space elevators.\n• Robert Goddard (1926) — launches the first liquid-fueled rocket from a Massachusetts field.\n• Wernher von Braun & the V-2 (1944) — first object to cross the Kármán line (100 km).\n• Sputnik (Oct 4, 1957) — Soviets put the first artificial satellite in orbit. Space Race begins.\n• Yuri Gagarin (Apr 12, 1961) — first human in space.\n• Apollo 11 (Jul 20, 1969) — Armstrong & Aldrin on the Moon. Apollo Guidance Computer: 64KB.\n• Space Shuttle program (1981–2011) — first reusable orbital spacecraft.\n• ISS (1998) — continuously crewed since 2000.\n• SpaceX Falcon 9 (2010) → first orbital booster landing (2015) → Starship (2023+). Reusability slashes cost-to-orbit by 10–100x.\n• Modern commercial era: Rocket Lab, Blue Origin, Relativity, ULA, Indian ISRO Chandrayaan-3 lunar south-pole landing (2023), JAXA, China's Tiangong station.\n\n📖 THE ROCKET EQUATION:\nΔv = Isp · g₀ · ln(m_initial / m_final). Translation: to gain velocity, you must throw mass out the back, fast. Most of a rocket on the pad (95%+) is propellant. This is why orbital flight stays expensive even with reusability.\n\n📖 SPACE TAX & FINANCE (yes, really):\n• Outer Space Treaty (1967) — no nation can claim sovereignty over celestial bodies. Tax jurisdiction in space is still a frontier topic.\n• US Commercial Space Launch Competitiveness Act (2015) — gives US citizens property rights to resources extracted from asteroids.\n• Rocket companies use R&D Tax Credits (IRC §41) heavily. SpaceX, Blue Origin, Relativity all claim them.\n• Section 174 (post-TCJA 2022) — R&D must now be amortized over 5 years (15 for foreign), not expensed immediately. Huge cash-flow hit for capital-intensive aerospace startups.\n• Bonus depreciation on launch infrastructure under Section 168 (winds down 2023+).\n• Spaceport bonds — Florida's Space Coast and Texas's Boca Chica both used municipal infrastructure bonds to fund pad construction.\n\n📖 INVESTING IN THE SPACE ECONOMY:\n• Pure-play public companies are rare: Rocket Lab (RKLB), Intuitive Machines (LUNR), Planet Labs (PL), AST SpaceMobile (ASTS), Iridium (IRDM).\n• SpaceX, Blue Origin, Relativity, Stoke — private. Exposure via secondary markets or VC funds.\n• ETFs: ARKX, UFO — broad space/satellite/aerospace exposure.\n• Defense primes (LMT, NOC, BA) capture most government space spending.\n\n💡 The pattern: each generation has dropped the cost-per-kg-to-orbit by an order of magnitude. Saturn V (1969): ~$5,400/kg in today's dollars. Falcon Heavy: ~$1,500/kg. Starship target: $100/kg. When launch is that cheap, every industry becomes a "space industry."\n\nNow look up — the next launch starts within 28 seconds. 🚀`,
     action: "launch",
+    travel: TRANSIT_HUBS,
   }),
 
   botcityhall: () => ({

@@ -52,6 +52,25 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
   const stepDistAccum = useRef(0);
   const stepAlt = useRef(false);
   const cameraMode = useGameStore((s) => s.cameraMode);
+  const pendingTeleport = useGameStore((s) => s.pendingTeleport);
+  const clearTeleport = useGameStore((s) => s.clearTeleport);
+
+  // Fast-travel: when a dialog button sets `pendingTeleport`, snap the player
+  // to the destination, kill velocity / vertical state, and clear the request.
+  useEffect(() => {
+    if (!pendingTeleport || !groupRef.current) return;
+    const [x, y, z] = pendingTeleport;
+    groupRef.current.position.set(x, y, z);
+    velocity.current.set(0, 0, 0);
+    verticalVel.current = 0;
+    // Dismount any active vehicle so the bot actually appears at the spot.
+    ridingRef.current = false;
+    vetteRef.current = false;
+    setRiding(false);
+    setVetteOn(false);
+    onPositionChange(groupRef.current.position.clone());
+    clearTeleport();
+  }, [pendingTeleport, clearTeleport, onPositionChange]);
   // Track the last touch interact tick we've consumed so a single tap fires
   // onInteract exactly once.
   const lastInteractTick = useRef(touchInput.interactTick);

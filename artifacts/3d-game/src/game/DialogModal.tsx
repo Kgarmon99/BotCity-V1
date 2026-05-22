@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "./gameStore";
-import { PurchaseOption, TaxDocument } from "./types";
+import { PurchaseOption, TaxDocument, TravelDestination } from "./types";
 import { sound } from "./sound";
 
 // IRS form granted per building when the player completes its interaction.
@@ -56,6 +56,7 @@ export default function DialogModal() {
     collectDocument,
     purchases,
     income,
+    teleport,
   } = useGameStore();
 
   // Play an open chirp the first time a given dialog appears (not on rerender).
@@ -166,6 +167,15 @@ export default function DialogModal() {
     closeDialog();
   };
 
+  // Fast-travel: also grant the originating station's lesson credit (so the
+  // player doesn't have to come back and click "All Aboard" just for the doc).
+  const handleTravel = (dest: TravelDestination) => {
+    if (dialog.buildingId) completeBuilding(dialog.buildingId);
+    teleport(dest.pos);
+    sound.coin();
+    closeDialog();
+  };
+
   const handlePurchase = (item: PurchaseOption) => {
     if (alreadyBought(item.id)) return;
     makePurchase(item);
@@ -191,6 +201,39 @@ export default function DialogModal() {
           <p className="text-emerald-100/80 text-sm whitespace-pre-line leading-relaxed mb-4">
             {dialog.body}
           </p>
+
+          {dialog.travel && dialog.travel.length > 0 && (
+            <div className="space-y-2 mb-4">
+              <div className="text-[11px] font-semibold text-sky-300/90 uppercase tracking-[0.18em]">
+                Fast Travel — Click to Depart
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {dialog.travel.map((dest) => {
+                  const here = dest.id === dialog.buildingId;
+                  return (
+                    <button
+                      key={dest.id}
+                      onClick={() => !here && handleTravel(dest)}
+                      disabled={here}
+                      className={`text-left p-3 rounded-xl border transition-all ${
+                        here
+                          ? "border-sky-500/20 bg-sky-900/10 opacity-50 cursor-not-allowed"
+                          : "border-sky-500/30 bg-sky-900/15 hover:bg-sky-800/35 hover:border-sky-400/60 hover:shadow-[0_0_22px_-6px_rgba(56,189,248,0.7)] cursor-pointer"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl leading-none">{dest.emoji}</span>
+                        <span className="font-semibold text-sm text-white">{dest.label}</span>
+                      </div>
+                      <div className="text-[11px] mt-1 text-sky-100/70 leading-snug">
+                        {here ? "You are here" : dest.blurb}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {dialog.options && (
             <div className="space-y-2.5 mb-4">

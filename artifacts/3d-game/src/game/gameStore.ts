@@ -13,6 +13,10 @@ interface GameStore extends GameState {
   weather: WeatherMode;
   setWeather: (w: WeatherMode) => void;
   cycleWeather: () => void;
+  /** Set when a fast-travel button is pressed; Player consumes & clears it. */
+  pendingTeleport: [number, number, number] | null;
+  teleport: (pos: [number, number, number]) => void;
+  clearTeleport: () => void;
   startGame: () => void;
   openDialog: (dialog: DialogContent) => void;
   closeDialog: () => void;
@@ -44,6 +48,10 @@ const initialState: GameState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
   cameraMode: 0,
+  pendingTeleport: null,
+
+  teleport: (pendingTeleport) => set({ pendingTeleport }),
+  clearTeleport: () => set({ pendingTeleport: null }),
 
   setCameraMode: (cameraMode) => set({ cameraMode }),
   cycleCamera: () =>
