@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "./gameStore";
 import { BUILDING_DEFS } from "./GameScene";
+import { effectiveXZ } from "./buildingLayout";
 import { playerTracker } from "./playerTracker";
 import { MINIMAP_EXTENT, ROAD_XS, ROAD_ZS, ROAD_STYLE, QUARTERS } from "./cityConstants";
 
@@ -23,6 +24,9 @@ function worldToRadar(wx: number, wz: number) {
 
 export default function MiniMap() {
   const visitedBuildings = useGameStore((s) => s.visitedBuildings);
+  const cityLayout = useGameStore((s) => s.cityLayout);
+  const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
+  const hoverPos = useGameStore((s) => s.hoverPos);
   // Persisted collapse so the player can hide the radar to free up screen
   // real estate on mobile.
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -185,7 +189,8 @@ export default function MiniMap() {
                   rendering — emoji floats above for instant recognition. */}
               {BUILDING_DEFS.map((b) => {
                 const visited = visitedBuildings.includes(b.id);
-                const { px, py } = worldToRadar(b.position[0], b.position[2]);
+                const [bx, bz] = effectiveXZ(b.position, b.id, cityLayout, selectedBuildingId, hoverPos);
+                const { px, py } = worldToRadar(bx, bz);
                 return (
                   <g key={b.id}>
                     <circle

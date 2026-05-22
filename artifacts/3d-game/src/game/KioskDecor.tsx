@@ -3,6 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { BUILDING_DEFS } from "./GameScene";
+import { useGameStore } from "./gameStore";
+import { effectiveXZ } from "./buildingLayout";
 
 // ════════════════════════════════════════════════════════════════════
 // KioskDecor — signature visual prop per outer-ring financial-ed kiosk.
@@ -1261,10 +1263,13 @@ export default function KioskDecor() {
     () => BUILDING_DEFS.filter((b) => OUTER_KIOSK_IDS.has(b.id)),
     []
   );
+  const cityLayout = useGameStore((s) => s.cityLayout);
+  const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
+  const hoverPos = useGameStore((s) => s.hoverPos);
   return (
     <group>
       {kiosks.map((b) => {
-        const [x, , z] = b.position;
+        const [x, z] = effectiveXZ(b.position, b.id, cityLayout, selectedBuildingId, hoverPos);
         const [ux, uz] = towardCenter(x, z);
         // Place the prop 2.6u toward city center from the kiosk center.
         // The kiosk body has 0.9u half-width, so a 2.6u offset leaves

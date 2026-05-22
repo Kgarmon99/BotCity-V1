@@ -4,6 +4,8 @@ import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import Player from "./Player";
 import Building, { BuildingData } from "./Building";
+import CityEditor from "./CityEditor";
+import { effectiveXZ } from "./buildingLayout";
 import World from "./World";
 import FollowCamera from "./FollowCamera";
 import HUD from "./HUD";
@@ -941,14 +943,24 @@ export default function GameScene() {
   const { visitedBuildings, openDialog, income, deductions, withheld, dialog, weather } = useGameStore();
   const fogParams = fogForWeather(weather);
 
+  const cityLayout = useGameStore((s) => s.cityLayout);
+  const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
+  const hoverPos = useGameStore((s) => s.hoverPos);
+
   const handlePositionChange = useCallback(
     (pos: THREE.Vector3) => {
       playerPos.current.copy(pos);
+      // Use a live snapshot (no re-render dep) so this stable callback still
+      // sees the latest overrides without recreating Player on each drop.
+      const { cityLayout: layout, selectedBuildingId: sel, hoverPos: hp } =
+        useGameStore.getState();
       let closest: string | null = null;
       let closestDist = Infinity;
       for (const b of BUILDING_DEFS) {
-        const bPos = new THREE.Vector3(b.position[0], 0, b.position[2]);
-        const dist = new THREE.Vector3(pos.x, 0, pos.z).distanceTo(bPos);
+        const [bx, bz] = effectiveXZ(b.position, b.id, layout, sel, hp);
+        const dist = new THREE.Vector3(pos.x, 0, pos.z).distanceTo(
+          new THREE.Vector3(bx, 0, bz),
+        );
         if (dist < INTERACT_RADIUS && dist < closestDist) {
           closest = b.id;
           closestDist = dist;
@@ -962,9 +974,13 @@ export default function GameScene() {
   const handleInteract = useCallback(
     (pos: THREE.Vector3) => {
       if (dialog) return;
+      const { cityLayout: layout, selectedBuildingId: sel, hoverPos: hp } =
+        useGameStore.getState();
       for (const b of BUILDING_DEFS) {
-        const bPos = new THREE.Vector3(b.position[0], 0, b.position[2]);
-        const dist = new THREE.Vector3(pos.x, 0, pos.z).distanceTo(bPos);
+        const [bx, bz] = effectiveXZ(b.position, b.id, layout, sel, hp);
+        const dist = new THREE.Vector3(pos.x, 0, pos.z).distanceTo(
+          new THREE.Vector3(bx, 0, bz),
+        );
         if (dist < INTERACT_RADIUS) {
           const dialogFn = DIALOGS[b.id];
           if (dialogFn) {
@@ -977,11 +993,15 @@ export default function GameScene() {
     [dialog, openDialog, income, deductions, withheld, visitedBuildings]
   );
 
-  const buildings: BuildingData[] = BUILDING_DEFS.map((b) => ({
-    ...b,
-    visited: visitedBuildings.includes(b.id),
-    available: true,
-  }));
+  const buildings: BuildingData[] = BUILDING_DEFS.map((b) => {
+    const [bx, bz] = effectiveXZ(b.position, b.id, cityLayout, selectedBuildingId, hoverPos);
+    return {
+      ...b,
+      position: [bx, b.position[1], bz] as [number, number, number],
+      visited: visitedBuildings.includes(b.id),
+      available: true,
+    };
+  });
 
   return (
     <>
@@ -1050,6 +1070,7 @@ export default function GameScene() {
           />
 
 
+          <CityEditor />
           <Player onPositionChange={handlePositionChange} onInteract={handleInteract} isMoving={playerMoving} />
         </Canvas>
       </div>

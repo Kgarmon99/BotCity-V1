@@ -1,7 +1,8 @@
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, ThreeEvent } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { useGameStore } from "./gameStore";
 
 export interface BuildingData {
   id: string;
@@ -96,6 +97,25 @@ export default function Building({ data, isNear }: BuildingProps) {
   const glowRef = useRef<THREE.Mesh>(null!);
   const trimRef = useRef<THREE.Mesh>(null!);
   const antennaRef = useRef<THREE.Mesh>(null!);
+  const editMode = useGameStore((s) => s.editMode);
+  const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
+  const setSelectedBuildingId = useGameStore((s) => s.setSelectedBuildingId);
+  const commitBuildingPos = useGameStore((s) => s.commitBuildingPos);
+  const isSelected = selectedBuildingId === data.id;
+
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    if (!editMode) return;
+    e.stopPropagation();
+    if (isSelected) {
+      // Click the building you're carrying = drop it here.
+      commitBuildingPos();
+    } else if (selectedBuildingId) {
+      // Carrying something else? Ignore — drop or cancel first.
+      return;
+    } else {
+      setSelectedBuildingId(data.id);
+    }
+  };
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
@@ -124,7 +144,19 @@ export default function Building({ data, isNear }: BuildingProps) {
   const sidePerRow = depth >= 4 ? 2 : 1;
 
   return (
-    <group position={position}>
+    <group
+      position={position}
+      onClick={handleClick}
+      onPointerOver={editMode ? (e) => { e.stopPropagation(); document.body.style.cursor = isSelected ? "grabbing" : "grab"; } : undefined}
+      onPointerOut={editMode ? () => { document.body.style.cursor = ""; } : undefined}
+    >
+      {/* Edit-mode selection halo — green ring under building when picked up. */}
+      {editMode && isSelected && (
+        <mesh position={[0, -height / 2 + 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[Math.max(width, depth) * 0.7, Math.max(width, depth) * 0.85, 32]} />
+          <meshBasicMaterial color="#22d3ee" transparent opacity={0.85} toneMapped={false} depthWrite={false} />
+        </mesh>
+      )}
       {/* ─── Stoop / front step (lifted above ground to avoid z-fighting) ─ */}
       <mesh position={[0, -height / 2 + 0.13, depth / 2 + 0.45]} receiveShadow castShadow>
         <boxGeometry args={[doorW + 1.4, 0.2, 0.9]} />
@@ -338,7 +370,7 @@ export default function Building({ data, isNear }: BuildingProps) {
       )}
 
       {/* ─── "Press E" prompt ───────────────────────────── */}
-      {isNear && <InteractPrompt y={height / 2 + 2.2} />}
+      {isNear && !editMode && <InteractPrompt y={height / 2 + 2.2} />}
 
       {/* ─── Building label ─────────────────────────────── */}
       <Text

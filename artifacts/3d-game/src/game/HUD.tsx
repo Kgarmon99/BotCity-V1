@@ -9,6 +9,71 @@ import MiniMap from "./MiniMap";
 // Sections render as small headers in the HUD so the 49-item list
 // is scannable. Adding a new kiosk? Drop it into the matching section
 // (or add a new section). IDs must match BUILDING_DEFS in GameScene.
+function CityEditorControls() {
+  const editMode = useGameStore((s) => s.editMode);
+  const toggleEditMode = useGameStore((s) => s.toggleEditMode);
+  const resetCityLayout = useGameStore((s) => s.resetCityLayout);
+  const cityLayout = useGameStore((s) => s.cityLayout);
+  const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
+  const cancelPickup = useGameStore((s) => s.cancelPickup);
+  const overrideCount = Object.keys(cityLayout).length;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={toggleEditMode}
+        className={`pointer-events-auto text-xs rounded-xl px-3 py-2 border backdrop-blur-md transition-colors ${
+          editMode
+            ? "bg-cyan-500/90 text-slate-950 border-cyan-200 shadow-[0_0_24px_-6px_rgba(34,211,238,0.9)] hover:bg-cyan-400"
+            : "bg-slate-950/80 text-white border-cyan-500/30 shadow-[0_0_24px_-12px_rgba(34,211,238,0.5)] hover:bg-slate-900/90"
+        }`}
+        title="Toggle Build Mode (B). Click a building to pick it up, click again to drop."
+      >
+        {editMode ? "🏗️ Building… (B)" : "🏗️ Build Mode (B)"}
+      </button>
+      {editMode && overrideCount > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm("Reset the entire city layout to its original design?")) {
+              resetCityLayout();
+            }
+          }}
+          className="pointer-events-auto bg-slate-950/80 text-rose-200 text-xs rounded-xl px-3 py-2 border border-rose-500/40 backdrop-blur-md hover:bg-rose-950/60 transition-colors"
+          title="Restore every building to its starting position"
+        >
+          ♻️ Reset Layout ({overrideCount})
+        </button>
+      )}
+      {editMode && selectedBuildingId && (
+        <button
+          type="button"
+          onClick={cancelPickup}
+          className="pointer-events-auto bg-slate-950/80 text-amber-200 text-xs rounded-xl px-3 py-2 border border-amber-500/40 backdrop-blur-md hover:bg-amber-950/60 transition-colors"
+          title="Put the building back where it was (Esc)"
+        >
+          ✖ Cancel pickup (Esc)
+        </button>
+      )}
+    </>
+  );
+}
+
+function CityEditorBanner() {
+  const editMode = useGameStore((s) => s.editMode);
+  const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
+  if (!editMode) return null;
+  return (
+    <div className="pointer-events-none fixed top-20 left-1/2 -translate-x-1/2 z-20">
+      <div className="bg-cyan-500/95 text-slate-950 rounded-full px-5 py-2 text-sm font-semibold border border-cyan-200 shadow-[0_0_30px_-6px_rgba(34,211,238,0.9)] backdrop-blur">
+        {selectedBuildingId
+          ? `🏗️ Carrying ${selectedBuildingId} — click ground to drop · Esc to cancel`
+          : "🏗️ Build Mode — click a building to pick it up · B or Esc to exit"}
+      </div>
+    </div>
+  );
+}
+
 type BuildingItem = { id: string; emoji: string; label: string };
 type BuildingSection = { title: string; emoji: string; items: BuildingItem[] };
 const BUILDING_SECTIONS: BuildingSection[] = [
@@ -293,6 +358,17 @@ export default function HUD() {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "h" || e.key === "H") setPanelsHidden((v) => !v);
+      // City editor: B toggles, Escape cancels pickup (or exits if nothing held).
+      if (e.key === "b" || e.key === "B") {
+        useGameStore.getState().toggleEditMode();
+      }
+      if (e.key === "Escape") {
+        const s = useGameStore.getState();
+        if (s.editMode) {
+          if (s.selectedBuildingId) s.cancelPickup();
+          else s.setEditMode(false);
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -300,17 +376,21 @@ export default function HUD() {
 
   return (
     <div className="fixed top-0 left-0 right-0 pointer-events-none z-10 p-4">
+      <CityEditorBanner />
       {/* Hide/Show panels toggle — always visible so the player can bring
           the HUD back. Sits top-left so it's adjacent to where the panels
           appear (and pairs with the SoundToggle on top-right). */}
-      <button
-        type="button"
-        onClick={() => setPanelsHidden((v) => !v)}
-        className="pointer-events-auto mb-3 bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)] hover:bg-slate-900/90 transition-colors"
-        title={panelsHidden ? "Show HUD panels (H)" : "Hide HUD panels (H)"}
-      >
-        {panelsHidden ? "👁️ Show HUD" : "🙈 Hide HUD"}
-      </button>
+      <div className="flex gap-2 mb-3 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setPanelsHidden((v) => !v)}
+          className="pointer-events-auto bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)] hover:bg-slate-900/90 transition-colors"
+          title={panelsHidden ? "Show HUD panels (H)" : "Hide HUD panels (H)"}
+        >
+          {panelsHidden ? "👁️ Show HUD" : "🙈 Hide HUD"}
+        </button>
+        <CityEditorControls />
+      </div>
       <div className={`flex gap-3 flex-wrap transition-opacity ${panelsHidden ? "hidden" : ""}`}>
         {/* Finance Panel */}
         <div className="bg-slate-950/85 text-white rounded-2xl p-4 min-w-[230px] border border-emerald-500/20 backdrop-blur-md shadow-[0_0_30px_-10px_rgba(34,197,94,0.4)]">

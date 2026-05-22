@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { GameState, DialogContent, PurchaseOption, TaxDocument, calculateTax } from "./types";
+import { LayoutOverrides, loadLayout, saveLayout, snap } from "./buildingLayout";
 
 export type CameraMode = 0 | 1 | 2 | 3 | 4;
 
@@ -26,6 +27,26 @@ interface GameStore extends GameState {
   collectDocument: (doc: TaxDocument) => void;
   fileTaxes: () => void;
   restart: () => void;
+
+  // ── City Editor ──────────────────────────────────────────
+  /** True while the player is rearranging the city. Freezes player input. */
+  editMode: boolean;
+  setEditMode: (b: boolean) => void;
+  toggleEditMode: () => void;
+  /** Persistent position overrides keyed by building id (x, z). */
+  cityLayout: LayoutOverrides;
+  /** Id of the building currently picked up (following the mouse), or null. */
+  selectedBuildingId: string | null;
+  /** Cursor position on the ground while dragging, snapped to grid. */
+  hoverPos: [number, number] | null;
+  setSelectedBuildingId: (id: string | null) => void;
+  setHoverPos: (p: [number, number] | null) => void;
+  /** Commit the currently-dragged building at its hover position. */
+  commitBuildingPos: () => void;
+  /** Cancel the current pickup without saving. */
+  cancelPickup: () => void;
+  /** Wipe all overrides — every building returns to its design position. */
+  resetCityLayout: () => void;
 }
 
 const initialState: GameState = {
@@ -116,4 +137,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   restart: () => set({ ...initialState }),
+
+  // ── City Editor ──────────────────────────────────────────
+  editMode: false,
+  setEditMode: (editMode) =>
+    set((s) =>
+      editMode
+        ? { editMode }
+        : { editMode, selectedBuildingId: null, hoverPos: null },
+    ),
+  toggleEditMode: () =>
+    set((s) => {
+      const next = !s.editMode;
+      return next
+        ? { editMode: true }
+        : { editMode: false, selectedBuildingId: null, hoverPos: null };
+    }),
+  cityLayout: loadLayout(),
+  selectedBuildingId: null,
+  hoverPos: null,
+  setSelectedBuildingId: (selectedBuildingId) =>
+    set({ selectedBuildingId, hoverPos: null }),
+  setHoverPos: (hoverPos) => set({ hoverPos }),
+  commitBuildingPos: () => {
+    const { selectedBuildingId, hoverPos, cityLayout } = get();
+    if (!selectedBuildingId || !hoverPos) {
+      set({ selectedBuildingId: null, hoverPos: null });
+      return;
+    }
+    const snapped: [number, number] = [snap(hoverPos[0]), snap(hoverPos[1])];
+    const next: LayoutOverrides = { ...cityLayout, [selectedBuildingId]: snapped };
+    saveLayout(next);
+    set({ cityLayout: next, selectedBuildingId: null, hoverPos: null });
+  },
+  cancelPickup: () => set({ selectedBuildingId: null, hoverPos: null }),
+  resetCityLayout: () => {
+    saveLayout({});
+    set({ cityLayout: {}, selectedBuildingId: null, hoverPos: null });
+  },
 }));

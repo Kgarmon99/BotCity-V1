@@ -190,6 +190,11 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       }
     }
 
+    // City editor freezes the player so the camera + cursor stay still.
+    if (useGameStore.getState().editMode) {
+      velocity.current.set(0, 0, 0);
+      return;
+    }
     const { forward, back, left, right } = keys.current;
     // Merge keyboard (binary) with joystick (analog). Take the larger
     // magnitude per axis so holding the joystick fully forward + tapping W
