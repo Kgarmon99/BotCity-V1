@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { useLinkedOffset } from "./buildingLayout";
 
 // ════════════════════════════════════════════════════════════════════
 // MoneyBot Media District (NE strip) + Military Base (SW outer band).
@@ -389,6 +390,7 @@ function MoneyBotComic() {
 // radar dish, and a brig holding two captured BrokeBots.
 // ──────────────────────────────────────────────────────────────────
 function MilitaryBase() {
+  const off = useLinkedOffset("militarybase");
   const radarRef = useRef<THREE.Group>(null!);
   const turretRef = useRef<THREE.Group>(null!);
   const beaconRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
@@ -450,7 +452,7 @@ function MilitaryBase() {
   );
 
   return (
-    <group position={[-105, 0, -45]}>
+    <group position={[-105 + off[0], 0, -45 + off[2]]}>
       {/* Compound apron — dirt/sand color */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[26, 26]} />
