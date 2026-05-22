@@ -5,6 +5,33 @@ import * as THREE from "three";
 import { BUILDING_DEFS } from "./GameScene";
 import { useGameStore } from "./gameStore";
 import { effectiveXZ } from "./buildingLayout";
+import { LOT_SIZE } from "./cityConstants";
+
+// Quarter-color paved plinth that travels with its kiosk in Build Mode.
+// Same visual as the old static ReservedLot tile so the look is unchanged.
+function KioskPlinth({ color }: { color: string }) {
+  const half = LOT_SIZE / 2;
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <planeGeometry args={[LOT_SIZE, LOT_SIZE]} />
+        <meshStandardMaterial color="#0b1220" roughness={0.9} metalness={0.05} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
+        <ringGeometry args={[half - 0.3, half - 0.1, 4, 1]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.5}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+          transparent
+          opacity={0.35}
+        />
+      </mesh>
+    </group>
+  );
+}
 
 // ════════════════════════════════════════════════════════════════════
 // KioskDecor — signature visual prop per outer-ring financial-ed kiosk.
@@ -1278,8 +1305,14 @@ export default function KioskDecor() {
         const pz = z + uz * 2.6;
         const rotY = Math.atan2(ux, uz); // face away from kiosk (toward center)
         return (
-          <group key={b.id} position={[px, 0, pz]} rotation={[0, rotY, 0]}>
-            <KioskProp id={b.id} color={b.color} />
+          <group key={b.id}>
+            {/* Plinth follows the kiosk so the paved tile moves with it. */}
+            <group position={[x, 0, z]}>
+              <KioskPlinth color={b.color} />
+            </group>
+            <group position={[px, 0, pz]} rotation={[0, rotY, 0]}>
+              <KioskProp id={b.id} color={b.color} />
+            </group>
           </group>
         );
       })}

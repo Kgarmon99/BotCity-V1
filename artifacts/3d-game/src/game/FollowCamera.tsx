@@ -161,7 +161,11 @@ export default function FollowCamera({ target }: FollowCameraProps) {
     gl.domElement.style.cursor = cameraMode === ORBIT_MODE ? "grab" : "";
   }, [cameraMode, gl]);
 
+  const editMode = useGameStore((s) => s.editMode);
   useFrame(() => {
+    // While the City Editor is open, CityEditor mounts its own
+    // OrthographicCamera as the default camera — don't fight it.
+    if (editMode) return;
     const preset = PRESETS[cameraMode];
     // In Orbit mode the offset is derived live from yaw/pitch/distance
     // (spherical coords around the player). All other modes use the static

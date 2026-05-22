@@ -1,48 +1,126 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, ThreeEvent } from "@react-three/fiber";
+import { useFrame, useThree, ThreeEvent } from "@react-three/fiber";
+import { OrthographicCamera } from "@react-three/drei";
 import * as THREE from "three";
-import { useGameStore, CameraMode } from "./gameStore";
+import { useGameStore } from "./gameStore";
 import { BUILDING_DEFS } from "./GameScene";
 import { snap, effectiveXZ } from "./buildingLayout";
 
 const GROUND_HALF = 200;
 
+// Ortho camera tuning. Zoom = pixels-per-world-unit; we clamp between a
+// fully zoomed-in district view and a fully zoomed-out whole-city view.
+const ZOOM_MIN = 3;     // 1u ≈ 3px — see entire 400u city in a 1280-wide view
+const ZOOM_MAX = 30;    // 1u ≈ 30px — close-in editing of a single lot
+const ZOOM_DEFAULT = 6; // good starting framing of the whole city
+const ZOOM_STEP = 1.15; // wheel zoom multiplier per notch
+const PAN_SPEED = 70;   // world units per second at full zoom-out
+const CAM_Y = 180;      // high enough to stay above the tallest building
+
 /**
  * Mounted inside the R3F Canvas. While `editMode` is on:
+ *  - Swaps the active camera to a high top-down OrthographicCamera so the
+ *    user can see and reach the entire city.
+ *  - WASD / arrow keys pan the camera; mouse wheel zooms.
  *  - A large invisible ground plane catches pointer-move + click events.
  *  - Moving the cursor updates the snapped `hoverPos`.
- *  - Clicking the ground commits the currently-selected building.
+ *  - Clicking commits the currently-selected building at hoverPos.
  *  - A neon snap-grid + ring under the picked-up building shows the drop zone.
  */
 export default function CityEditor() {
   const editMode = useGameStore((s) => s.editMode);
   const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
   const hoverPos = useGameStore((s) => s.hoverPos);
-  const cityLayout = useGameStore((s) => s.cityLayout);
   const setHoverPos = useGameStore((s) => s.setHoverPos);
   const commitBuildingPos = useGameStore((s) => s.commitBuildingPos);
   const cancelPickup = useGameStore((s) => s.cancelPickup);
   const setSelectedBuildingId = useGameStore((s) => s.setSelectedBuildingId);
 
   const ringRef = useRef<THREE.Mesh>(null!);
-  const setCameraMode = useGameStore((s) => s.setCameraMode);
+  const camRef = useRef<THREE.OrthographicCamera>(null!);
+  const { gl } = useThree();
 
-  // When entering edit mode, force orbit camera so the user can drag-pan to
-  // any side of the city (the player is frozen, so follow-cams freeze too).
-  // Restore the previous camera on exit.
-  const prevCameraRef = useRef<CameraMode | null>(null);
+  // Camera pan/zoom state (refs so updates don't trigger React re-renders).
+  const panRef = useRef<[number, number]>([0, 0]);
+  const zoomRef = useRef<number>(ZOOM_DEFAULT);
+  const keysRef = useRef<Set<string>>(new Set());
+
+  // Reset framing every time edit mode is (re)entered.
   useEffect(() => {
     if (editMode) {
-      prevCameraRef.current = useGameStore.getState().cameraMode;
-      setCameraMode(4);
-    } else if (prevCameraRef.current !== null) {
-      setCameraMode(prevCameraRef.current);
-      prevCameraRef.current = null;
+      panRef.current = [0, 0];
+      zoomRef.current = ZOOM_DEFAULT;
+      keysRef.current.clear();
     }
-  }, [editMode, setCameraMode]);
+  }, [editMode]);
 
-  // Pulse the drop-zone ring while a building is selected.
-  useFrame(({ clock }) => {
+  // Keyboard pan listeners (WASD + arrows). Active only in edit mode.
+  useEffect(() => {
+    if (!editMode) return;
+    const PAN_KEYS = new Set([
+      "w", "a", "s", "d", "W", "A", "S", "D",
+      "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+    ]);
+    const onDown = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (PAN_KEYS.has(e.key)) keysRef.current.add(e.key.toLowerCase());
+    };
+    const onUp = (e: KeyboardEvent) => {
+      keysRef.current.delete(e.key.toLowerCase());
+    };
+    const onBlur = () => keysRef.current.clear();
+    window.addEventListener("keydown", onDown);
+    window.addEventListener("keyup", onUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onDown);
+      window.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [editMode]);
+
+  // Wheel zoom on the canvas DOM. Active only in edit mode.
+  useEffect(() => {
+    if (!editMode) return;
+    const el = gl.domElement;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const dir = e.deltaY > 0 ? 1 / ZOOM_STEP : ZOOM_STEP;
+      zoomRef.current = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomRef.current * dir));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [editMode, gl]);
+
+  // Per-frame: apply pan keys, push pan + zoom to the camera, pulse drop ring.
+  useFrame(({ clock }, dt) => {
+    if (editMode && camRef.current) {
+      // Resolve pan input.
+      const k = keysRef.current;
+      let dx = 0;
+      let dz = 0;
+      if (k.has("w") || k.has("arrowup")) dz -= 1;
+      if (k.has("s") || k.has("arrowdown")) dz += 1;
+      if (k.has("a") || k.has("arrowleft")) dx -= 1;
+      if (k.has("d") || k.has("arrowright")) dx += 1;
+      if (dx !== 0 || dz !== 0) {
+        const len = Math.hypot(dx, dz);
+        // Scale pan speed inversely with zoom so it feels constant in pixels.
+        const speed = (PAN_SPEED * dt * ZOOM_DEFAULT) / zoomRef.current;
+        const [px, pz] = panRef.current;
+        const nx = Math.max(-GROUND_HALF, Math.min(GROUND_HALF, px + (dx / len) * speed));
+        const nz = Math.max(-GROUND_HALF, Math.min(GROUND_HALF, pz + (dz / len) * speed));
+        panRef.current = [nx, nz];
+      }
+      const [px, pz] = panRef.current;
+      camRef.current.position.set(px, CAM_Y, pz);
+      camRef.current.lookAt(px, 0, pz);
+      if (camRef.current.zoom !== zoomRef.current) {
+        camRef.current.zoom = zoomRef.current;
+        camRef.current.updateProjectionMatrix();
+      }
+    }
     if (ringRef.current && selectedBuildingId) {
       const t = clock.elapsedTime;
       ringRef.current.scale.setScalar(1 + Math.sin(t * 4) * 0.08);
@@ -67,7 +145,6 @@ export default function CityEditor() {
     if (selectedBuildingId) {
       commitBuildingPos();
     } else {
-      // Click on empty ground deselects (no-op if nothing is selected).
       setSelectedBuildingId(null);
     }
   };
@@ -78,13 +155,24 @@ export default function CityEditor() {
     cancelPickup();
   };
 
-  // Drop-zone marker — uses the live hover position so it follows the cursor.
   const ringPos = hoverPos ?? [0, 0];
 
   return (
     <group>
-      {/* Snap grid — faint neon grid overlay so the player can see snap cells.
-          y=0.06 sits just above the road/ground without z-fighting.
+      {/* High top-down ortho camera — makeDefault swaps it in as the active
+          camera while edit mode is on. FollowCamera bails on its useFrame
+          when editMode is true so it doesn't fight this one. */}
+      <OrthographicCamera
+        ref={camRef}
+        makeDefault
+        position={[0, CAM_Y, 0]}
+        zoom={ZOOM_DEFAULT}
+        near={0.1}
+        far={500}
+        up={[0, 0, -1]}
+      />
+
+      {/* Snap grid — faint neon overlay so the player can see snap cells.
           400u span with 200 divisions ⇒ 2u cells (matches GRID_SNAP). */}
       <gridHelper
         args={[GROUND_HALF * 2, GROUND_HALF, "#22d3ee", "#0e7490"]}
@@ -109,8 +197,7 @@ export default function CityEditor() {
         </mesh>
       )}
 
-      {/* Invisible click/move catcher. y=0.04 so it sits above the road plane
-          but below shapes; events bubble down from buildings (they stopPropagation). */}
+      {/* Invisible click/move catcher across the whole city. */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0.04, 0]}
@@ -122,8 +209,7 @@ export default function CityEditor() {
         <meshBasicMaterial visible={false} />
       </mesh>
 
-      {/* Selection halos around all overridden buildings (light visual confirm
-          that "yes, you moved these"). */}
+      {/* Green halos under every building that has been moved. */}
       <SelectionHalos />
     </group>
   );

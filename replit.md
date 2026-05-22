@@ -27,7 +27,8 @@ _Replace the heading above with the project's name, and this line with one sente
   - Existing kiosk definitions: `BUILDING_DEFS` in `src/game/GameScene.tsx`.
   - HUD section model (Objectives panel): `BUILDING_SECTIONS` in `src/game/HUD.tsx`.
   - Outer-ring expansion (6 quarters / 30 reserved lots for upcoming financial-ed kiosks): `src/game/ExpansionQuarters.tsx`.
-  - **City Editor (drag-to-rearrange Build Mode)**: `src/game/CityEditor.tsx` + `src/game/buildingLayout.ts`. Layout overrides live in `gameStore.cityLayout` (persisted to `localStorage["botcity.cityLayout.v1"]`). Anywhere a building's position is consumed (GameScene collision/interact + render, KioskDecor, MiniMap) goes through `effectiveXZ(def.position, id, cityLayout, selectedBuildingId, hoverPos)`. Snap grid is 2u (matches roads). Toggle with `B` or HUD button; player input is frozen while editing and the camera auto-switches to orbit mode 4 (restored on exit).
+  - **City Editor (drag-to-rearrange Build Mode)**: `src/game/CityEditor.tsx` + `src/game/buildingLayout.ts`. Layout overrides live in `gameStore.cityLayout` (persisted to `localStorage["botcity.cityLayout.v1"]`). Anywhere a building's position is consumed (GameScene collision/interact + render, KioskDecor plinth + prop, MiniMap) goes through `effectiveXZ(def.position, id, cityLayout, selectedBuildingId, hoverPos)`. Snap grid is 2u (matches roads). Toggle with `B` or HUD button; player input is frozen, FollowCamera bails (`if (editMode) return;` in its useFrame), and CityEditor mounts a high top-down `OrthographicCamera` (`makeDefault`) with WASD/arrow pan + wheel zoom (clamped `ZOOM_MIN`/`MAX`).
+  - **Kiosk plinths live in `KioskDecor`, not `ExpansionQuarters`**: each outer-ring kiosk renders its own dark-tile + quarter-color ring at its effective position, so the plinth follows the kiosk during Build Mode. `ExpansionQuarters` only renders quarter signposts now.
 
 ## Architecture decisions
 

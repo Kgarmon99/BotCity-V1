@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { QUARTERS, RESERVED_LOTS, LOT_SIZE } from "./cityConstants";
+import { QUARTERS } from "./cityConstants";
 
 // ════════════════════════════════════════════════════════════════════
 // ExpansionQuarters — renders the 6 outer-ring financial-ed quarters.
@@ -15,39 +15,9 @@ import { QUARTERS, RESERVED_LOTS, LOT_SIZE } from "./cityConstants";
 // + a faint emissive accent ring around each kiosk's footprint.
 // ════════════════════════════════════════════════════════════════════
 
-function ReservedLot({
-  position,
-  color,
-}: {
-  position: [number, number];
-  color: string;
-}) {
-  const [x, z] = position;
-  const half = LOT_SIZE / 2;
-  return (
-    <group position={[x, 0, z]}>
-      {/* Themed paving — slightly darker tint of the quarter color so the
-          kiosk on top reads as belonging to its district. */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
-        <planeGeometry args={[LOT_SIZE, LOT_SIZE]} />
-        <meshStandardMaterial color="#0b1220" roughness={0.9} metalness={0.05} />
-      </mesh>
-      {/* Faint emissive border ring — subtle district color halo. */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
-        <ringGeometry args={[half - 0.3, half - 0.1, 4, 1]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.5}
-          side={THREE.DoubleSide}
-          toneMapped={false}
-          transparent
-          opacity={0.35}
-        />
-      </mesh>
-    </group>
-  );
-}
+// NOTE: ReservedLot plinths used to be rendered here, statically positioned
+// from cityConstants. They moved into KioskDecor so the plinth follows its
+// kiosk when the player drags it in Build Mode.
 
 function QuarterSignpost({
   position,
@@ -134,13 +104,6 @@ function QuarterSignpost({
 export default function ExpansionQuarters() {
   return (
     <group>
-      {RESERVED_LOTS.map((lot) => (
-        <ReservedLot
-          key={lot.id}
-          position={lot.position}
-          color={lot.color}
-        />
-      ))}
       {QUARTERS.map((q) => (
         <QuarterSignpost
           key={q.id}
