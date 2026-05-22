@@ -9,10 +9,11 @@ import { snap, effectiveXZ } from "./buildingLayout";
 const GROUND_HALF = 200;
 
 // Ortho camera tuning. Zoom = pixels-per-world-unit; we clamp between a
-// fully zoomed-in district view and a fully zoomed-out whole-city view.
-const ZOOM_MIN = 3;     // 1u ≈ 3px — see entire 400u city in a 1280-wide view
+// fully zoomed-in single-lot view and a fully zoomed-out whole-city view.
+// City spans ±200u (400u total) so ZOOM_DEFAULT≈2 fits it on a 720-tall canvas.
+const ZOOM_MIN = 1.5;   // whole 400u city visible with margin
 const ZOOM_MAX = 30;    // 1u ≈ 30px — close-in editing of a single lot
-const ZOOM_DEFAULT = 6; // good starting framing of the whole city
+const ZOOM_DEFAULT = 2; // initial framing — whole city in view
 const ZOOM_STEP = 1.15; // wheel zoom multiplier per notch
 const PAN_SPEED = 70;   // world units per second at full zoom-out
 const CAM_Y = 180;      // high enough to stay above the tallest building
@@ -115,7 +116,11 @@ export default function CityEditor() {
       }
       const [px, pz] = panRef.current;
       camRef.current.position.set(px, CAM_Y, pz);
-      camRef.current.lookAt(px, 0, pz);
+      // Rotation is fixed straight-down via the rotation prop below — do
+      // NOT call lookAt() here. lookAt with a vertical view direction is
+      // singular against the default up=(0,1,0) vector and produces a NaN
+      // view matrix (visible as a "green screen" — only the clear color
+      // remains because nothing projects correctly).
       if (camRef.current.zoom !== zoomRef.current) {
         camRef.current.zoom = zoomRef.current;
         camRef.current.updateProjectionMatrix();
@@ -166,10 +171,10 @@ export default function CityEditor() {
         ref={camRef}
         makeDefault
         position={[0, CAM_Y, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
         zoom={ZOOM_DEFAULT}
         near={0.1}
         far={500}
-        up={[0, 0, -1]}
       />
 
       {/* Snap grid — faint neon overlay so the player can see snap cells.
