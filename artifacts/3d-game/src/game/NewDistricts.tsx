@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { useLinkedOffset } from "./buildingLayout";
 
 // ─────────────────────────────────────────────────────────────────────
 // Four new districts that fill educational gaps in the BotCity tax/
@@ -20,6 +21,7 @@ import * as THREE from "three";
 // Tax court & audits. NE empty quadrant between Casino, Rocket Station,
 // and Hospital. Footprint x[73, 97] z[-52, -32] = 24×20.
 function BotCourt() {
+  const off = useLinkedOffset("botcourt");
   const scaleRef = useRef<THREE.Group>(null!);
   const beaconRef = useRef<THREE.MeshStandardMaterial>(null!);
   useFrame((s) => {
@@ -28,7 +30,7 @@ function BotCourt() {
     if (beaconRef.current) beaconRef.current.emissiveIntensity = 0.9 + Math.sin(t * 2) * 0.5;
   });
   return (
-    <group position={[85, 0, -42]}>
+    <group position={[85 + off[0], 0, -42 + off[2]]}>
       {/* Stone plaza ground tinting */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[24, 20]} />
@@ -113,6 +115,7 @@ function BotCourt() {
 // Borrowing & Credit quarter (bankruptcy @ 95,-103: 10u east / 4u south
 // clear). 17u gap south to the new BotEcon Lab kiosk at (70,-103).
 function BotInsurance() {
+  const off = useLinkedOffset("botinsurance");
   const umbrellaRef = useRef<THREE.Group>(null!);
   const towerLightRef = useRef<THREE.MeshStandardMaterial>(null!);
   useFrame((s) => {
@@ -121,7 +124,7 @@ function BotInsurance() {
     if (towerLightRef.current) towerLightRef.current.emissiveIntensity = 1.0 + Math.sin(t * 3) * 0.6;
   });
   return (
-    <group position={[75, 0, -90]}>
+    <group position={[75 + off[0], 0, -90 + off[2]]}>
       {/* Slate-blue corporate plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[20, 16]} />
@@ -211,6 +214,7 @@ function BotInsurance() {
 // band between road x=27 and road x=54, kept inside the player bound
 // at z<=105. Footprint x[30, 52] z[87, 105] = 22×18.
 function BotEnergy() {
+  const off = useLinkedOffset("botenergy");
   const turbineRef = useRef<THREE.Group>(null!);
   const chargeRef = useRef<THREE.MeshStandardMaterial>(null!);
   useFrame((s) => {
@@ -219,7 +223,7 @@ function BotEnergy() {
     if (chargeRef.current) chargeRef.current.emissiveIntensity = 0.8 + Math.sin(t * 5) * 0.6;
   });
   return (
-    <group position={[41, 0, 96]}>
+    <group position={[41 + off[0], 0, 96 + off[2]]}>
       {/* Eco-green plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[22, 18]} />
@@ -326,6 +330,7 @@ function BotEnergy() {
 // between Soccer Stadium (east edge at x=-26) and the x=0 road, north
 // of Golf Course. Footprint x[-22, -8] z[-81, -65] = 14×16.
 function BotFactory() {
+  const off = useLinkedOffset("botfactory");
   const smokeRefs = useRef<Array<THREE.MeshStandardMaterial | null>>([]);
   const conveyorRef = useRef<THREE.MeshStandardMaterial>(null!);
   useFrame((s) => {
@@ -338,7 +343,7 @@ function BotFactory() {
     }
   });
   return (
-    <group position={[-15, 0, -73]}>
+    <group position={[-15 + off[0], 0, -73 + off[2]]}>
       {/* Concrete factory yard */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[14, 16]} />

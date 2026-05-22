@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { sound } from "./sound";
+import { useLinkedOffset } from "./buildingLayout";
 
 // ─────────────────────────────────────────────────────────────────────
 // 4 new districts at the middle-ring corners (±27, ±27).
@@ -22,6 +23,7 @@ import { sound } from "./sound";
 //   • spectator dots ringing the upper deck for crowd feel
 //   • entrance archway with team-color banners flanking the south sign
 function Stadium() {
+  const off = useLinkedOffset("botstadium");
   const jumboRefs = useRef<Array<THREE.Mesh | null>>([]);
   const bannerRefs = useRef<Array<THREE.Mesh | null>>([]);
   useFrame((s) => {
@@ -46,7 +48,7 @@ function Stadium() {
     [-1.6, 0, 0],
   ];
   return (
-    <group position={[-40.5, 0, -40.5]}>
+    <group position={[-40.5 + off[0], 0, -40.5 + off[2]]}>
       {/* Concrete plaza apron — half-ring on south side ONLY, away from
           the kiosk to the north. Spans angles 0..π (south semicircle). */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
@@ -310,8 +312,9 @@ function MarketStall({
 }
 
 function Market() {
+  const off = useLinkedOffset("botmarket");
   return (
-    <group position={[40.5, 0, -40.5]}>
+    <group position={[40.5 + off[0], 0, -40.5 + off[2]]}>
       {/* Plaza tiled floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
         <planeGeometry args={[11, 11]} />
@@ -934,6 +937,7 @@ function Beach() {
 // A periodic-launch pad way out in the empty NE corner. The rocket loops
 // through idle → ignition → ascent → reset on a ~28-second cycle.
 function RocketStation() {
+  const off = useLinkedOffset("botrocket");
   const rocketRef = useRef<THREE.Group>(null!);
   const flameRef = useRef<THREE.Mesh>(null!);
   const smokeRef = useRef<THREE.Mesh>(null!);
@@ -1053,7 +1057,7 @@ function RocketStation() {
   });
 
   return (
-    <group position={[75, 0, -75]}>
+    <group position={[75 + off[0], 0, -75 + off[2]]}>
       {/* Concrete launch pad */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[12, 12]} />
@@ -2083,8 +2087,9 @@ function Shop({
 }
 
 function ShopsCluster() {
+  const off = useLinkedOffset("botshops");
   return (
-    <group position={[-40.5, 0, 40.5]}>
+    <group position={[-40.5 + off[0], 0, 40.5 + off[2]]}>
       {/* Plaza floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
         <planeGeometry args={[11, 11]} />
@@ -2330,8 +2335,9 @@ function Dealer() {
       flagRef.current.rotation.y = Math.sin(s.clock.elapsedTime * 1.6) * 0.25;
     }
   });
+  const off = useLinkedOffset("botdealer");
   return (
-    <group position={[-13.5, 0, -40.5]}>
+    <group position={[-13.5 + off[0], 0, -40.5 + off[2]]}>
       {/* Big parking lot tarmac — south of the showroom (expanded 7.5×4 → 16×8) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 6]}>
         <planeGeometry args={[16, 8]} />
@@ -2461,8 +2467,9 @@ function Farm() {
       tractorRef.current.position.x = 4 + Math.sin(t * 0.5) * 1.2;
     }
   });
+  const off = useLinkedOffset("botfarm");
   return (
-    <group position={[-60, 0, -61.5]}>
+    <group position={[-60 + off[0], 0, -61.5 + off[2]]}>
       {/* ── Soil patch under the barn ── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[5, 4]} />
@@ -3447,8 +3454,9 @@ function Port() {
       forkliftRef.current.position.x = -5 + Math.sin(t * 0.4) * 1.5;
     }
   });
+  const off = useLinkedOffset("botport");
   return (
-    <group position={[75, 0, 72]}>
+    <group position={[75 + off[0], 0, 72 + off[2]]}>
       {/* ── Sea surface — wider plane east, N and S of the building.
           Center (13.25, 0.04, 4), 19.5×26 → local x[3.5, 23], z[-9, 17]. */}
       <mesh ref={waveRef} rotation={[-Math.PI / 2, 0, 0]} position={[13.25, 0.04, 4]}>
@@ -3945,8 +3953,9 @@ function Casino() {
       mat.emissiveIntensity = (Math.floor(t * 3 + 1.5) % 2) * 3;
     }
   });
+  const off = useLinkedOffset("botcasino");
   return (
-    <group position={[52.5, 0, -60]}>
+    <group position={[52.5 + off[0], 0, -60 + off[2]]}>
       {/* ── Red carpet leading south to the door */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 3.5]}>
         <planeGeometry args={[2.5, 5]} />
@@ -4113,8 +4122,9 @@ function Mine() {
       mat.emissiveIntensity = 1.5 + Math.sin(t * 4) * 0.6;
     }
   });
+  const off = useLinkedOffset("botmine");
   return (
-    <group position={[-75, 0, -37.5]}>
+    <group position={[-75 + off[0], 0, -37.5 + off[2]]}>
       {/* ── Dirt patch under the entire district ── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-2, 0.02, -2]}>
         <planeGeometry args={[30, 18]} />
@@ -4609,8 +4619,9 @@ function Zoo() {
       birdRef.current.rotation.y = -t * 0.9 + Math.PI / 2;
     }
   });
+  const off = useLinkedOffset("botzoo");
   return (
-    <group position={[-28, 0, 92]} scale={1.7}>
+    <group position={[-28 + off[0], 0, 92 + off[2]]} scale={1.7}>
       {/* ── Park lawn — enlarged 24×11 (was 13×10), shifted west to
             cover the new pens. Local x[-17.5..+6.5], z[-6..+5].
             Under the outer scale=1.7 wrapper, this becomes a 40.8×18.7
@@ -5129,8 +5140,9 @@ function SoccerStadium() {
       if (m) m.rotation.y = Math.sin(t * 1.8 + i) * 0.5;
     });
   });
+  const off = useLinkedOffset("botsoccer");
   return (
-    <group position={[-40.5, 0, -82.5]}>
+    <group position={[-40.5 + off[0], 0, -82.5 + off[2]]}>
       {/* Pitch — bigger green grass rectangle (22 wide x 7 deep) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]} receiveShadow>
         <planeGeometry args={[22, 7]} />
@@ -5385,8 +5397,9 @@ function BasketballArena() {
       ballRef.current.rotation.z = t * 2;
     }
   });
+  const off = useLinkedOffset("botbasketball");
   return (
-    <group position={[40.5, 0, 45]}>
+    <group position={[40.5 + off[0], 0, 45 + off[2]]}>
       {/* Concrete plaza apron — half-ring on south side only (away from
           z=54 road), so it doesn't push the envelope into the road band. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
@@ -5598,8 +5611,9 @@ function ArtDistrict() {
   useFrame((s) => {
     if (torusRef.current) torusRef.current.rotation.y = s.clock.elapsedTime * 0.3;
   });
+  const off = useLinkedOffset("botgallery");
   return (
-    <group position={[-75, 0, -10]}>
+    <group position={[-75 + off[0], 0, -10 + off[2]]}>
       {/* Polished marble plaza floor around the gallery */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[14, 12]} />
@@ -5746,8 +5760,9 @@ function FashionDistrict() {
       mat.emissiveIntensity = 1.4 + Math.sin(s.clock.elapsedTime * 3) * 0.4;
     }
   });
+  const off = useLinkedOffset("botfashion");
   return (
-    <group position={[40.5, 0, 64]}>
+    <group position={[40.5 + off[0], 0, 64 + off[2]]}>
       {/* Plaza floor — dark with magenta glow (12 wide x 10 deep) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <planeGeometry args={[12, 10]} />

@@ -1,4 +1,5 @@
 import { BUILDING_DEFS } from "./GameScene";
+import { useGameStore } from "./gameStore";
 
 export const GRID_SNAP = 2;
 const LS_KEY = "botcity.cityLayout.v1";
@@ -55,6 +56,22 @@ export function effectiveXZ(
   const o = overrides[id];
   if (o) return o;
   return [defPos[0], defPos[2]];
+}
+
+/** Live delta (current effective position minus the def's default position)
+ *  for a given kiosk id. Decoration components paired with a kiosk add this
+ *  to their own anchor `<group position>` so the whole structure (field,
+ *  stands, etc.) translates with the kiosk as the user drags it in Build
+ *  Mode. Returns [0, 0, 0] if the kiosk has no override and is not the one
+ *  currently being carried. */
+export function useLinkedOffset(kioskId: string): [number, number, number] {
+  const cityLayout = useGameStore((s) => s.cityLayout);
+  const selectedId = useGameStore((s) => s.selectedBuildingId);
+  const hoverPos = useGameStore((s) => s.hoverPos);
+  const def = BUILDING_DEFS.find((b) => b.id === kioskId);
+  if (!def) return [0, 0, 0];
+  const [ex, ez] = effectiveXZ(def.position, kioskId, cityLayout, selectedId, hoverPos);
+  return [ex - def.position[0], 0, ez - def.position[2]];
 }
 
 /** Get effective [x, y, z] for a building id by looking up its def. */
