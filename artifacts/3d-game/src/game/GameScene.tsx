@@ -28,6 +28,7 @@ import KioskDecor from "./KioskDecor";
 import CityHallPlaza from "./CityHallPlaza";
 import CityMedia from "./CityMedia";
 import DistrictGateways from "./DistrictGateways";
+import Particles from "./Particles";
 import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
 import Streetscape from "./Streetscape";
@@ -1012,6 +1013,7 @@ export default function GameScene() {
           <NewDistricts />
           <ExpansionQuarters />
           <DistrictGateways />
+          <Particles />
           <KioskDecor />
           <Streetscape />
           <BuildingAccents />
