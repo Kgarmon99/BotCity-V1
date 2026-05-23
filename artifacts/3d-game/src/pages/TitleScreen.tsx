@@ -156,6 +156,13 @@ const FEATURES = [
     desc: "Machine learning & automation district",
     accent: "from-cyan-500/15 to-blue-500/10 border-cyan-400/35",
   },
+  // 🎢  BotLand Amusement Park
+  {
+    emoji: "🎢",
+    title: "BotLand",
+    desc: "Roller coasters, Ferris wheel & more",
+    accent: "from-red-500/15 to-amber-500/10 border-red-400/35",
+  },
 
   // 🎓  Education & transit
   {

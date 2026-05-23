@@ -301,6 +301,22 @@ const BUILDING_SECTIONS: BuildingSection[] = [
       { id: "botautomation", emoji: "🔄", label: "BotAutomation Hub" },
     ],
   },
+  {
+    title: "BotLand Amusement Park",
+    emoji: "🎢",
+    items: [
+      { id: "botlandgate",    emoji: "🎢", label: "BotLand Main Gate" },
+      { id: "botferris",      emoji: "🎡", label: "BotLand Ferris Wheel" },
+      { id: "botcoaster",     emoji: "🎢", label: "BotLand Roller Coaster" },
+      { id: "botcarousel",    emoji: "🎠", label: "BotLand Carousel" },
+      { id: "botwaterslide",  emoji: "💦", label: "BotLand Water Slide" },
+      { id: "botswing",       emoji: "🪑", label: "BotLand Swing Ride" },
+      { id: "botdrop",        emoji: "🗼", label: "BotLand Drop Tower" },
+      { id: "botbumper",      emoji: "🚗", label: "BotLand Bumper Cars" },
+      { id: "botarcade",      emoji: "🕹️", label: "BotLand Arcade" },
+      { id: "botconcessions", emoji: "🍿", label: "BotLand Concessions" },
+    ],
+  },
 ];
 
 const BUILDINGS: BuildingItem[] = BUILDING_SECTIONS.flatMap((s) => s.items);

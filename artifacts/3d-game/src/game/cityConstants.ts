@@ -189,6 +189,27 @@ export const QUARTERS: Quarter[] = [
       [134, -138],  // botautomation
     ]),
   },
+  {
+    id: "botland",
+    name: "BotLand Amusement Park",
+    emoji: "🎢",
+    hudTitle: "BotLand",
+    color: "#dc2626",
+    signpost: [42, 0, 42],
+    signpostRotY: Math.PI / 4, // faces center (NW)
+    lots: explicitLots("bl", [
+      [50, 50],   // botlandgate
+      [45, 45],   // botferris
+      [65, 50],   // botcoaster
+      [50, 65],   // botcarousel
+      [60, 70],   // botwaterslide
+      [40, 60],   // botswing
+      [70, 60],   // botdrop
+      [55, 80],   // botbumper
+      [42, 75],   // botarcade
+      [58, 52],   // botconcessions
+    ]),
+  },
 ];
 
 /** Flat list of all reserved lots — used for visualization. */

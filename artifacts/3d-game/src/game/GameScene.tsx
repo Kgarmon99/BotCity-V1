@@ -40,6 +40,7 @@ import River from "./River";
 import ObservationTower from "./ObservationTower";
 import AmbientLife from "./AmbientLife";
 import DistrictDetails from "./DistrictDetails";
+import BotLand from "./BotLand";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -891,6 +892,17 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   { id: "botdatacenter", label: "BotData Center",           position: [130, 1.5, -122], color: "#0e7490", roofColor: "#67e8f9", width: 2.2, depth: 2.2, height: 3, emoji: "🖥️" },
   { id: "botrobotics",   label: "BotRobotics Factory",      position: [138, 1.5, -122], color: "#155e75", roofColor: "#fde047", width: 2.0, depth: 2.0, height: 4, emoji: "🔧" },
   { id: "botautomation", label: "BotAutomation Hub",        position: [134, 1.5, -138], color: "#164e63", roofColor: "#fbbf24", width: 2.0, depth: 2.0, height: 3.5, emoji: "🔄" },
+  // ── BotLand 🎢 (amusement park), southeast at x≈55, z≈55 ──
+  { id: "botlandgate",    label: "BotLand Main Gate",       position: [50, 1.5, 50], color: "#dc2626", roofColor: "#fbbf24", width: 3, depth: 1.5, height: 4, emoji: "🎢" },
+  { id: "botferris",      label: "BotLand Ferris Wheel",    position: [45, 1.5, 45], color: "#fbbf24", roofColor: "#dc2626", width: 2, depth: 2, height: 3, emoji: "🎡" },
+  { id: "botcoaster",     label: "BotLand Roller Coaster",  position: [65, 1.5, 50], color: "#ef4444", roofColor: "#7c2d12", width: 2.5, depth: 2.5, height: 3, emoji: "🎢" },
+  { id: "botcarousel",    label: "BotLand Carousel",        position: [50, 1.5, 65], color: "#ec4899", roofColor: "#fbbf24", width: 2, depth: 2, height: 3, emoji: "🎠" },
+  { id: "botwaterslide",  label: "BotLand Water Slide",     position: [60, 1.5, 70], color: "#06b6d4", roofColor: "#0891b2", width: 2, depth: 2, height: 3, emoji: "💦" },
+  { id: "botswing",       label: "BotLand Swing Ride",      position: [40, 1.5, 60], color: "#8b5cf6", roofColor: "#fbbf24", width: 2, depth: 2, height: 3, emoji: "🪑" },
+  { id: "botdrop",        label: "BotLand Drop Tower",      position: [70, 1.5, 60], color: "#1e3a8a", roofColor: "#dc2626", width: 2, depth: 2, height: 4, emoji: "🗼" },
+  { id: "botbumper",      label: "BotLand Bumper Cars",     position: [55, 1.5, 80], color: "#22c55e", roofColor: "#fbbf24", width: 2.5, depth: 2.5, height: 2.5, emoji: "🚗" },
+  { id: "botarcade",      label: "BotLand Arcade",          position: [42, 1.5, 75], color: "#a855f7", roofColor: "#fbbf24", width: 2, depth: 1.8, height: 3, emoji: "🕹️" },
+  { id: "botconcessions", label: "BotLand Concessions",     position: [58, 1.5, 52], color: "#f97316", roofColor: "#fef3c7", width: 2, depth: 1.5, height: 2.5, emoji: "🍿" },
 ];
 
 const INTERACT_RADIUS = 4.5;
@@ -1083,6 +1095,7 @@ export default function GameScene() {
           <Blimp />
           <Statues />
           <Landmarks />
+          <BotLand />
           <Billboards />
           <NPCBots />
           <CitizenBots />
