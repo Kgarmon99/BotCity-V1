@@ -1,6 +1,6 @@
 import { useGameStore } from "./gameStore";
 import { calculateTax } from "./types";
-import { sound } from "./sound";
+import { sound, music } from "./sound";
 import { useEffect, useState } from "react";
 import TouchControls from "./TouchControls";
 import MiniMap from "./MiniMap";
@@ -290,6 +290,17 @@ const BUILDING_SECTIONS: BuildingSection[] = [
       { id: "botpolicy",    emoji: "🏛️", label: "BotPolicyHall" },
     ],
   },
+  {
+    title: "AI & Bots",
+    emoji: "🤖",
+    items: [
+      { id: "botaihq",       emoji: "🧠", label: "BotAI Headquarters" },
+      { id: "botmlab",       emoji: "⚙️", label: "BotMachine Learning Lab" },
+      { id: "botdatacenter", emoji: "🖥️", label: "BotData Center" },
+      { id: "botrobotics",   emoji: "🔧", label: "BotRobotics Factory" },
+      { id: "botautomation", emoji: "🔄", label: "BotAutomation Hub" },
+    ],
+  },
 ];
 
 const BUILDINGS: BuildingItem[] = BUILDING_SECTIONS.flatMap((s) => s.items);
@@ -395,23 +406,18 @@ export default function HUD() {
       <div className={`flex gap-3 flex-wrap transition-opacity ${panelsHidden ? "hidden" : ""}`}>
         {/* Finance Panel */}
         <div className="bg-slate-950/85 text-white rounded-2xl p-4 min-w-[230px] border border-emerald-500/20 backdrop-blur-md shadow-[0_0_30px_-10px_rgba(34,197,94,0.4)]">
-          <PanelHeader>Tax Return Summary</PanelHeader>
+          <PanelHeader>💰 Financial Overview</PanelHeader>
           <div className="space-y-1.5 text-sm">
-            <Row label="Gross Income" value={`$${income.toLocaleString()}`} tone="good" />
-            <Row label="Total Deductions" value={`-$${totalDed.toLocaleString()}`} tone="muted" />
+            <Row label="Total Income" value={`$${income.toLocaleString()}`} tone="good" />
+            <Row label="Total Savings" value={`$${Math.max(0, income - deductions).toLocaleString()}`} tone="good" />
+            <Row label="Investments" value={`$${deductions.toLocaleString()}`} tone="warn" />
             <div className="border-t border-emerald-500/10 pt-1.5">
-              <Row label="Taxable Income" value={`$${taxableIncome.toLocaleString()}`} />
+              <Row label="Net Worth" value={`$${Math.max(0, income + deductions).toLocaleString()}`} tone="good" bold />
             </div>
-            <Row label="Tax Bracket" value={bracket} tone="warn" />
-            <Row label="Tax Owed" value={`$${tax.toLocaleString()}`} tone="bad" />
-            <Row label="Withheld" value={`$${withheld.toLocaleString()}`} tone="muted" />
+            <Row label="Financial IQ" value={`Level ${Math.floor(completed / 5) + 1}`} tone="warn" />
+            <Row label="Buildings Explored" value={`${completed}/${BUILDINGS.length}`} tone="muted" />
             <div className="border-t border-emerald-500/10 pt-1.5">
-              <Row
-                label={estimatedRefund >= 0 ? "Est. Refund" : "Amount Owed"}
-                value={`$${Math.abs(estimatedRefund).toLocaleString()}`}
-                tone={estimatedRefund >= 0 ? "good" : "bad"}
-                bold
-              />
+              <Row label="XP Score" value={`${score.toLocaleString()}`} tone="good" bold />
             </div>
           </div>
         </div>
@@ -499,7 +505,7 @@ export default function HUD() {
           </div>
         </div>
 
-        {/* Documents / 1040 Backpack Panel */}
+        {/* Learning Backpack Panel */}
         <DocumentsPanel docs={documents} income={income} deductions={deductions} withheld={withheld} tax={tax} />
       </div>
 
@@ -547,50 +553,41 @@ interface DocsPanelProps {
 }
 
 function DocumentsPanel({ docs, income, deductions, withheld, tax }: DocsPanelProps) {
-  // Mirror `calculateTax` in types.ts — extra deductions stack ON TOP of the
-  // standard deduction. Keeping the math in sync prevents the Form 1040
-  // preview from disagreeing with the live tax summary above.
-  const standardDeduction = 14600;
-  const totalDeduction = standardDeduction + deductions;
-  const taxable = Math.max(0, income - totalDeduction);
-  const net = withheld - tax;
+  const netWorth = Math.max(0, income + deductions);
+  const savingsRate = income > 0 ? Math.round(((income - deductions) / income) * 100) : 0;
   return (
     <div className="bg-slate-950/85 text-white rounded-2xl p-4 min-w-[230px] max-w-[260px] border border-amber-500/20 backdrop-blur-md shadow-[0_0_30px_-10px_rgba(251,191,36,0.4)]">
-      <PanelHeader>📋 Form 1040 — Live Preview</PanelHeader>
+      <PanelHeader>🎓 Learning Progress</PanelHeader>
       <div className="space-y-1 text-[12px]">
-        <FormLine line="1a" label="Wages (W-2)" value={income} />
-        <FormLine line="11" label="AGI" value={income} />
-        <FormLine line="12" label="Std. ded." value={-standardDeduction} />
-        {deductions > 0 && <FormLine line="12b" label="Other ded." value={-deductions} />}
+        <FormLine line="📊" label="Financial Literacy" value={Math.min(100, docs.length * 5)} />
+        <FormLine line="💰" label="Net Worth" value={netWorth} />
+        <FormLine line="📈" label="Savings Rate" value={savingsRate} />
         <div className="border-t border-amber-500/15 pt-1">
-          <FormLine line="15" label="Taxable income" value={taxable} bold />
+          <FormLine line="🎯" label="Lessons Completed" value={docs.length} bold />
         </div>
-        <FormLine line="16" label="Tax" value={-tax} />
-        <FormLine line="25a" label="Withheld" value={withheld} />
-        <div className="border-t border-amber-500/15 pt-1">
-          <FormLine
-            line={net >= 0 ? "34" : "37"}
-            label={net >= 0 ? "Refund" : "Owe"}
-            value={Math.abs(net)}
-            bold
-            highlight={net >= 0 ? "good" : "bad"}
-          />
+        <FormLine line="🏦" label="Income Sources" value={Math.floor(income / 10000) + 1} />
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-emerald-200/45 font-mono text-[10px] w-7 shrink-0">🛡️</span>
+          <span className="text-emerald-200/70 flex-1 truncate">Insurance Coverage</span>
+          <span className="font-mono tabular-nums text-emerald-100">
+            {withheld > 0 ? "Active" : "None"}
+          </span>
         </div>
       </div>
       <div className="mt-3 pt-2 border-t border-amber-500/15">
         <div className="text-[10px] uppercase tracking-[0.18em] text-amber-300/80 font-bold mb-1.5">
-          Backpack ({docs.length})
+          🎒 Knowledge Backpack ({docs.length})
         </div>
         {docs.length === 0 ? (
           <div className="text-[11px] text-emerald-200/40 italic">
-            Visit buildings to collect IRS documents…
+            Visit buildings to collect financial lessons…
           </div>
         ) : (
           <div className="flex flex-wrap gap-1.5">
             {docs.map((d) => (
               <div
                 key={d.id}
-                title={`${d.code} — ${d.label} (Line ${d.line})`}
+                title={`${d.code} — ${d.label}`}
                 className="px-2 py-1 rounded-md bg-amber-900/20 border border-amber-500/30 text-[10px] font-mono text-amber-200 flex items-center gap-1"
               >
                 <span>{d.icon}</span>
@@ -668,15 +665,16 @@ function SoundToggle() {
   const [muted, setMuted] = useState<boolean>(() => sound.isMuted());
   useEffect(() => {
     sound.setMuted(muted);
+    music.setMuted(muted);
   }, [muted]);
   return (
     <button
       type="button"
       onClick={() => setMuted((m) => !m)}
       className="fixed top-4 right-4 z-20 pointer-events-auto bg-slate-950/80 text-white text-xs rounded-xl px-3 py-2 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_24px_-12px_rgba(34,197,94,0.5)] hover:bg-slate-900/90 transition-colors"
-      title={muted ? "Unmute sound" : "Mute sound"}
+      title={muted ? "Unmute sound & music" : "Mute sound & music"}
     >
-      {muted ? "🔇" : "🔊"}
+      {muted ? "🔇" : "🔊🎵"}
     </button>
   );
 }

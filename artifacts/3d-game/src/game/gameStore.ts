@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { GameState, DialogContent, PurchaseOption, TaxDocument, calculateTax } from "./types";
 import { LayoutOverrides, loadLayout, saveLayout, snap } from "./buildingLayout";
+import { music } from "./sound";
 
 export type CameraMode = 0 | 1 | 2 | 3 | 4;
 
@@ -86,7 +87,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         WEATHER_CYCLE[(WEATHER_CYCLE.indexOf(s.weather) + 1) % WEATHER_CYCLE.length],
     })),
 
-  startGame: () => set({ ...initialState, screen: "game" }),
+  startGame: () => {
+    music.start();
+    set({ ...initialState, screen: "game" });
+  },
 
   openDialog: (dialog) =>
     set((s) => ({ dialog, dialogOpenTick: s.dialogOpenTick + 1 })),
@@ -136,7 +140,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
-  restart: () => set({ ...initialState }),
+  restart: () => {
+    music.stop();
+    set({ ...initialState });
+  },
 
   // ── City Editor ──────────────────────────────────────────
   editMode: false,

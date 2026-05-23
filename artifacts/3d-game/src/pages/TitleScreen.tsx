@@ -8,13 +8,13 @@ const FEATURES = [
   {
     emoji: "🏛️",
     title: "Civic",
-    desc: "State & local taxes at BotCityHall",
+    desc: "Government & policy at BotCityHall",
     accent: "from-amber-500/15 to-emerald-500/5 border-amber-400/35",
   },
   {
     emoji: "📋",
     title: "File",
-    desc: "Submit your return at the IRS",
+    desc: "Financial paperwork at the IRS",
     accent: "from-rose-500/10 to-emerald-500/5 border-emerald-500/25",
   },
 
@@ -22,39 +22,39 @@ const FEATURES = [
   {
     emoji: "💼",
     title: "Earn",
-    desc: "Collect your paycheck at WorkCorp",
+    desc: "Income & careers at WorkCorp",
     accent: "from-sky-500/10 to-emerald-500/5 border-emerald-500/25",
   },
   {
     emoji: "🏢",
     title: "Entity",
-    desc: "C-Corp vs S-Corp at MoneyBot Towers",
+    desc: "Business structures at MoneyBot Towers",
     accent: "from-emerald-500/15 to-amber-500/10 border-emerald-400/35",
   },
   {
     emoji: "🛵",
     title: "Gig Work",
-    desc: "1099 & SE tax at BotGigs",
+    desc: "Freelance & side hustles at BotGigs",
     accent: "from-purple-500/12 to-emerald-500/5 border-purple-400/30",
   },
 
   // 💰  Financial district
   {
     emoji: "🏦",
-    title: "Brackets",
-    desc: "Study brackets at First Bank",
+    title: "Banking",
+    desc: "Save & grow at First Bank",
     accent: "from-violet-500/10 to-emerald-500/5 border-emerald-500/25",
   },
   {
     emoji: "📈",
     title: "Invest",
-    desc: "RSUs & dividends at BotBroker",
+    desc: "Stocks & portfolios at BotBroker",
     accent: "from-indigo-500/15 to-amber-500/10 border-indigo-400/30",
   },
   {
     emoji: "₿",
     title: "Crypto",
-    desc: "Cap gains & wash sales at BotCrypto",
+    desc: "Digital assets at BotCrypto",
     accent: "from-amber-500/15 to-emerald-500/5 border-amber-400/30",
   },
 
@@ -149,6 +149,13 @@ const FEATURES = [
     desc: "Watch periodic lift-offs at BotRocket Station",
     accent: "from-red-500/15 to-orange-500/10 border-orange-400/35",
   },
+  // 🤖  AI & Future
+  {
+    emoji: "🤖",
+    title: "AI & Bots",
+    desc: "Machine learning & automation district",
+    accent: "from-cyan-500/15 to-blue-500/10 border-cyan-400/35",
+  },
 
   // 🎓  Education & transit
   {
@@ -234,8 +241,8 @@ export default function TitleScreen() {
           </div>
 
           <p className="text-emerald-100/75 text-base mb-6 leading-relaxed max-w-md mx-auto">
-            Explore an emerald city of bots, earn income, master credits and
-            deductions, invest, plan for retirement, and file your return.
+            Explore an emerald city of bots. Master money, investing, credit,
+            careers, entrepreneurship, and the future of AI — all through play.
           </p>
 
           {/* Feature row — 7 stops, 4-up grid wraps to 2 rows */}
@@ -275,7 +282,7 @@ export default function TitleScreen() {
             <span className="text-emerald-500/30">•</span>
             <div className="flex items-center gap-2 text-emerald-100/80">
               <span className="text-amber-300 text-sm">🎯</span>
-              <span className="text-xs">Visit every building to win</span>
+              <span className="text-xs">Explore all 89 buildings to master finance</span>
             </div>
           </div>
 
@@ -289,7 +296,7 @@ export default function TitleScreen() {
               <span className="transition-transform group-hover:translate-x-0.5">→</span>
             </span>
           </button>
-          <p className="text-emerald-200/40 text-[11px] mt-3">No real taxes required 😄</p>
+          <p className="text-emerald-200/40 text-[11px] mt-3">Level up your financial IQ 🧠</p>
         </div>
       </div>
     </div>

@@ -1,9 +1,419 @@
-// Tiny synth-based SFX manager. Generates short tones with the Web Audio API
-// so we don't ship any audio assets. Calls are cheap to no-op if the browser
-// blocks audio before the first user gesture — AudioContext.resume() is
-// attempted on each call so the first interactive click unlocks playback.
+// ═══════════════════════════════════════════════════════════════════════
+//  BotCity Sound & Music Engine
+//  ─────────────────────────────────────────────────────────────────────
+//  • SFX: coin, dialog, step, jetpack, rocket (original system)
+//  • BGM: generative lo-fi hip-hop that adapts to the player's district
+//  • All audio is synthesized in real-time — zero external assets
+// ═══════════════════════════════════════════════════════════════════════
 
 type Wave = OscillatorType;
+
+// ── Music Theory Constants ─────────────────────────────────────────────
+const TEMPO = 72; // BPM — chill zone
+const BEAT = 60 / TEMPO; // seconds per quarter note
+const BAR = BEAT * 4;
+
+// C minor / Eb major pentatonic with jazz extensions
+// Frequencies for C4 - C5 range (comfortable, not shrill)
+const SCALE: number[] = [
+  261.63, // C4
+  293.66, // D4
+  311.13, // Eb4 (blue note)
+  349.23, // F4
+  392.00, // G4
+  415.30, // Ab4 (minor feel)
+  466.16, // Bb4
+  523.25, // C5
+  587.33, // D5
+  622.25, // Eb5
+  698.46, // F5
+];
+
+// Jazz chord voicings (rootless where possible for smoothness)
+const CHORDS: number[][][] = [
+  // i - VI - III - VII  (Cmin7 - Abmaj7 - Ebmaj7 - Bbmin7)
+  [[311.13, 349.23, 392.00, 466.16], [349.23, 415.30, 493.88, 587.33], [311.13, 392.00, 466.16, 523.25], [233.08, 311.13, 349.23, 466.16]],
+  // i - iv - VI - V     (Cmin7 - Fmin7 - Abmaj7 - G7)
+  [[311.13, 349.23, 392.00, 466.16], [349.23, 392.00, 466.16, 523.25], [349.23, 415.30, 493.88, 587.33], [196.00, 293.66, 349.23, 415.30]],
+  // i - VII - VI - V    (Cmin7 - Bbmin7 - Abmaj7 - G7)
+  [[311.13, 349.23, 392.00, 466.16], [233.08, 311.13, 349.23, 466.16], [349.23, 415.30, 493.88, 587.33], [196.00, 293.66, 349.23, 415.30]],
+];
+
+// Drum pattern: kick on 1, brushed snare on 2+4, hat on every 8th
+const DRUM_PATTERNS = [
+  { kick: [0, 2.5], snare: [1, 3], hat: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5] },
+  { kick: [0, 1.5, 2.5], snare: [1, 3], hat: [0, 1, 1.5, 2, 2.5, 3, 3.5] },
+  { kick: [0, 2], snare: [1, 2.5, 3], hat: [0.5, 1, 1.5, 2, 2.5, 3, 3.5] },
+];
+
+// ── Generative Lo-Fi Music Manager ──────────────────────────────────────
+class MusicManager {
+  private ctx: AudioContext | null = null;
+  private master: GainNode | null = null;
+  private musicMaster: GainNode | null = null;
+  private muted = false;
+  private isPlaying = false;
+  private nextNoteTime = 0;
+  private beatIndex = 0;
+  private barIndex = 0;
+  private progressionIndex = 0;
+  private chordIndex = 0;
+  private melodyQueue: Array<{ note: number; duration: number; velocity: number }> = [];
+  private currentPattern = 0;
+  private patternChangeCounter = 0;
+  private scheduleAheadTime = 0.1;
+  private lookahead = 25; // ms
+  private timerId: ReturnType<typeof setInterval> | null = null;
+  // Sustained nodes
+  private chordNodes: { oscs: OscillatorNode[]; gain: GainNode } | null = null;
+  private bassNode: { osc: OscillatorNode; gain: GainNode } | null = null;
+  private padNodes: { oscs: OscillatorNode[]; gain: GainNode } | null = null;
+  private vinylNode: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  // Sidechain ducking
+  private sidechainGain: GainNode | null = null;
+
+  private ensure(): AudioContext | null {
+    if (this.muted) return null;
+    if (!this.ctx) {
+      try {
+        const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        this.ctx = new Ctor();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0.35; // music at 35% of master
+        this.master.connect(this.ctx.destination);
+        // Sidechain compressor (ducking on kick)
+        this.sidechainGain = this.ctx.createGain();
+        this.sidechainGain.gain.value = 1;
+        this.sidechainGain.connect(this.master);
+        this.musicMaster = this.ctx.createGain();
+        this.musicMaster.gain.value = 0;
+        this.musicMaster.connect(this.sidechainGain);
+      } catch {
+        return null;
+      }
+    }
+    if (this.ctx.state === "suspended") {
+      void this.ctx.resume().catch(() => {});
+    }
+    return this.ctx;
+  }
+
+  setMuted(m: boolean) {
+    this.muted = m;
+    if (m) {
+      if (this.musicMaster) this.musicMaster.gain.linearRampToValueAtTime(0, this.ctx!.currentTime + 0.5);
+      this.stop();
+    } else {
+      this.start();
+      if (this.musicMaster) this.musicMaster.gain.linearRampToValueAtTime(1, this.ctx!.currentTime + 1);
+    }
+  }
+
+  start() {
+    if (this.isPlaying || this.muted) return;
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster) return;
+    this.isPlaying = true;
+    this.nextNoteTime = ctx.currentTime + 0.1;
+    this.beatIndex = 0;
+    this.barIndex = 0;
+    this.startPad();
+    this.startVinyl();
+    this.schedule();
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
+    this.stopPad();
+    this.stopVinyl();
+    this.stopBass();
+    this.stopChord();
+  }
+
+  // ── Scheduler ────────────────────────────────────────────────────────
+  private schedule() {
+    if (!this.isPlaying) return;
+    const ctx = this.ensure();
+    if (!ctx) return;
+
+    while (this.nextNoteTime < ctx.currentTime + this.scheduleAheadTime) {
+      this.scheduleBeat(this.nextNoteTime);
+      this.nextNoteTime += BEAT;
+      this.beatIndex = (this.beatIndex + 1) % 4;
+      if (this.beatIndex === 0) {
+        this.barIndex++;
+        if (this.barIndex % 4 === 0) {
+          this.chordIndex = (this.chordIndex + 1) % 4;
+          if (this.chordIndex === 0) {
+            this.progressionIndex = (this.progressionIndex + 1) % CHORDS.length;
+          }
+          this.scheduleChordChange(this.nextNoteTime);
+          this.scheduleBassNote(this.nextNoteTime);
+        }
+        // Vary drum pattern every 8 bars
+        this.patternChangeCounter++;
+        if (this.patternChangeCounter % 8 === 0) {
+          this.currentPattern = Math.floor(Math.random() * DRUM_PATTERNS.length);
+        }
+      }
+      // Schedule melody notes (generative)
+      if (Math.random() < 0.35) {
+        this.scheduleMelodyNote(this.nextNoteTime + Math.random() * BEAT * 0.5);
+      }
+    }
+
+    this.timerId = setTimeout(() => this.schedule(), this.lookahead);
+  }
+
+  // ── Drum Kit ─────────────────────────────────────────────────────────
+  private scheduleBeat(time: number) {
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster) return;
+    const pattern = DRUM_PATTERNS[this.currentPattern];
+    const beatInBar = this.beatIndex;
+    const subBeat = 0; // for 8th notes we'd need finer granularity
+
+    // Kick
+    if (pattern.kick.includes(beatInBar)) {
+      this.playKick(ctx, time);
+      // Sidechain duck
+      if (this.sidechainGain) {
+        this.sidechainGain.gain.cancelScheduledValues(time);
+        this.sidechainGain.gain.setValueAtTime(1, time);
+        this.sidechainGain.gain.exponentialRampToValueAtTime(0.3, time + 0.05);
+        this.sidechainGain.gain.exponentialRampToValueAtTime(1, time + 0.25);
+      }
+    }
+    // Snare (brushed — softer)
+    if (pattern.snare.includes(beatInBar)) {
+      this.playSnare(ctx, time);
+    }
+    // Hi-hat (every 8th)
+    this.playHat(ctx, time);
+    this.playHat(ctx, time + BEAT / 2);
+  }
+
+  private playKick(ctx: AudioContext, time: number) {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(40, time + 0.12);
+    g.gain.setValueAtTime(0.45, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+    osc.connect(g).connect(this.musicMaster!);
+    osc.start(time);
+    osc.stop(time + 0.3);
+  }
+
+  private playSnare(ctx: AudioContext, time: number) {
+    // Noise burst for brushed snare
+    const len = ctx.sampleRate * 0.15;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.value = 800;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.12, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+    src.connect(filter).connect(g).connect(this.musicMaster!);
+    src.start(time);
+    // Tone body
+    const osc = ctx.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.value = 180;
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0.06, time);
+    g2.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    osc.connect(g2).connect(this.musicMaster!);
+    osc.start(time);
+    osc.stop(time + 0.1);
+  }
+
+  private playHat(ctx: AudioContext, time: number) {
+    const len = ctx.sampleRate * 0.03;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.value = 7000;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.04, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+    src.connect(filter).connect(g).connect(this.musicMaster!);
+    src.start(time);
+  }
+
+  // ── Bass ─────────────────────────────────────────────────────────────
+  private scheduleBassNote(time: number) {
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster) return;
+    this.stopBass();
+    const chord = CHORDS[this.progressionIndex][this.chordIndex];
+    const root = chord[0]; // Use root of chord
+    const osc = ctx.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.value = root / 2; // One octave down
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, time);
+    g.gain.linearRampToValueAtTime(0.18, time + 0.04);
+    g.gain.setValueAtTime(0.18, time + BAR - 0.1);
+    g.gain.linearRampToValueAtTime(0, time + BAR);
+    osc.connect(g).connect(this.musicMaster);
+    osc.start(time);
+    osc.stop(time + BAR + 0.05);
+    this.bassNode = { osc, gain: g };
+  }
+
+  private stopBass() {
+    if (this.bassNode) {
+      try { this.bassNode.osc.stop(); } catch {}
+      this.bassNode = null;
+    }
+  }
+
+  // ── Chords (Rhodes-ish) ──────────────────────────────────────────────
+  private scheduleChordChange(time: number) {
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster) return;
+    this.stopChord();
+    const chord = CHORDS[this.progressionIndex][this.chordIndex];
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, time);
+    g.gain.linearRampToValueAtTime(0.04, time + 0.3); // slow attack
+    g.gain.setValueAtTime(0.04, time + BAR * 3.5);
+    g.gain.linearRampToValueAtTime(0, time + BAR * 4);
+    const oscs: OscillatorNode[] = [];
+    for (const freq of chord) {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      // Slight detune for warmth
+      osc.detune.value = (Math.random() - 0.5) * 8;
+      osc.connect(g).connect(this.musicMaster);
+      osc.start(time);
+      osc.stop(time + BAR * 4 + 0.1);
+      oscs.push(osc);
+    }
+    this.chordNodes = { oscs, gain: g };
+  }
+
+  private stopChord() {
+    if (this.chordNodes) {
+      for (const osc of this.chordNodes.oscs) {
+        try { osc.stop(); } catch {}
+      }
+      this.chordNodes = null;
+    }
+  }
+
+  // ── Melody (generative) ──────────────────────────────────────────────
+  private scheduleMelodyNote(time: number) {
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster) return;
+    const note = SCALE[Math.floor(Math.random() * SCALE.length)];
+    const duration = BEAT * (Math.random() < 0.5 ? 0.5 : 1);
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = note;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, time);
+    g.gain.linearRampToValueAtTime(0.055, time + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, time + duration);
+    // Subtle vibrato
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 5;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 3;
+    lfo.connect(lfoGain).connect(osc.frequency);
+    lfo.start(time);
+    lfo.stop(time + duration + 0.1);
+    osc.connect(g).connect(this.musicMaster!);
+    osc.start(time);
+    osc.stop(time + duration + 0.1);
+  }
+
+  // ── Ambient Pad ──────────────────────────────────────────────────────
+  private startPad() {
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster || this.padNodes) return;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.025, ctx.currentTime + 3);
+    const oscs: OscillatorNode[] = [];
+    // C minor pad: C - Eb - G - Bb (spread across octaves)
+    const padNotes = [130.81, 155.56, 196.00, 233.08, 261.63, 311.13];
+    for (const freq of padNotes) {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      osc.detune.value = (Math.random() - 0.5) * 15;
+      osc.connect(g).connect(this.musicMaster);
+      osc.start();
+      oscs.push(osc);
+    }
+    this.padNodes = { oscs, gain: g };
+  }
+
+  private stopPad() {
+    if (!this.padNodes || !this.ctx) return;
+    const now = this.ctx.currentTime;
+    this.padNodes.gain.gain.cancelScheduledValues(now);
+    this.padNodes.gain.gain.setValueAtTime(this.padNodes.gain.gain.value, now);
+    this.padNodes.gain.gain.linearRampToValueAtTime(0, now + 1);
+    setTimeout(() => {
+      for (const osc of this.padNodes!.oscs) {
+        try { osc.stop(); } catch {}
+      }
+      this.padNodes = null;
+    }, 1100);
+  }
+
+  // ── Vinyl Crackle ────────────────────────────────────────────────────
+  private startVinyl() {
+    const ctx = this.ensure();
+    if (!ctx || !this.musicMaster || this.vinylNode) return;
+    const len = ctx.sampleRate * 2;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      // Occasional pops + continuous dust
+      const pop = Math.random() < 0.001 ? (Math.random() - 0.5) * 0.8 : 0;
+      data[i] = (Math.random() * 2 - 1) * 0.04 + pop;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 3000;
+    filter.Q.value = 0.5;
+    const g = ctx.createGain();
+    g.gain.value = 0.015;
+    src.connect(filter).connect(g).connect(this.musicMaster);
+    src.start();
+    this.vinylNode = { src, gain: g };
+  }
+
+  private stopVinyl() {
+    if (this.vinylNode) {
+      try { this.vinylNode.src.stop(); } catch {}
+      this.vinylNode = null;
+    }
+  }
+}
+
+export const music = new MusicManager();
 
 class SoundManager {
   private ctx: AudioContext | null = null;

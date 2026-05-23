@@ -103,6 +103,8 @@ export default function Building({ data, isNear }: BuildingProps) {
   const commitBuildingPos = useGameStore((s) => s.commitBuildingPos);
   const isSelected = selectedBuildingId === data.id;
 
+  const windowGlowRef = useRef<THREE.Mesh>(null!);
+
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     if (!editMode) return;
     e.stopPropagation();
@@ -129,6 +131,10 @@ export default function Building({ data, isNear }: BuildingProps) {
     if (antennaRef.current) {
       const mat = antennaRef.current.material as THREE.MeshStandardMaterial;
       mat.emissiveIntensity = 1.4 + Math.sin(t * 4 + data.position[2]) * 0.6;
+    }
+    if (windowGlowRef.current) {
+      const mat = windowGlowRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = (isNear ? 2.5 : 1.2) + Math.sin(t * 3 + data.position[0]) * 0.4;
     }
   });
 
@@ -176,6 +182,21 @@ export default function Building({ data, isNear }: BuildingProps) {
           emissiveIntensity={isNear ? 0.4 : 0.15}
           metalness={0.7}
           roughness={0.25}
+        />
+      </mesh>
+
+      {/* ─── Glass facade overlay (front face only) ─────── */}
+      <mesh position={[0, 0, depth / 2 + 0.02]} ref={windowGlowRef}>
+        <planeGeometry args={[width - 0.3, height - 0.5]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={isNear ? 2.5 : 1.2}
+          transparent
+          opacity={0.08}
+          metalness={0.95}
+          roughness={0.05}
+          side={THREE.DoubleSide}
         />
       </mesh>
 

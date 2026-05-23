@@ -885,6 +885,12 @@ export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   { id: "bottrade",       label: "BotTrade Hall",         position: [-13, 1.5, 103], color: "#ea580c", roofColor: "#22d3ee", width: 1.8, depth: 1.8, height: 3, emoji: "🌐" },
   { id: "botinflation",   label: "BotInflation Park",     position: [22,  1.5, 103], color: "#c2410c", roofColor: "#fef3c7", width: 1.8, depth: 1.8, height: 3, emoji: "🎈" }, // moved from 40 (inside BotEnergy Plaza)
   { id: "botpolicy",      label: "BotPolicyHall",         position: [95,  1.5, 103], color: "#9a3412", roofColor: "#fbbf24", width: 1.8, depth: 1.8, height: 4, emoji: "🏛️" },
+  // ── AI & Bots 🤖 (cyan #06b6d4), new northeast tech corridor ──
+  { id: "botaihq",       label: "BotAI Headquarters",       position: [130, 1.5, -130], color: "#06b6d4", roofColor: "#1e3a8a", width: 2.5, depth: 2.5, height: 5, emoji: "🧠" },
+  { id: "botmlab",       label: "BotMachine Learning Lab",  position: [138, 1.5, -130], color: "#0891b2", roofColor: "#22d3ee", width: 2.0, depth: 2.0, height: 4, emoji: "⚙️" },
+  { id: "botdatacenter", label: "BotData Center",           position: [130, 1.5, -122], color: "#0e7490", roofColor: "#67e8f9", width: 2.2, depth: 2.2, height: 3, emoji: "🖥️" },
+  { id: "botrobotics",   label: "BotRobotics Factory",      position: [138, 1.5, -122], color: "#155e75", roofColor: "#fde047", width: 2.0, depth: 2.0, height: 4, emoji: "🔧" },
+  { id: "botautomation", label: "BotAutomation Hub",        position: [134, 1.5, -138], color: "#164e63", roofColor: "#fbbf24", width: 2.0, depth: 2.0, height: 3.5, emoji: "🔄" },
 ];
 
 const INTERACT_RADIUS = 4.5;

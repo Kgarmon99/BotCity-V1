@@ -173,6 +173,22 @@ export const QUARTERS: Quarter[] = [
       [70, -103],  // botecon (relocated to opposite strip to avoid landmark crowding)
     ]),
   },
+  {
+    id: "ai",
+    name: "AI & Bots",
+    emoji: "🤖",
+    hudTitle: "AI & Bots",
+    color: "#06b6d4",
+    signpost: [142, 0, -142],
+    signpostRotY: -Math.PI / 4, // faces center (SW)
+    lots: explicitLots("ai", [
+      [130, -130],  // botaihq
+      [138, -130],  // botmlab
+      [130, -122],  // botdatacenter
+      [138, -122],  // botrobotics
+      [134, -138],  // botautomation
+    ]),
+  },
 ];
 
 /** Flat list of all reserved lots — used for visualization. */

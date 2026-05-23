@@ -433,11 +433,154 @@ function Hill({ feature }: { feature: TerrainFeature }) {
   );
 }
 
+// Animated water fountain in the central plaza
+function Fountain() {
+  const waterRef = useRef<THREE.Mesh>(null!);
+  const rippleRefs = useRef<THREE.Mesh[]>([]);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (waterRef.current) {
+      const mat = waterRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = 0.3 + Math.sin(t * 2) * 0.1;
+    }
+    rippleRefs.current.forEach((ref, i) => {
+      if (ref) {
+        const scale = 1 + Math.sin(t * 3 + i * 1.5) * 0.15;
+        ref.scale.setScalar(scale);
+        (ref.material as THREE.MeshBasicMaterial).opacity = 0.3 - (scale - 1) * 0.5;
+      }
+    });
+  });
+  return (
+    <group position={[0, 0.1, 0]}>
+      {/* Water pool */}
+      <mesh ref={waterRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <circleGeometry args={[2.2, 32]} />
+        <meshStandardMaterial
+          color="#064e3b"
+          emissive="#22c55e"
+          emissiveIntensity={0.3}
+          metalness={0.9}
+          roughness={0.1}
+          transparent
+          opacity={0.85}
+        />
+      </mesh>
+      {/* Ripples */}
+      {[0, 1, 2].map((i) => (
+        <mesh
+          key={`ripple-${i}`}
+          ref={(el) => { if (el) rippleRefs.current[i] = el; }}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0.03 + i * 0.01, 0]}
+        >
+          <ringGeometry args={[0.5 + i * 0.4, 0.7 + i * 0.4, 32]} />
+          <meshBasicMaterial color="#4ade80" transparent opacity={0.2} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+      {/* Central jet */}
+      <mesh position={[0, 1.2, 0]}>
+        <cylinderGeometry args={[0.08, 0.2, 2.4, 8]} />
+        <meshStandardMaterial
+          color="#22c55e"
+          emissive="#4ade80"
+          emissiveIntensity={1.5}
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+      <pointLight position={[0, 1, 0]} intensity={2} distance={8} color="#22c55e" />
+    </group>
+  );
+}
+
+// Firefly particles that drift around the city
+function Fireflies() {
+  const refs = useRef<THREE.Mesh[]>([]);
+  const positions = useMemo(() =>
+    Array.from({ length: 40 }, () => ({
+      x: (Math.random() - 0.5) * 80,
+      y: 1 + Math.random() * 8,
+      z: (Math.random() - 0.5) * 80,
+      speed: 0.3 + Math.random() * 0.7,
+      offset: Math.random() * Math.PI * 2,
+    })),
+  []);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    refs.current.forEach((ref, i) => {
+      if (ref) {
+        const p = positions[i];
+        ref.position.x = p.x + Math.sin(t * p.speed + p.offset) * 3;
+        ref.position.y = p.y + Math.sin(t * p.speed * 0.7 + p.offset) * 1.5;
+        ref.position.z = p.z + Math.cos(t * p.speed + p.offset) * 3;
+        (ref.material as THREE.MeshStandardMaterial).emissiveIntensity =
+          1.5 + Math.sin(t * 4 + p.offset) * 1;
+      }
+    });
+  });
+
+  return (
+    <group>
+      {positions.map((_, i) => (
+        <mesh
+          key={`firefly-${i}`}
+          ref={(el) => { if (el) refs.current[i] = el; }}
+        >
+          <sphereGeometry args={[0.08, 8, 8]} />
+          <meshStandardMaterial
+            color="#fbbf24"
+            emissive="#fbbf24"
+            emissiveIntensity={2}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Street lamp with actual point light
+function StreetLamp({ pos }: { pos: [number, number, number] }) {
+  const lightRef = useRef<THREE.PointLight>(null!);
+  const bulbRef = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (lightRef.current) {
+      lightRef.current.intensity = 1.5 + Math.sin(t * 2 + pos[0]) * 0.3;
+    }
+    if (bulbRef.current) {
+      (bulbRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity =
+        2 + Math.sin(t * 2 + pos[0]) * 0.5;
+    }
+  });
+  return (
+    <group position={pos}>
+      <mesh position={[0, 1.75, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.06, 3.5, 6]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.8} />
+      </mesh>
+      <mesh ref={bulbRef} position={[0, 3.6, 0]}>
+        <torusGeometry args={[0.35, 0.06, 8, 24]} />
+        <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={2} toneMapped={false} />
+      </mesh>
+      <pointLight
+        ref={lightRef}
+        position={[0, 3.2, 0]}
+        intensity={1.5}
+        distance={12}
+        color="#22c55e"
+        castShadow={false}
+      />
+    </group>
+  );
+}
+
 function Terrain() {
   return (
     <group>
       {hillPositions.map((f, i) => (
-        // Apply vertical squash via parent group so the dome reads as a hill.
         <group key={`hill-${i}`} position={f.pos} scale={[1, f.height / f.baseR, 1]}>
           <Hill feature={f} />
         </group>
@@ -508,10 +651,16 @@ export default function World() {
         <DataSpire key={`spire-${i}`} pos={s.pos} height={s.height} />
       ))}
 
-      {/* Neon green lamps */}
+      {/* Street lamps with real light casting */}
       {lampPositions.map((pos, i) => (
-        <NeonLamp key={`lamp-${i}`} pos={pos} />
+        <StreetLamp key={`lamp-${i}`} pos={pos} />
       ))}
+
+      {/* Central fountain */}
+      <Fountain />
+
+      {/* Firefly particles */}
+      <Fireflies />
 
       {/* Floating coins */}
       {coinPositions.map((pos, i) => (
