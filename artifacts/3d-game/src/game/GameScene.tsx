@@ -41,6 +41,8 @@ import ObservationTower from "./ObservationTower";
 import AmbientLife from "./AmbientLife";
 import DistrictDetails from "./DistrictDetails";
 import BotLand from "./BotLand";
+import GroundDetails from "./GroundDetails";
+import StreetFurniture from "./StreetFurniture";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
 
@@ -1074,6 +1076,8 @@ export default function GameScene() {
           <Skybox />
           <World />
           <RoadGrid />
+          <GroundDetails />
+          <StreetFurniture />
           <CityDetails />
           <CityBuildings />
           <CityExpansion />

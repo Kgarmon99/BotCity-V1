@@ -3,6 +3,7 @@ import { useFrame, ThreeEvent } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameStore } from "./gameStore";
+import { getDayFactor, getNightFactor } from "./DayNightCycle";
 
 export interface BuildingData {
   id: string;
@@ -54,29 +55,66 @@ function WindowGrid({
       ? [0]
       : Array.from({ length: windowsPerRow }, (_, i) => -usable / 2 + i * step);
 
+  // Each window gets a random "lit" state that persists
+  const litWindows = useRef<boolean[][]>(() => {
+    return Array.from({ length: count }, () =>
+      Array.from({ length: windowsPerRow }, () => Math.random() > 0.3)
+    );
+  }).current;
+
+  const paneRefs = useRef<(THREE.Mesh | null)[][]>([]);
+
+  useFrame(() => {
+    const nightFactor = getNightFactor();
+    const dayFactor = getDayFactor();
+    paneRefs.current.forEach((row, r) => {
+      row.forEach((pane, c) => {
+        if (pane) {
+          const mat = pane.material as THREE.MeshStandardMaterial;
+          const isLit = litWindows[r]?.[c] ?? false;
+          // During day: windows reflect sky (low emissive)
+          // During night: lit windows glow warm, unlit ones dark
+          if (isLit) {
+            mat.emissiveIntensity = 0.3 + nightFactor * 2.2;
+            mat.color.setHex(0xffeebb); // warm light
+            mat.emissive.setHex(0xffcc66);
+          } else {
+            mat.emissiveIntensity = 0.1 + nightFactor * 0.3;
+            mat.color.setHex(0x1a2332); // dark
+            mat.emissive.setHex(0x0a1525);
+          }
+        }
+      });
+    });
+  });
+
   return (
     <group rotation={[0, rotationY, 0]} position={[0, 0, 0]}>
       {Array.from({ length: count }).map((_, row) =>
         xs.map((x, col) => {
           const y = startY + row * spacing;
+          const isLit = litWindows[row]?.[col] ?? false;
           return (
             <group key={`${row}-${col}`} position={[x, y, z]}>
-              {/* Window pane */}
-              <mesh>
+              {/* Window pane with night lighting */}
+              <mesh ref={(el) => {
+                if (!paneRefs.current[row]) paneRefs.current[row] = [];
+                paneRefs.current[row][col] = el;
+              }}>
                 <boxGeometry args={[0.55, 0.4, 0.04]} />
                 <meshStandardMaterial
-                  color={color}
-                  emissive={color}
-                  emissiveIntensity={1.4}
+                  color={isLit ? "#ffeebb" : "#1a2332"}
+                  emissive={isLit ? "#ffcc66" : "#0a1525"}
+                  emissiveIntensity={isLit ? 1.4 : 0.1}
                   toneMapped={false}
                 />
               </mesh>
-              {/* Frame — sits in front of the pane (no overlap with pane volume) */}
+              {/* Frame */}
               <mesh position={[0, 0, 0.04]}>
                 <boxGeometry args={[0.62, 0.47, 0.02]} />
                 <meshStandardMaterial color="#0b1220" metalness={0.6} roughness={0.4} />
               </mesh>
-              {/* Mullions (horizontal + vertical), in front of frame */}
+              {/* Mullions */}
               <mesh position={[0, 0, 0.06]}>
                 <boxGeometry args={[0.55, 0.03, 0.01]} />
                 <meshStandardMaterial color="#0b1220" />
@@ -85,6 +123,13 @@ function WindowGrid({
                 <boxGeometry args={[0.03, 0.4, 0.01]} />
                 <meshStandardMaterial color="#0b1220" />
               </mesh>
+              {/* Subtle window glow on ground below (night only) */}
+              {isLit && (
+                <mesh position={[0, -y - 0.5, 0.15]} rotation={[-Math.PI / 2, 0, 0]}>
+                  <planeGeometry args={[0.5, 0.3]} />
+                  <meshBasicMaterial color="#ffcc66" transparent opacity={0.08} />
+                </mesh>
+              )}
             </group>
           );
         }),
