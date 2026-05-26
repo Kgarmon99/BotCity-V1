@@ -1,33 +1,63 @@
 import { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 // =====================================================================
-// GroundDetails — grass tufts, pavement patches, parking lots,
-// plazas, and ground clutter to break up the flat green plane.
+// GroundDetails — instanced grass, pavement, parking, plazas.
+// Uses THREE.InstancedMesh for repeated objects to minimize draw calls.
 // =====================================================================
 
-function GrassTuft({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
-  const blades = useMemo(() => {
-    return Array.from({ length: 4 }, (_, i) => ({
-      x: (Math.random() - 0.5) * 0.15,
-      z: (Math.random() - 0.5) * 0.15,
-      h: 0.08 + Math.random() * 0.12,
-      rot: Math.random() * Math.PI,
-      lean: (Math.random() - 0.5) * 0.2,
-      color: ["#16a34a", "#22c55e", "#15803d"][i % 3],
-    }));
+function InstancedGrass() {
+  const count = 40;
+  const meshRef = useRef<THREE.InstancedMesh>(null!);
+
+  const { matrices, colors } = useMemo(() => {
+    const mats = new Float32Array(count * 16);
+    const cols = new Float32Array(count * 3);
+    const dummy = new THREE.Object3D();
+    const palette = [
+      new THREE.Color("#16a34a"),
+      new THREE.Color("#22c55e"),
+      new THREE.Color("#15803d"),
+      new THREE.Color("#4ade80"),
+    ];
+
+    const positions: [number, number, number][] = [
+      [-8, 0, 8], [-6, 0, 10], [-10, 0, 6], [-5, 0, 5],
+      [8, 0, -8], [10, 0, -6], [6, 0, -10], [5, 0, -5],
+      [-50, 0, -50], [-52, 0, -48], [-48, 0, -52],
+      [50, 0, 50], [52, 0, 48], [48, 0, 52],
+      [-20, 0, 30], [25, 0, -25], [-30, 0, -20], [35, 0, 35],
+      [-15, 0, -35], [40, 0, -40], [-45, 0, 15], [20, 0, 45],
+      [-60, 0, 20], [60, 0, -20], [15, 0, 55], [-25, 0, -50],
+      [45, 0, 25], [-55, 0, -15], [30, 0, -45], [-40, 0, 40],
+      [75, 0, 10], [-75, 0, -10], [10, 0, 75], [-10, 0, -75],
+      [100, 0, 30], [-100, 0, -30], [30, 0, 100], [-30, 0, -100],
+      [0, 0, 60], [0, 0, -60],
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const [bx, by, bz] = positions[i] || [0, 0, 0];
+      dummy.position.set(bx + (Math.random() - 0.5) * 2, by, bz + (Math.random() - 0.5) * 2);
+      dummy.scale.setScalar(0.6 + Math.random() * 0.8);
+      dummy.rotation.y = Math.random() * Math.PI;
+      dummy.updateMatrix();
+      dummy.matrix.toArray(mats, i * 16);
+
+      const col = palette[Math.floor(Math.random() * palette.length)];
+      cols[i * 3] = col.r;
+      cols[i * 3 + 1] = col.g;
+      cols[i * 3 + 2] = col.b;
+    }
+    return { matrices: mats, colors: cols };
   }, []);
 
   return (
-    <group position={position} scale={scale}>
-      {blades.map((b, i) => (
-        <mesh key={i} position={[b.x, b.h / 2, b.z]} rotation={[b.lean, b.rot, 0]}>
-          <boxGeometry args={[0.02, b.h, 0.02]} />
-          <meshStandardMaterial color={b.color} />
-        </mesh>
-      ))}
-    </group>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]} receiveShadow>
+      <boxGeometry args={[0.02, 0.15, 0.02]} />
+      <meshStandardMaterial />
+      <instancedBufferAttribute attach="instanceMatrix" args={[new THREE.InstancedBufferAttribute(matrices, 16)]} />
+      <instancedBufferAttribute attach="instanceColor" args={[new THREE.InstancedBufferAttribute(colors, 3)]} />
+    </instancedMesh>
   );
 }
 
@@ -54,12 +84,10 @@ function ParkingLot({ position, width, depth, rotation = 0 }: {
   const spaces = Math.floor(width / 2.5);
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      {/* Asphalt base */}
       <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color="#0f172a" roughness={0.95} />
       </mesh>
-      {/* Parking lines */}
       {Array.from({ length: spaces + 1 }).map((_, i) => (
         <mesh key={i} position={[-width / 2 + i * 2.5, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[0.08, depth * 0.9]} />
@@ -101,7 +129,6 @@ function DrainGrate({ position, rotation = 0 }: { position: [number, number, num
         <planeGeometry args={[0.5, 0.5]} />
         <meshStandardMaterial color="#1f2937" metalness={0.8} roughness={0.4} />
       </mesh>
-      {/* Grate bars */}
       {[-0.15, 0, 0.15].map((x, i) => (
         <mesh key={i} position={[x, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[0.04, 0.45]} />
@@ -112,24 +139,12 @@ function DrainGrate({ position, rotation = 0 }: { position: [number, number, num
   );
 }
 
-// Pre-placed ground details around the city
-const GRASS_CLUMPS: [number, number, number][] = [
-  // Financial district green space
-  [-8, 0, 8], [-6, 0, 10], [8, 0, -8], [6, 0, -10],
-  // Parks
-  [-50, 0, -50], [50, 0, 50],
-  // Scattered around
-  [-20, 0, 30], [25, 0, -25], [-30, 0, -20], [35, 0, 35],
-];
-
 const PAVEMENT_PATCHES: { pos: [number, number, number]; w: number; d: number; r?: number }[] = [
-  // Building plazas
-  { pos: [12, 0.01, -15], w: 8, d: 8 },      // WorkCorp
-  { pos: [-13.5, 0.01, -12], w: 9, d: 9 },   // TaxMart
-  { pos: [13.5, 0.01, 13.5], w: 6, d: 6 },   // FirstBank
-  { pos: [-13.5, 0.01, 13.5], w: 6, d: 6 },  // IRS
-  { pos: [19.5, 0.01, -19.5], w: 7, d: 7 },  // MoneyBot Towers
-  // Sidewalk extensions
+  { pos: [12, 0.01, -15], w: 8, d: 8 },
+  { pos: [-13.5, 0.01, -12], w: 9, d: 9 },
+  { pos: [13.5, 0.01, 13.5], w: 6, d: 6 },
+  { pos: [-13.5, 0.01, 13.5], w: 6, d: 6 },
+  { pos: [19.5, 0.01, -19.5], w: 7, d: 7 },
   { pos: [90, 0.01, -7], w: 5, d: 5 },
   { pos: [90, 0.01, -62], w: 5, d: 5 },
   { pos: [-105, 0.01, -31.5], w: 6, d: 6 },
@@ -142,22 +157,19 @@ const PARKING_LOTS: { pos: [number, number, number]; w: number; d: number; r?: n
   { pos: [82, 0.01, -18], w: 8, d: 6 },
 ];
 
-const PLAZA_TILES: { pos: [number, number, number]; color?: string }[] = [
-  // Central plaza pattern
-  ...Array.from({ length: 5 }, (_, i) =>
-    Array.from({ length: 5 }, (_, j) => ({
-      pos: [(-2 + i) * 2, 0.02, (-2 + j) * 2] as [number, number, number],
-      color: (i + j) % 2 === 0 ? "#1e293b" : "#334155",
-    }))
-  ).flat(),
-  // City hall plaza
-  ...Array.from({ length: 4 }, (_, i) =>
+const PLAZA_TILES = Array.from({ length: 5 }, (_, i) =>
+  Array.from({ length: 5 }, (_, j) => ({
+    pos: [(-2 + i) * 2, 0.02, (-2 + j) * 2] as [number, number, number],
+    color: (i + j) % 2 === 0 ? "#1e293b" : "#334155",
+  }))
+).flat().concat(
+  Array.from({ length: 4 }, (_, i) =>
     Array.from({ length: 4 }, (_, j) => ({
       pos: [17 + i * 2, 0.02, -43 + j * 2] as [number, number, number],
       color: (i + j) % 2 === 0 ? "#1e293b" : "#0f172a",
     }))
-  ).flat(),
-];
+  ).flat()
+);
 
 const MANHOLES: [number, number, number][] = [
   [3, 0.01, 3], [-5, 0.01, -7], [15, 0.01, 8],
@@ -173,32 +185,19 @@ const DRAIN_GRATES: { pos: [number, number, number]; r?: number }[] = [
 export default function GroundDetails() {
   return (
     <group>
-      {/* Grass clumps */}
-      {GRASS_CLUMPS.map((pos, i) => (
-        <GrassTuft key={`grass-${i}`} position={pos} scale={0.8 + Math.random() * 0.4} />
-      ))}
-
-      {/* Pavement patches */}
+      <InstancedGrass />
       {PAVEMENT_PATCHES.map((p, i) => (
         <PavementPatch key={`pave-${i}`} position={p.pos} width={p.w} depth={p.d} rotation={p.r ?? 0} />
       ))}
-
-      {/* Parking lots */}
       {PARKING_LOTS.map((p, i) => (
         <ParkingLot key={`park-${i}`} position={p.pos} width={p.w} depth={p.d} rotation={p.r ?? 0} />
       ))}
-
-      {/* Plaza tiles */}
       {PLAZA_TILES.map((t, i) => (
         <PlazaTile key={`plaza-${i}`} position={t.pos} color={t.color} />
       ))}
-
-      {/* Manholes */}
       {MANHOLES.map((pos, i) => (
         <Manhole key={`mh-${i}`} position={pos} />
       ))}
-
-      {/* Drain grates */}
       {DRAIN_GRATES.map((g, i) => (
         <DrainGrate key={`drain-${i}`} position={g.pos} rotation={g.r ?? 0} />
       ))}
