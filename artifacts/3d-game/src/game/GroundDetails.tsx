@@ -8,30 +8,22 @@ import * as THREE from "three";
 // =====================================================================
 
 function GrassTuft({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
-  const ref = useRef<THREE.Group>(null!);
   const blades = useMemo(() => {
-    return Array.from({ length: 5 + Math.floor(Math.random() * 4) }, (_, i) => ({
-      x: (Math.random() - 0.5) * 0.2,
-      z: (Math.random() - 0.5) * 0.2,
-      h: 0.08 + Math.random() * 0.15,
+    return Array.from({ length: 4 }, (_, i) => ({
+      x: (Math.random() - 0.5) * 0.15,
+      z: (Math.random() - 0.5) * 0.15,
+      h: 0.08 + Math.random() * 0.12,
       rot: Math.random() * Math.PI,
-      lean: (Math.random() - 0.5) * 0.3,
-      color: ["#16a34a", "#22c55e", "#15803d", "#4ade80"][Math.floor(Math.random() * 4)],
+      lean: (Math.random() - 0.5) * 0.2,
+      color: ["#16a34a", "#22c55e", "#15803d"][i % 3],
     }));
   }, []);
 
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (ref.current) {
-      ref.current.rotation.z = Math.sin(t * 1.5 + position[0]) * 0.02;
-    }
-  });
-
   return (
-    <group ref={ref} position={position} scale={scale}>
+    <group position={position} scale={scale}>
       {blades.map((b, i) => (
         <mesh key={i} position={[b.x, b.h / 2, b.z]} rotation={[b.lean, b.rot, 0]}>
-          <boxGeometry args={[0.015, b.h, 0.015]} />
+          <boxGeometry args={[0.02, b.h, 0.02]} />
           <meshStandardMaterial color={b.color} />
         </mesh>
       ))}
@@ -123,14 +115,11 @@ function DrainGrate({ position, rotation = 0 }: { position: [number, number, num
 // Pre-placed ground details around the city
 const GRASS_CLUMPS: [number, number, number][] = [
   // Financial district green space
-  [-8, 0, 8], [-6, 0, 10], [-10, 0, 6], [-5, 0, 5],
-  [8, 0, -8], [10, 0, -6], [6, 0, -10], [5, 0, -5],
+  [-8, 0, 8], [-6, 0, 10], [8, 0, -8], [6, 0, -10],
   // Parks
-  [-50, 0, -50], [-52, 0, -48], [-48, 0, -52],
-  [50, 0, 50], [52, 0, 48], [48, 0, 52],
+  [-50, 0, -50], [50, 0, 50],
   // Scattered around
   [-20, 0, 30], [25, 0, -25], [-30, 0, -20], [35, 0, 35],
-  [-15, 0, -35], [40, 0, -40], [-45, 0, 15], [20, 0, 45],
 ];
 
 const PAVEMENT_PATCHES: { pos: [number, number, number]; w: number; d: number; r?: number }[] = [

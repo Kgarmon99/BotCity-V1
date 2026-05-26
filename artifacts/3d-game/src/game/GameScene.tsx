@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, Suspense, lazy } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
@@ -11,40 +11,42 @@ import FollowCamera from "./FollowCamera";
 import HUD from "./HUD";
 import DialogModal from "./DialogModal";
 import Skybox from "./Skybox";
-import NPCBots from "./NPCBots";
-import CitizenBots from "./CitizenBots";
-import Billboards from "./Billboards";
-import MoneyRain from "./MoneyRain";
 import Weather, { fogForWeather } from "./Weather";
 import Traffic from "./Traffic";
-import CityDetails from "./CityDetails";
-import Statues from "./Statues";
-import CityBuildings from "./CityBuildings";
-import CityExpansion from "./CityExpansion";
-import Landmarks from "./Landmarks";
-import CityDistricts from "./CityDistricts";
-import CityDistrictsExtra from "./CityDistrictsExtra";
-import NewDistricts from "./NewDistricts";
-import ExpansionQuarters from "./ExpansionQuarters";
-import KioskDecor from "./KioskDecor";
-import CityHallPlaza from "./CityHallPlaza";
-import CityMedia from "./CityMedia";
-import DistrictGateways from "./DistrictGateways";
-import Particles from "./Particles";
-import Blimp from "./Blimp";
 import RoadGrid from "./RoadGrid";
-import Streetscape from "./Streetscape";
-import BuildingAccents from "./BuildingAccents";
 import DayNightCycle from "./DayNightCycle";
 import River from "./River";
-import ObservationTower from "./ObservationTower";
-import AmbientLife from "./AmbientLife";
-import DistrictDetails from "./DistrictDetails";
-import BotLand from "./BotLand";
-import GroundDetails from "./GroundDetails";
-import StreetFurniture from "./StreetFurniture";
 import { useGameStore } from "./gameStore";
 import { DIALOGS } from "./dialogs";
+
+// Lazy load heavy district/scenery components to reduce initial bundle
+const NPCBots = lazy(() => import("./NPCBots"));
+const CitizenBots = lazy(() => import("./CitizenBots"));
+const Billboards = lazy(() => import("./Billboards"));
+const MoneyRain = lazy(() => import("./MoneyRain"));
+const CityDetails = lazy(() => import("./CityDetails"));
+const Statues = lazy(() => import("./Statues"));
+const CityBuildings = lazy(() => import("./CityBuildings"));
+const CityExpansion = lazy(() => import("./CityExpansion"));
+const Landmarks = lazy(() => import("./Landmarks"));
+const CityDistricts = lazy(() => import("./CityDistricts"));
+const CityDistrictsExtra = lazy(() => import("./CityDistrictsExtra"));
+const NewDistricts = lazy(() => import("./NewDistricts"));
+const ExpansionQuarters = lazy(() => import("./ExpansionQuarters"));
+const KioskDecor = lazy(() => import("./KioskDecor"));
+const CityHallPlaza = lazy(() => import("./CityHallPlaza"));
+const CityMedia = lazy(() => import("./CityMedia"));
+const DistrictGateways = lazy(() => import("./DistrictGateways"));
+const Particles = lazy(() => import("./Particles"));
+const Blimp = lazy(() => import("./Blimp"));
+const Streetscape = lazy(() => import("./Streetscape"));
+const BuildingAccents = lazy(() => import("./BuildingAccents"));
+const ObservationTower = lazy(() => import("./ObservationTower"));
+const AmbientLife = lazy(() => import("./AmbientLife"));
+const DistrictDetails = lazy(() => import("./DistrictDetails"));
+const BotLand = lazy(() => import("./BotLand"));
+const GroundDetails = lazy(() => import("./GroundDetails"));
+const StreetFurniture = lazy(() => import("./StreetFurniture"));
 
 export const BUILDING_DEFS: Omit<BuildingData, "visited" | "available">[] = [
   // ─── Media district (east corridor at x=90, scenery in CityMedia.tsx) ───
@@ -1076,36 +1078,40 @@ export default function GameScene() {
           <Skybox />
           <World />
           <RoadGrid />
-          <GroundDetails />
-          <StreetFurniture />
-          <CityDetails />
-          <CityBuildings />
-          <CityExpansion />
-          <CityDistricts />
-          <CityDistrictsExtra />
-          <NewDistricts />
-          <ExpansionQuarters />
-          <DistrictGateways />
-          <Particles />
-          <KioskDecor />
-          <Streetscape />
-          <BuildingAccents />
-          <DistrictDetails />
           <River />
-          <ObservationTower />
-          <AmbientLife />
-          <CityHallPlaza />
-          <CityMedia />
-          <Blimp />
-          <Statues />
-          <Landmarks />
-          <BotLand />
-          <Billboards />
-          <NPCBots />
-          <CitizenBots />
-          <MoneyRain />
           <Weather mode={weather} />
           <Traffic />
+
+          {/* Lazy-loaded scenery — wrapped in Suspense for code splitting */}
+          <Suspense fallback={null}>
+            <GroundDetails />
+            <StreetFurniture />
+            <CityDetails />
+            <CityBuildings />
+            <CityExpansion />
+            <CityDistricts />
+            <CityDistrictsExtra />
+            <NewDistricts />
+            <ExpansionQuarters />
+            <DistrictGateways />
+            <Particles />
+            <KioskDecor />
+            <Streetscape />
+            <BuildingAccents />
+            <DistrictDetails />
+            <ObservationTower />
+            <AmbientLife />
+            <CityHallPlaza />
+            <CityMedia />
+            <Blimp />
+            <Statues />
+            <Landmarks />
+            <BotLand />
+            <Billboards />
+            <NPCBots />
+            <CitizenBots />
+            <MoneyRain />
+          </Suspense>
 
           {buildings.map((b) => (
             <Building

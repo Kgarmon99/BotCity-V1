@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { useFrame, ThreeEvent } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
@@ -138,7 +138,7 @@ function WindowGrid({
   );
 }
 
-export default function Building({ data, isNear }: BuildingProps) {
+function BuildingComponent({ data, isNear }: BuildingProps) {
   const glowRef = useRef<THREE.Mesh>(null!);
   const trimRef = useRef<THREE.Mesh>(null!);
   const antennaRef = useRef<THREE.Mesh>(null!);
@@ -453,6 +453,9 @@ export default function Building({ data, isNear }: BuildingProps) {
     </group>
   );
 }
+
+const Building = memo(BuildingComponent);
+export default Building;
 
 function InteractPrompt({ y }: { y: number }) {
   const groupRef = useRef<THREE.Group>(null!);

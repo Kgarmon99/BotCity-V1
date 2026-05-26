@@ -207,40 +207,31 @@ function FireHydrant({ position }: { position: [number, number, number] }) {
 const BENCHES: { pos: [number, number, number]; rot: number }[] = [
   { pos: [3, 0, 3], rot: 0.5 }, { pos: [-4, 0, 5], rot: -0.3 },
   { pos: [16, 0, -12], rot: 1.2 }, { pos: [-15, 0, 15], rot: -0.8 },
-  { pos: [28, 0, 20], rot: 0.2 }, { pos: [-25, 0, -20], rot: 1.5 },
-  { pos: [55, 0, 45], rot: 0.7 }, { pos: [-50, 0, 50], rot: -0.5 },
 ];
 
 const BUS_STOPS: { pos: [number, number, number]; rot: number }[] = [
   { pos: [27, 0, 2], rot: 0 }, { pos: [-27, 0, -2], rot: Math.PI },
-  { pos: [2, 0, 27], rot: -Math.PI / 2 }, { pos: [-2, 0, -27], rot: Math.PI / 2 },
 ];
 
 const TRASH_CANS: { pos: [number, number, number]; rot: number }[] = [
   { pos: [5, 0, -5], rot: 0 }, { pos: [-8, 0, 8], rot: 0.5 },
   { pos: [20, 0, -18], rot: 0.2 }, { pos: [-18, 0, 20], rot: -0.3 },
-  { pos: [35, 0, 35], rot: 0.7 }, { pos: [-30, 0, -30], rot: 1.1 },
-  { pos: [50, 0, -10], rot: 0.4 }, { pos: [-55, 0, 10], rot: -0.6 },
 ];
 
 const MAILBOXES: { pos: [number, number, number]; rot: number }[] = [
   { pos: [8, 0, 12], rot: 0.3 }, { pos: [-10, 0, -8], rot: -0.5 },
-  { pos: [22, 0, 25], rot: 0.8 }, { pos: [-20, 0, -22], rot: -0.2 },
 ];
 
 const NEWSPAPER_STANDS: { pos: [number, number, number]; rot: number }[] = [
   { pos: [6, 0, -8], rot: 0.4 }, { pos: [-6, 0, 10], rot: -0.7 },
-  { pos: [30, 0, -15], rot: 0.1 }, { pos: [-35, 0, 25], rot: -0.4 },
 ];
 
 const BIKE_RACKS: { pos: [number, number, number]; rot: number }[] = [
   { pos: [14, 0, 10], rot: 0.6 }, { pos: [-12, 0, -14], rot: -0.3 },
-  { pos: [40, 0, 30], rot: 0.9 }, { pos: [-45, 0, -35], rot: -0.8 },
 ];
 
 const FIRE_HYDRANTS: [number, number, number][] = [
   [2, 0, -3], [-5, 0, 7], [18, 0, -22], [-22, 0, 18],
-  [45, 0, 40], [-48, 0, -42], [60, 0, -20], [-65, 0, 15],
 ];
 
 export default function StreetFurniture() {
