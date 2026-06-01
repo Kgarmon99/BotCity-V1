@@ -3,21 +3,6 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { PLAYER_BOUND } from "./cityConstants";
 
-// =====================================================================
-// DayNightCycle — animated lighting + visible sun that orbits the city.
-// =====================================================================
-// Owns the scene's ambient, directional, and hemisphere lights so they
-// can be smoothly interpolated by phase. A full cycle is PERIOD seconds.
-//
-// Hoisted Color/Vector constants are reused every frame; no useFrame
-// callback allocates.
-
-// Phase is derived from the player's wall-clock so the in-game sky matches
-// the real time of day: 6am → sunrise (sun in east), noon → sun overhead,
-// 6pm → sunset (sun in west), midnight → sun below the city.
-//
-// Exported so other systems (e.g. Particles' fireflies) can gate effects
-// on real-time day vs. night without re-deriving the formula.
 export function getRealTimePhase(now: Date = new Date()): number {
   const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
   return ((hours - 6) / 24) * Math.PI * 2;
@@ -33,13 +18,13 @@ export function getNightFactor(now?: Date): number {
 
 const tmpColor = new THREE.Color();
 const dayAmbient = new THREE.Color("#86efac");
-const nightAmbient = new THREE.Color("#1e3a8a");
+const nightAmbient = new THREE.Color("#3b82f6"); 
 const dayDir = new THREE.Color("#fef3c7");
 const nightDir = new THREE.Color("#93c5fd");
 const dayHemiUp = new THREE.Color("#4ade80");
-const nightHemiUp = new THREE.Color("#1e293b");
+const nightHemiUp = new THREE.Color("#334155"); 
 const dayHemiDown = new THREE.Color("#16a34a");
-const nightHemiDown = new THREE.Color("#0f172a");
+const nightHemiDown = new THREE.Color("#1e293b"); 
 const daySunCol = new THREE.Color("#fde047");
 const sunsetCol = new THREE.Color("#fb923c");
 
@@ -56,27 +41,25 @@ export default function DayNightCycle() {
     const sy = Math.sin(phase) * 60;
     const sz = Math.sin(phase * 0.5) * 20;
     const dayFactor = Math.max(0, Math.sin(phase));
-    // Sunset glow strongest when sun is near horizon and rising/setting.
     const horizonProx = 1 - Math.abs(Math.sin(phase));
     const aboveHorizon = Math.max(0, Math.sin(phase + 0.1));
     const sunsetFactor = horizonProx * aboveHorizon;
 
     if (dirRef.current) {
-      // Keep the light source above ground so shadows always sweep
-      // the city; visual sun mesh can dip below.
-      dirRef.current.position.set(sx, Math.max(2, sy), sz);
-      dirRef.current.intensity = dayFactor * 0.85 + 0.08;
+      const isNight = sy < 0;
+      dirRef.current.position.set(isNight ? -sx : sx, Math.max(10, Math.abs(sy)), isNight ? -sz : sz);
+      dirRef.current.intensity = dayFactor * 0.85 + 0.3;
       tmpColor.copy(nightDir).lerp(dayDir, dayFactor);
       if (sunsetFactor > 0.1) tmpColor.lerp(sunsetCol, sunsetFactor * 0.5);
       dirRef.current.color.copy(tmpColor);
     }
     if (ambRef.current) {
-      ambRef.current.intensity = 0.15 + dayFactor * 0.4;
+      ambRef.current.intensity = 0.4 + dayFactor * 0.4;
       tmpColor.copy(nightAmbient).lerp(dayAmbient, dayFactor);
       ambRef.current.color.copy(tmpColor);
     }
     if (hemiRef.current) {
-      hemiRef.current.intensity = 0.25 + dayFactor * 0.5;
+      hemiRef.current.intensity = 0.5 + dayFactor * 0.5;
       tmpColor.copy(nightHemiUp).lerp(dayHemiUp, dayFactor);
       hemiRef.current.color.copy(tmpColor);
       tmpColor.copy(nightHemiDown).lerp(dayHemiDown, dayFactor);
@@ -116,7 +99,6 @@ export default function DayNightCycle() {
         shadow-camera-bottom={-PLAYER_BOUND}
       />
       <hemisphereLight ref={hemiRef} args={["#4ade80", "#16a34a", 0.6]} />
-      {/* Visible sun + soft halo */}
       <mesh ref={sunRef} position={[60, 30, 0]}>
         <sphereGeometry args={[2.6, 24, 18]} />
         <meshBasicMaterial color="#fde047" toneMapped={false} />
