@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { MoneyBotModel, type MoneyBotAnim } from "./MoneyBotModel";
-import { BotMobile, BotVette } from "./CityDistricts";
+import { BotMobile, BotVette } from "./Vehicles";
 import { useGameStore } from "./gameStore";
 import { cameraInput } from "./cameraInput";
 import { touchInput } from "./touchInput";
@@ -24,9 +24,9 @@ interface PlayerProps {
   isMoving: React.MutableRefObject<boolean>;
 }
 
-const WALK_SPEED = 9;
-const RIDE_SPEED = 22; // BotMobile boost (~2.4x walking)
-const VETTE_SPEED = 42; // BotVette boost (~4.7x walking) — held with V
+const WALK_SPEED = 14;
+const RIDE_SPEED = 34; // BotMobile boost (~2.4x walking)
+const VETTE_SPEED = 60; // BotVette boost (~4.3x walking) — held with V
 const JETPACK_THRUST = 32; // upward accel when Shift held (m/s²)
 const JETPACK_TAKEOFF_IMPULSE = 9; // instant vertical kick on jet press near ground
 const JETPACK_AIR_BOOST = 1.4; // horizontal-speed multiplier while jetting airborne
@@ -39,6 +39,7 @@ const LANDING_THUD_VEL = -12; // |vy| above this on landing → louder thud
 export default function Player({ onPositionChange, onInteract, isMoving }: PlayerProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const velocity = useRef(new THREE.Vector3());
+  const moveDir = useRef(new THREE.Vector3());
   const verticalVel = useRef(0);
   const keys = useRef<Keys>({ forward: false, back: false, left: false, right: false, jet: false });
   const ridingRef = useRef(false);
@@ -216,7 +217,7 @@ export default function Player({ onPositionChange, onInteract, isMoving }: Playe
       Math.abs(kb) >= Math.abs(touch) ? kb : touch;
     const inX = pickAxis(kbX, touchInput.moveX);
     const inZ = pickAxis(kbZ, touchInput.moveZ * -1); // joystick fwd = -Z
-    const dir = new THREE.Vector3();
+    const dir = moveDir.current.set(0, 0, 0);
 
     if (cameraMode === 4) {
       // Orbit mode: input is camera-relative. inZ < 0 = forward (away from

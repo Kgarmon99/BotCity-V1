@@ -156,22 +156,43 @@ function NeonLamp({ pos }: { pos: [number, number, number] }) {
   );
 }
 
-// Floating particle orb
-function ParticleOrb({ pos, delay }: { pos: [number, number, number]; delay: number }) {
-  const ref = useRef<THREE.Mesh>(null!);
+// Floating particle orbs — single Points cloud (1 draw call) instead of
+// 30 individually animated meshes.
+function ParticleOrbs({ anchors }: { anchors: [number, number, number][] }) {
+  const pointsRef = useRef<THREE.Points>(null);
+  const positions = useMemo(
+    () => new Float32Array(anchors.length * 3),
+    [anchors],
+  );
+
   useFrame((state) => {
-    if (ref.current) {
-      const t = state.clock.elapsedTime + delay;
-      ref.current.position.y = pos[1] + Math.sin(t * 1.2) * 1.5;
-      ref.current.position.x = pos[0] + Math.sin(t * 0.7) * 0.8;
-      ref.current.position.z = pos[2] + Math.cos(t * 0.9) * 0.8;
+    const points = pointsRef.current;
+    if (!points) return;
+    for (let i = 0; i < anchors.length; i++) {
+      const t = state.clock.elapsedTime + i * 0.2;
+      const [x, y, z] = anchors[i];
+      positions[i * 3] = x + Math.sin(t * 0.7) * 0.8;
+      positions[i * 3 + 1] = y + Math.sin(t * 1.2) * 1.5;
+      positions[i * 3 + 2] = z + Math.cos(t * 0.9) * 0.8;
     }
+    points.geometry.attributes.position.needsUpdate = true;
   });
+
   return (
-    <mesh ref={ref} position={pos}>
-      <sphereGeometry args={[0.12, 12, 12]} />
-      <meshStandardMaterial color="#86efac" emissive="#22c55e" emissiveIntensity={3} toneMapped={false} />
-    </mesh>
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        color="#86efac"
+        size={0.35}
+        sizeAttenuation
+        toneMapped={false}
+        transparent
+        opacity={0.9}
+        depthWrite={false}
+      />
+    </points>
   );
 }
 
@@ -228,7 +249,6 @@ function PlazaAura() {
         <ringGeometry args={[2, 2.5, 32]} />
         <meshBasicMaterial color="#fbbf24" transparent opacity={0.5} side={THREE.DoubleSide} />
       </mesh>
-      <pointLight position={[0, 1, 0]} intensity={3} distance={15} color="#22c55e" />
     </group>
   );
 }
@@ -489,16 +509,19 @@ function Fountain() {
           opacity={0.4}
         />
       </mesh>
-      <pointLight position={[0, 1, 0]} intensity={2} distance={8} color="#22c55e" />
     </group>
   );
 }
 
-// Firefly particles that drift around the city
+// Firefly particles that drift around the city.
+// Rendered as a single THREE.Points cloud (1 draw call) instead of one
+// mesh + material per firefly.
+const FIREFLY_COUNT = 40;
+
 function Fireflies() {
-  const refs = useRef<THREE.Mesh[]>([]);
-  const positions = useMemo(() =>
-    Array.from({ length: 40 }, () => ({
+  const pointsRef = useRef<THREE.Points>(null);
+  const seeds = useMemo(() =>
+    Array.from({ length: FIREFLY_COUNT }, () => ({
       x: (Math.random() - 0.5) * 80,
       y: 1 + Math.random() * 8,
       z: (Math.random() - 0.5) * 80,
@@ -506,38 +529,39 @@ function Fireflies() {
       offset: Math.random() * Math.PI * 2,
     })),
   []);
+  const positions = useMemo(
+    () => new Float32Array(FIREFLY_COUNT * 3),
+    [],
+  );
 
   useFrame((state) => {
+    const points = pointsRef.current;
+    if (!points) return;
     const t = state.clock.elapsedTime;
-    refs.current.forEach((ref, i) => {
-      if (ref) {
-        const p = positions[i];
-        ref.position.x = p.x + Math.sin(t * p.speed + p.offset) * 3;
-        ref.position.y = p.y + Math.sin(t * p.speed * 0.7 + p.offset) * 1.5;
-        ref.position.z = p.z + Math.cos(t * p.speed + p.offset) * 3;
-        (ref.material as THREE.MeshStandardMaterial).emissiveIntensity =
-          1.5 + Math.sin(t * 4 + p.offset) * 1;
-      }
-    });
+    for (let i = 0; i < FIREFLY_COUNT; i++) {
+      const p = seeds[i];
+      positions[i * 3] = p.x + Math.sin(t * p.speed + p.offset) * 3;
+      positions[i * 3 + 1] = p.y + Math.sin(t * p.speed * 0.7 + p.offset) * 1.5;
+      positions[i * 3 + 2] = p.z + Math.cos(t * p.speed + p.offset) * 3;
+    }
+    points.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
-    <group>
-      {positions.map((_, i) => (
-        <mesh
-          key={`firefly-${i}`}
-          ref={(el) => { if (el) refs.current[i] = el; }}
-        >
-          <sphereGeometry args={[0.08, 8, 8]} />
-          <meshStandardMaterial
-            color="#fbbf24"
-            emissive="#fbbf24"
-            emissiveIntensity={2}
-            toneMapped={false}
-          />
-        </mesh>
-      ))}
-    </group>
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        color="#fbbf24"
+        size={0.25}
+        sizeAttenuation
+        toneMapped={false}
+        transparent
+        opacity={0.9}
+        depthWrite={false}
+      />
+    </points>
   );
 }
 
@@ -565,14 +589,6 @@ function StreetLamp({ pos }: { pos: [number, number, number] }) {
         <torusGeometry args={[0.35, 0.06, 8, 24]} />
         <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={2} toneMapped={false} />
       </mesh>
-      <pointLight
-        ref={lightRef}
-        position={[0, 3.2, 0]}
-        intensity={1.5}
-        distance={12}
-        color="#22c55e"
-        castShadow={false}
-      />
     </group>
   );
 }
@@ -673,9 +689,7 @@ export default function World() {
       ))}
 
       {/* Floating particle orbs */}
-      {particlePositions.map((pos, i) => (
-        <ParticleOrb key={`orb-${i}`} pos={pos} delay={i * 0.2} />
-      ))}
+      <ParticleOrbs anchors={particlePositions} />
 
       {/* Distant skyline */}
       {distantTowers.map((t, i) => (

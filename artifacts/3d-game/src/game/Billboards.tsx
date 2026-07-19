@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { BUILDING_DEFS } from "./GameScene";
+import { BUILDING_DEFS } from "./buildingDefs";
 
 // ════════════════════════════════════════════════════════════════════
 // Billboards — animated roadside cross-promo signs that cycle ads for

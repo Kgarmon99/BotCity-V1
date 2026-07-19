@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { BotMobile } from "./CityDistricts";
+import { BotMobile } from "./Vehicles";
 
 // Traffic on the two main avenues (x=0 N-S and z=0 E-W). Cars cruise in
 // dedicated lanes offset slightly from the avenue centerline and wrap

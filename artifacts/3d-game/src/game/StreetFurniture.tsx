@@ -35,7 +35,7 @@ function InstancedBenches() {
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} castShadow receiveShadow>
       <boxGeometry args={[1.2, 0.06, 0.35]} />
       <meshStandardMaterial color="#7c2d12" roughness={0.9} />
-      <instancedBufferAttribute attach="instanceMatrix" args={[new THREE.InstancedBufferAttribute(matrices, 16)]} />
+      <instancedBufferAttribute attach="instanceMatrix" args={[matrices, 16]} />
     </instancedMesh>
   );
 }
@@ -68,7 +68,7 @@ function InstancedTrashCans() {
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} castShadow>
       <cylinderGeometry args={[0.2, 0.18, 0.7, 12]} />
       <meshStandardMaterial color="#1f2937" metalness={0.6} roughness={0.4} />
-      <instancedBufferAttribute attach="instanceMatrix" args={[new THREE.InstancedBufferAttribute(matrices, 16)]} />
+      <instancedBufferAttribute attach="instanceMatrix" args={[matrices, 16]} />
     </instancedMesh>
   );
 }
@@ -98,7 +98,7 @@ function InstancedFireHydrants() {
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} castShadow>
       <cylinderGeometry args={[0.1, 0.12, 0.5, 8]} />
       <meshStandardMaterial color="#dc2626" metalness={0.4} roughness={0.5} />
-      <instancedBufferAttribute attach="instanceMatrix" args={[new THREE.InstancedBufferAttribute(matrices, 16)]} />
+      <instancedBufferAttribute attach="instanceMatrix" args={[matrices, 16]} />
     </instancedMesh>
   );
 }

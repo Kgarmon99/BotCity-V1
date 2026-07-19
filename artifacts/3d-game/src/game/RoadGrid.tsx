@@ -114,7 +114,6 @@ function Streetlight({ position }: { position: [number, number, number] }) {
         <meshStandardMaterial color="#86efac" emissive="#22c55e" emissiveIntensity={2.5} toneMapped={false} />
       </mesh>
       {/* Light glow */}
-      <pointLight position={[0, 2.8, 0]} color="#22c55e" intensity={0.8} distance={12} />
     </group>
   );
 }

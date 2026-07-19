@@ -92,7 +92,6 @@ function Statue({ position, rotation = 0, pose = "hero", plaque }: StatueProps) 
         <MoneyBotModel scale={1.1} animation={POSE_TO_ANIM[pose]} phase={phase} paused />
       </group>
       {/* Green up-light */}
-      <pointLight position={[0, 3, 0]} intensity={1.5} color="#22c55e" distance={8} />
     </group>
   );
 }

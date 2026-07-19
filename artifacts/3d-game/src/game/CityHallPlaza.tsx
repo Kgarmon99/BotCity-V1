@@ -124,7 +124,6 @@ function Fountain() {
         />
       </mesh>
       {/* Soft cyan light bathing the plaza at night */}
-      <pointLight color="#22d3ee" intensity={1.2} distance={8} position={[0, 1.6, 0]} />
     </group>
   );
 }
@@ -255,7 +254,6 @@ function LampPost({ pos }: { pos: [number, number] }) {
           toneMapped={false}
         />
       </mesh>
-      <pointLight color="#fbbf24" intensity={0.6} distance={5} position={[0, 3.25, 0]} />
       {/* Decorative cap */}
       <mesh position={[0, 3.6, 0]}>
         <coneGeometry args={[0.25, 0.3, 4]} />
@@ -487,7 +485,6 @@ function Bollard({ pos }: { pos: [number, number] }) {
         <sphereGeometry args={[0.13, 14, 12]} />
         <meshStandardMaterial color="#fef3c7" emissive="#fbbf24" emissiveIntensity={2.0} toneMapped={false} />
       </mesh>
-      <pointLight color="#fbbf24" intensity={0.25} distance={2.5} position={[0, 0.55, 0]} />
     </group>
   );
 }

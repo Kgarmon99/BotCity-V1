@@ -2,7 +2,7 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { BUILDING_DEFS } from "./GameScene";
+import { BUILDING_DEFS } from "./buildingDefs";
 import { useGameStore } from "./gameStore";
 import { effectiveXZ } from "./buildingLayout";
 import { LOT_SIZE } from "./cityConstants";

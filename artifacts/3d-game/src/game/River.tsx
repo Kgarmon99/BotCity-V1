@@ -2,6 +2,7 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { getDayFactor } from "./DayNightCycle";
+import { randomAngle, randomBetween, randomCentered } from "./random";
 
 // =====================================================================
 // River — animated waterway with waves, shoreline rocks, reeds,
@@ -66,7 +67,6 @@ function ArchedBridge({
             <sphereGeometry args={[0.1, 8, 8]} />
             <meshStandardMaterial color="#fef3c7" emissive="#fbbf24" emissiveIntensity={2} toneMapped={false} />
           </mesh>
-          <pointLight position={[0, 0.2, 0]} color="#fbbf24" intensity={0.5} distance={5} />
         </group>
       ))}
     </group>
@@ -145,18 +145,57 @@ function WaterSurface({ width, length, position }: { width: number; length: numb
   );
 }
 
+const SHORELINE_TUFT_COUNT = 40;
+const SHORELINE_GRASS_COLORS = ["#16a34a", "#22c55e", "#15803d"] as const;
+const REED_BASES: [number, number][] = [
+  [1.1, 54],
+  [4.9, 57],
+  [1.1, 62],
+  [4.9, 65],
+  [1.1, 70],
+  [4.9, 72],
+];
+const REED_OFFSETS = [0, 0.2, -0.15, 0.1, -0.05] as const;
+
+interface ShorelineTuft {
+  x: number;
+  z: number;
+  height: number;
+  rotationY: number;
+  color: string;
+}
+
+interface ReedCluster {
+  position: [number, number, number];
+  stems: {
+    dx: number;
+    y: number;
+    height: number;
+    color: string;
+  }[];
+}
+
+function createReedClusters(): ReedCluster[] {
+  return REED_BASES.map(([x, z]) => ({
+    position: [x, 0, z],
+    stems: REED_OFFSETS.map((dx, index) => ({
+      dx,
+      y: randomBetween(0.4, 0.6),
+      height: randomBetween(0.7, 1.0),
+      color: index % 2 === 0 ? "#65a30d" : "#84cc16",
+    })),
+  }));
+}
+
 function ShorelineGrass({ x, zStart, zEnd }: { x: number; zStart: number; zEnd: number }) {
   const tufts = useMemo(() => {
-    const arr = [];
-    for (let i = 0; i < 40; i++) {
-      arr.push({
-        x: x + (Math.random() - 0.5) * 0.6,
-        z: zStart + Math.random() * (zEnd - zStart),
-        h: 0.15 + Math.random() * 0.2,
-        rot: Math.random() * Math.PI,
-      });
-    }
-    return arr;
+    return Array.from({ length: SHORELINE_TUFT_COUNT }, (_, index): ShorelineTuft => ({
+      x: x + randomCentered(0.6),
+      z: randomBetween(zStart, zEnd),
+      height: randomBetween(0.15, 0.35),
+      rotationY: randomBetween(0, Math.PI),
+      color: SHORELINE_GRASS_COLORS[index % SHORELINE_GRASS_COLORS.length],
+    }));
   }, [x, zStart, zEnd]);
 
   return (
@@ -168,9 +207,9 @@ function ShorelineGrass({ x, zStart, zEnd }: { x: number; zStart: number; zEnd: 
       </mesh>
       {/* Individual grass tufts */}
       {tufts.map((t, i) => (
-        <mesh key={i} position={[t.x, t.h / 2, t.z]} rotation={[0, t.rot, 0.1]}>
-          <boxGeometry args={[0.03, t.h, 0.03]} />
-          <meshStandardMaterial color={i % 3 === 0 ? "#16a34a" : i % 3 === 1 ? "#22c55e" : "#15803d"} />
+        <mesh key={i} position={[t.x, t.height / 2, t.z]} rotation={[0, t.rotationY, 0.1]}>
+          <boxGeometry args={[0.03, t.height, 0.03]} />
+          <meshStandardMaterial color={t.color} />
         </mesh>
       ))}
     </group>
@@ -179,7 +218,7 @@ function ShorelineGrass({ x, zStart, zEnd }: { x: number; zStart: number; zEnd: 
 
 function Fish({ startPos }: { startPos: [number, number, number] }) {
   const ref = useRef<THREE.Group>(null!);
-  const offset = useMemo(() => Math.random() * Math.PI * 2, []);
+  const offset = useMemo(() => randomAngle(), []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime + offset;
@@ -209,6 +248,7 @@ export default function River() {
   const lilyRef1 = useRef<THREE.Mesh>(null!);
   const lilyRef2 = useRef<THREE.Mesh>(null!);
   const lilyRef3 = useRef<THREE.Mesh>(null!);
+  const reedClusters = useMemo(createReedClusters, []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
@@ -304,12 +344,12 @@ export default function River() {
       <Fish startPos={[3.5, 0.04, 68]} />
 
       {/* Reeds along the banks */}
-      {[[1.1, 54], [4.9, 57], [1.1, 62], [4.9, 65], [1.1, 70], [4.9, 72]].map(([x, z], i) => (
-        <group key={i} position={[x, 0, z]}>
-          {[0, 0.2, -0.15, 0.1, -0.05].map((dx, j) => (
-            <mesh key={j} position={[dx, 0.4 + Math.random() * 0.2, 0]}>
-              <cylinderGeometry args={[0.02, 0.025, 0.7 + Math.random() * 0.3, 4]} />
-              <meshStandardMaterial color={j % 2 === 0 ? "#65a30d" : "#84cc16"} />
+      {reedClusters.map((cluster, i) => (
+        <group key={i} position={cluster.position}>
+          {cluster.stems.map((stem, j) => (
+            <mesh key={j} position={[stem.dx, stem.y, 0]}>
+              <cylinderGeometry args={[0.02, 0.025, stem.height, 4]} />
+              <meshStandardMaterial color={stem.color} />
             </mesh>
           ))}
           {/* Reed head */}

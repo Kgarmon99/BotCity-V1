@@ -252,8 +252,19 @@ export default function TitleScreen() {
             careers, entrepreneurship, and the future of AI — all through play.
           </p>
 
-          {/* Feature row — 7 stops, 4-up grid wraps to 2 rows */}
-          <div className="grid grid-cols-4 gap-2 mb-5 text-left">
+          {/* Keep the primary action above the long city guide on phones. */}
+          <button
+            onClick={startGame}
+            className="group relative w-full sm:w-auto bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-slate-950 font-black text-lg py-3.5 px-10 rounded-2xl transition-all transform hover:scale-[1.03] active:scale-95 shadow-[0_0_40px_-4px_rgba(251,191,36,0.6)] hover:shadow-[0_0_60px_-4px_rgba(251,191,36,0.8)] mb-6"
+          >
+            <span className="inline-flex items-center gap-2">
+              Start Playing
+              <span className="transition-transform group-hover:translate-x-0.5">→</span>
+            </span>
+          </button>
+
+          {/* City guide: two readable columns on phones, four on desktop. */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5 text-left">
             {FEATURES.map(({ emoji, title, desc, accent }, i) => (
               <div
                 key={title}
@@ -293,16 +304,6 @@ export default function TitleScreen() {
             </div>
           </div>
 
-          {/* CTA */}
-          <button
-            onClick={startGame}
-            className="group relative bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-slate-950 font-black text-lg py-3.5 px-10 rounded-2xl transition-all transform hover:scale-[1.03] active:scale-95 shadow-[0_0_40px_-4px_rgba(251,191,36,0.6)] hover:shadow-[0_0_60px_-4px_rgba(251,191,36,0.8)]"
-          >
-            <span className="inline-flex items-center gap-2">
-              Start Playing
-              <span className="transition-transform group-hover:translate-x-0.5">→</span>
-            </span>
-          </button>
           <p className="text-emerald-200/40 text-[11px] mt-3">Level up your financial IQ 🧠</p>
         </div>
       </div>

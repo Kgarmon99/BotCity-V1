@@ -1,4 +1,4 @@
-import { BUILDING_DEFS } from "./GameScene";
+import { BUILDING_DEFS } from "./buildingDefs";
 import { useGameStore } from "./gameStore";
 
 export const GRID_SNAP = 2;

@@ -95,7 +95,6 @@ function FerrisWheel({ position }: { position: [number, number, number] }) {
         <meshStandardMaterial color="#1f2937" metalness={0.5} />
       </mesh>
       {/* Lights */}
-      <pointLight position={[0, radius, 0]} intensity={3} distance={20} color="#fbbf24" />
     </group>
   );
 }
@@ -220,7 +219,6 @@ function Carousel({ position }: { position: [number, number, number] }) {
         <coneGeometry args={[5, 2, 12]} />
         <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.2} />
       </mesh>
-      <pointLight position={[0, 4, 0]} intensity={2} distance={15} color="#fbbf24" />
     </group>
   );
 }
@@ -269,7 +267,6 @@ function WaterSlide({ position }: { position: [number, number, number] }) {
         <circleGeometry args={[3, 16]} />
         <meshStandardMaterial color="#0891b2" emissive="#22d3ee" emissiveIntensity={0.2} metalness={0.8} roughness={0.1} />
       </mesh>
-      <pointLight position={[0, 2, 6]} intensity={2} distance={10} color="#06b6d4" />
     </group>
   );
 }
@@ -329,7 +326,6 @@ function SwingRide({ position }: { position: [number, number, number] }) {
           );
         })}
       </group>
-      <pointLight position={[0, 8, 0]} intensity={2} distance={15} color="#fbbf24" />
     </group>
   );
 }
@@ -377,7 +373,6 @@ function DropTower({ position }: { position: [number, number, number] }) {
         <sphereGeometry args={[0.5, 8, 8]} />
         <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={3} toneMapped={false} />
       </mesh>
-      <pointLight position={[0, 12, 0]} intensity={3} distance={20} color="#ef4444" />
     </group>
   );
 }
@@ -432,7 +427,6 @@ function BumperCars({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[8, 0.1, 8]} />
         <meshStandardMaterial color="#374151" transparent opacity={0.3} />
       </mesh>
-      <pointLight position={[0, 4, 0]} intensity={2} distance={12} color="#fbbf24" />
     </group>
   );
 }
@@ -485,9 +479,6 @@ export default function BotLand() {
       <BumperCars position={[55, 0, 80]} />
 
       {/* Ambient lighting for the park */}
-      <pointLight position={[55, 10, 60]} intensity={5} distance={40} color="#fbbf24" />
-      <pointLight position={[45, 5, 45]} intensity={3} distance={20} color="#ef4444" />
-      <pointLight position={[65, 5, 50]} intensity={3} distance={20} color="#3b82f6" />
     </group>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { getNightFactor } from "./DayNightCycle";
+import { randomAngle, randomBetween } from "./random";
 
 // ════════════════════════════════════════════════════════════════════
 // Particles — ambient atmosphere effects rendered as THREE.Points.
@@ -42,11 +43,11 @@ function FireflySwarm({
     const phases = new Float32Array(count);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      homes[i * 3 + 0] = center[0] + (Math.random() * 2 - 1) * spread[0];
-      homes[i * 3 + 1] = center[1] + Math.random() * spread[1];
-      homes[i * 3 + 2] = center[2] + (Math.random() * 2 - 1) * spread[2];
-      phases[i] = Math.random() * Math.PI * 2;
-      speeds[i] = 0.35 + Math.random() * 0.55;
+      homes[i * 3 + 0] = center[0] + randomBetween(-spread[0], spread[0]);
+      homes[i * 3 + 1] = center[1] + randomBetween(0, spread[1]);
+      homes[i * 3 + 2] = center[2] + randomBetween(-spread[2], spread[2]);
+      phases[i] = randomAngle();
+      speeds[i] = randomBetween(0.35, 0.9);
     }
     return { homes, phases, speeds };
   }, [count, center, spread]);
@@ -135,9 +136,9 @@ function SteamPlume({
     for (let i = 0; i < count; i++) {
       // Stagger initial ages so the column is steady-state from frame 0.
       ages[i] = (i / count) * lifespan;
-      radial[i * 2 + 0] = Math.random() * Math.PI * 2;
-      radial[i * 2 + 1] = Math.random();
-      speeds[i] = 0.85 + Math.random() * 0.4;
+      radial[i * 2 + 0] = randomAngle();
+      radial[i * 2 + 1] = randomBetween(0, 1);
+      speeds[i] = randomBetween(0.85, 1.25);
     }
     return { ages, radial, speeds, lifespan };
   }, [count, height, rise]);
@@ -162,8 +163,8 @@ function SteamPlume({
       data.ages[i] += dt * data.speeds[i];
       if (data.ages[i] > data.lifespan) {
         data.ages[i] -= data.lifespan;
-        data.radial[i * 2 + 0] = Math.random() * Math.PI * 2;
-        data.radial[i * 2 + 1] = Math.random();
+        data.radial[i * 2 + 0] = randomAngle();
+        data.radial[i * 2 + 1] = randomBetween(0, 1);
       }
       const y = data.ages[i] * rise;
       // Plume widens as it rises.
@@ -213,12 +214,12 @@ function SparkBurst({
     const ages = new Float32Array(count);
     const lifes = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      lifes[i] = 0.55 + Math.random() * 0.7;
-      ages[i] = Math.random() * lifes[i]; // stagger
-      const a = Math.random() * Math.PI * 2;
-      const r = Math.random();
+      lifes[i] = randomBetween(0.55, 1.25);
+      ages[i] = randomBetween(0, lifes[i]); // stagger
+      const a = randomAngle();
+      const r = randomBetween(0, 1);
       vel[i * 3 + 0] = Math.cos(a) * spread * r;
-      vel[i * 3 + 1] = upBias + Math.random() * 2.4;
+      vel[i * 3 + 1] = upBias + randomBetween(0, 2.4);
       vel[i * 3 + 2] = Math.sin(a) * spread * r;
     }
     return { vel, ages, lifes };
@@ -246,11 +247,11 @@ function SparkBurst({
       if (data.ages[i] > data.lifes[i]) {
         // Respawn at origin with fresh velocity.
         data.ages[i] = 0;
-        data.lifes[i] = 0.5 + Math.random() * 0.7;
-        const a = Math.random() * Math.PI * 2;
-        const r = Math.random();
+        data.lifes[i] = randomBetween(0.5, 1.2);
+        const a = randomAngle();
+        const r = randomBetween(0, 1);
         data.vel[i * 3 + 0] = Math.cos(a) * spread * r;
-        data.vel[i * 3 + 1] = upBias + Math.random() * 2.4;
+        data.vel[i * 3 + 1] = upBias + randomBetween(0, 2.4);
         data.vel[i * 3 + 2] = Math.sin(a) * spread * r;
       }
       const age = data.ages[i];

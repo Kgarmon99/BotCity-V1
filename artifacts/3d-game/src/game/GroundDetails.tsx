@@ -1,5 +1,6 @@
 import { useRef, useMemo } from "react";
 import * as THREE from "three";
+import { pickRandom, randomBetween, randomCentered } from "./random";
 
 // =====================================================================
 // GroundDetails — instanced grass, pavement, parking, plazas.
@@ -37,13 +38,13 @@ function InstancedGrass() {
 
     for (let i = 0; i < count; i++) {
       const [bx, by, bz] = positions[i] || [0, 0, 0];
-      dummy.position.set(bx + (Math.random() - 0.5) * 2, by, bz + (Math.random() - 0.5) * 2);
-      dummy.scale.setScalar(0.6 + Math.random() * 0.8);
-      dummy.rotation.y = Math.random() * Math.PI;
+      dummy.position.set(bx + randomCentered(2), by, bz + randomCentered(2));
+      dummy.scale.setScalar(randomBetween(0.6, 1.4));
+      dummy.rotation.y = randomBetween(0, Math.PI);
       dummy.updateMatrix();
       dummy.matrix.toArray(mats, i * 16);
 
-      const col = palette[Math.floor(Math.random() * palette.length)];
+      const col = pickRandom(palette);
       cols[i * 3] = col.r;
       cols[i * 3 + 1] = col.g;
       cols[i * 3 + 2] = col.b;
@@ -55,8 +56,8 @@ function InstancedGrass() {
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} receiveShadow>
       <boxGeometry args={[0.02, 0.15, 0.02]} />
       <meshStandardMaterial />
-      <instancedBufferAttribute attach="instanceMatrix" args={[new THREE.InstancedBufferAttribute(matrices, 16)]} />
-      <instancedBufferAttribute attach="instanceColor" args={[new THREE.InstancedBufferAttribute(colors, 3)]} />
+      <instancedBufferAttribute attach="instanceMatrix" args={[matrices, 16]} />
+      <instancedBufferAttribute attach="instanceColor" args={[colors, 3]} />
     </instancedMesh>
   );
 }

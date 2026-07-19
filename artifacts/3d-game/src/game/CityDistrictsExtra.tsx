@@ -1092,7 +1092,6 @@ function Waterfall({ pos }: { pos: [number, number, number] }) {
         ))}
       </group>
       {/* Cyan glow lighting the area at night */}
-      <pointLight color="#22d3ee" intensity={1.0} distance={9} position={[0, 1, 0]} />
     </group>
   );
 }
@@ -1466,7 +1465,6 @@ function NationalPark() {
             toneMapped={false}
           />
         </mesh>
-        <pointLight color="#fb923c" intensity={1.2} distance={6} position={[0, 0.5, 0]} />
       </group>
       {/* ─── Waterfall on the south face of the central mountain ───
           Mountain at (0, 7.5, -25) has radius 6, so its south face front

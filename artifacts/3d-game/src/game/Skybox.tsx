@@ -16,7 +16,7 @@ function Aurora() {
   });
   return (
     <mesh ref={ref} position={[0, 35, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[20, 50, 64]} />
+      <ringGeometry args={[20, 50, 32]} />
       <meshBasicMaterial
         color="#22c55e"
         transparent
@@ -40,7 +40,7 @@ function Aurora2() {
   });
   return (
     <mesh ref={ref} position={[0, 40, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[30, 60, 64]} />
+      <ringGeometry args={[30, 60, 32]} />
       <meshBasicMaterial
         color="#fbbf24"
         transparent
@@ -57,15 +57,15 @@ function Moon() {
   return (
     <group position={[-40, 30, -50]}>
       <mesh>
-        <sphereGeometry args={[3, 32, 32]} />
+        <sphereGeometry args={[3, 16, 12]} />
         <meshBasicMaterial color="#dcfce7" />
       </mesh>
       <mesh>
-        <sphereGeometry args={[4, 32, 32]} />
+        <sphereGeometry args={[4, 16, 12]} />
         <meshBasicMaterial color="#22c55e" transparent opacity={0.25} />
       </mesh>
       <mesh>
-        <sphereGeometry args={[5.5, 32, 32]} />
+        <sphereGeometry args={[5.5, 16, 12]} />
         <meshBasicMaterial color="#22c55e" transparent opacity={0.1} />
       </mesh>
     </group>
@@ -109,7 +109,7 @@ function ShootingStar() {
     <group>
       <mesh ref={ref} visible={false}>
         <sphereGeometry args={[0.15, 8, 8]} />
-        <meshBasicMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={5} toneMapped={false} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </mesh>
       <mesh ref={trailRef} visible={false}>
         <cylinderGeometry args={[0.02, 0.08, 6, 4]} />
@@ -144,13 +144,13 @@ function Nebula() {
 export default function Skybox() {
   return (
     <group>
-      <Stars radius={150} depth={80} count={8000} factor={5} fade speed={0.3} />
+      <Stars radius={150} depth={80} count={1800} factor={4} fade speed={0.15} />
       <Moon />
       <Aurora />
       <Aurora2 />
       <Nebula />
       {/* Multiple shooting stars */}
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 2 }).map((_, i) => (
         <ShootingStar key={`star-${i}`} />
       ))}
     </group>

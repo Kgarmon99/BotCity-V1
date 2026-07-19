@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "./gameStore";
-import { BUILDING_DEFS } from "./GameScene";
+import { BUILDING_DEFS } from "./buildingDefs";
 import { effectiveXZ } from "./buildingLayout";
 import { playerTracker } from "./playerTracker";
 import { MINIMAP_EXTENT, ROAD_XS, ROAD_ZS, ROAD_STYLE, QUARTERS } from "./cityConstants";

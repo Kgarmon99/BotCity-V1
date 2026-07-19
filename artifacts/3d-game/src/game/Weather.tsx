@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { WeatherMode } from "./gameStore";
+import { randomBetween, randomCentered } from "./random";
 
 // Weather particles follow the camera in a fixed-size box so the player always
 // sees a roughly constant density of rain/snow regardless of where they roam.
@@ -19,22 +20,38 @@ const SNOW_COUNT = 700;
 // avoid allocating thousands of THREE.Object3D / Matrix4 objects per frame.
 const dummy = new THREE.Object3D();
 
+interface RainParticle {
+  x: number;
+  y: number;
+  z: number;
+  vy: number;
+}
+
+interface SnowParticle extends RainParticle {
+  driftPhase: number;
+  driftAmp: number;
+}
+
+function randomWeatherXz(): number {
+  return randomCentered(BOX_HALF * 2);
+}
+
+function randomWeatherY(): number {
+  return randomBetween(BOX_BOTTOM, BOX_TOP);
+}
+
 function Rain() {
   const meshRef = useRef<THREE.InstancedMesh>(null!);
   const { camera } = useThree();
 
   // Per-particle state: position (relative to box) and fall speed.
   const particles = useMemo(() => {
-    const arr: { x: number; y: number; z: number; vy: number }[] = [];
-    for (let i = 0; i < RAIN_COUNT; i++) {
-      arr.push({
-        x: (Math.random() - 0.5) * 2 * BOX_HALF,
-        y: Math.random() * (BOX_TOP - BOX_BOTTOM) + BOX_BOTTOM,
-        z: (Math.random() - 0.5) * 2 * BOX_HALF,
-        vy: -22 - Math.random() * 10, // 22–32 units/sec downward
-      });
-    }
-    return arr;
+    return Array.from({ length: RAIN_COUNT }, (): RainParticle => ({
+      x: randomWeatherXz(),
+      y: randomWeatherY(),
+      z: randomWeatherXz(),
+      vy: -randomBetween(22, 32),
+    }));
   }, []);
 
   useFrame((_, delta) => {
@@ -50,8 +67,8 @@ function Rain() {
       if (p.y < BOX_BOTTOM) {
         // Recycle to the top at a new random x/z relative to current camera.
         p.y = BOX_TOP;
-        p.x = (Math.random() - 0.5) * 2 * BOX_HALF;
-        p.z = (Math.random() - 0.5) * 2 * BOX_HALF;
+        p.x = randomWeatherXz();
+        p.z = randomWeatherXz();
       }
       dummy.position.set(cx + p.x, p.y, cz + p.z);
       // Stretch streaks along the velocity direction for a "fast fall" look.
@@ -77,25 +94,14 @@ function Snow() {
   const { camera } = useThree();
 
   const particles = useMemo(() => {
-    const arr: {
-      x: number;
-      y: number;
-      z: number;
-      vy: number;
-      driftPhase: number;
-      driftAmp: number;
-    }[] = [];
-    for (let i = 0; i < SNOW_COUNT; i++) {
-      arr.push({
-        x: (Math.random() - 0.5) * 2 * BOX_HALF,
-        y: Math.random() * (BOX_TOP - BOX_BOTTOM) + BOX_BOTTOM,
-        z: (Math.random() - 0.5) * 2 * BOX_HALF,
-        vy: -1.6 - Math.random() * 1.2, // 1.6–2.8 units/sec — much slower than rain
-        driftPhase: Math.random() * Math.PI * 2,
-        driftAmp: 0.4 + Math.random() * 0.6,
-      });
-    }
-    return arr;
+    return Array.from({ length: SNOW_COUNT }, (): SnowParticle => ({
+      x: randomWeatherXz(),
+      y: randomWeatherY(),
+      z: randomWeatherXz(),
+      vy: -randomBetween(1.6, 2.8),
+      driftPhase: randomBetween(0, Math.PI * 2),
+      driftAmp: randomBetween(0.4, 1.0),
+    }));
   }, []);
 
   useFrame((state, delta) => {
@@ -109,8 +115,8 @@ function Snow() {
       p.y += p.vy * dt;
       if (p.y < BOX_BOTTOM) {
         p.y = BOX_TOP;
-        p.x = (Math.random() - 0.5) * 2 * BOX_HALF;
-        p.z = (Math.random() - 0.5) * 2 * BOX_HALF;
+        p.x = randomWeatherXz();
+        p.z = randomWeatherXz();
       }
       // Sinusoidal horizontal drift to sell the "snowflake floating" feel.
       const drift = Math.sin(t * 0.8 + p.driftPhase) * p.driftAmp;
@@ -142,28 +148,4 @@ export default function Weather({ mode }: WeatherProps) {
       {mode === "snow" && <Snow />}
     </group>
   );
-}
-
-/**
- * Returns the `<fog>` args + scene background color for the given weather.
- * Used by GameScene so fog density tightens in rain/snow/fog and the sky
- * color matches the mood.
- */
-export function fogForWeather(mode: WeatherMode): {
-  color: string;
-  near: number;
-  far: number;
-  background: string;
-} {
-  switch (mode) {
-    case "rain":
-      return { color: "#1e293b", near: 25, far: 110, background: "#020617" };
-    case "snow":
-      return { color: "#cbd5e1", near: 20, far: 95, background: "#1e293b" };
-    case "fog":
-      return { color: "#475569", near: 8, far: 55, background: "#334155" };
-    case "clear":
-    default:
-      return { color: "#052e16", near: 55, far: 160, background: "#021410" };
-  }
 }

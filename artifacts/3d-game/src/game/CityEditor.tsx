@@ -3,7 +3,7 @@ import { useFrame, useThree, ThreeEvent } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameStore } from "./gameStore";
-import { BUILDING_DEFS } from "./GameScene";
+import { BUILDING_DEFS } from "./buildingDefs";
 import { snap, effectiveXZ } from "./buildingLayout";
 
 const GROUND_HALF = 200;

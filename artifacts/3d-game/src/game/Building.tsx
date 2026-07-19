@@ -1,9 +1,8 @@
-import { useRef, memo } from "react";
+import { useMemo, useRef, memo } from "react";
 import { useFrame, ThreeEvent } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameStore } from "./gameStore";
-import { getDayFactor, getNightFactor } from "./DayNightCycle";
 
 export interface BuildingData {
   id: string;
@@ -56,37 +55,11 @@ function WindowGrid({
       : Array.from({ length: windowsPerRow }, (_, i) => -usable / 2 + i * step);
 
   // Each window gets a random "lit" state that persists
-  const litWindows = useRef<boolean[][]>(() => {
+  const litWindows = useMemo<boolean[][]>(() => {
     return Array.from({ length: count }, () =>
       Array.from({ length: windowsPerRow }, () => Math.random() > 0.3)
     );
-  }).current;
-
-  const paneRefs = useRef<(THREE.Mesh | null)[][]>([]);
-
-  useFrame(() => {
-    const nightFactor = getNightFactor();
-    const dayFactor = getDayFactor();
-    paneRefs.current.forEach((row, r) => {
-      row.forEach((pane, c) => {
-        if (pane) {
-          const mat = pane.material as THREE.MeshStandardMaterial;
-          const isLit = litWindows[r]?.[c] ?? false;
-          // During day: windows reflect sky (low emissive)
-          // During night: lit windows glow warm, unlit ones dark
-          if (isLit) {
-            mat.emissiveIntensity = 0.3 + nightFactor * 2.2;
-            mat.color.setHex(0xffeebb); // warm light
-            mat.emissive.setHex(0xffcc66);
-          } else {
-            mat.emissiveIntensity = 0.1 + nightFactor * 0.3;
-            mat.color.setHex(0x1a2332); // dark
-            mat.emissive.setHex(0x0a1525);
-          }
-        }
-      });
-    });
-  });
+  }, [count, windowsPerRow]);
 
   return (
     <group rotation={[0, rotationY, 0]} position={[0, 0, 0]}>
@@ -97,10 +70,7 @@ function WindowGrid({
           return (
             <group key={`${row}-${col}`} position={[x, y, z]}>
               {/* Window pane with night lighting */}
-              <mesh ref={(el) => {
-                if (!paneRefs.current[row]) paneRefs.current[row] = [];
-                paneRefs.current[row][col] = el;
-              }}>
+              <mesh>
                 <boxGeometry args={[0.55, 0.4, 0.04]} />
                 <meshStandardMaterial
                   color={isLit ? "#ffeebb" : "#1a2332"}
@@ -140,15 +110,11 @@ function WindowGrid({
 
 function BuildingComponent({ data, isNear }: BuildingProps) {
   const glowRef = useRef<THREE.Mesh>(null!);
-  const trimRef = useRef<THREE.Mesh>(null!);
-  const antennaRef = useRef<THREE.Mesh>(null!);
   const editMode = useGameStore((s) => s.editMode);
   const selectedBuildingId = useGameStore((s) => s.selectedBuildingId);
   const setSelectedBuildingId = useGameStore((s) => s.setSelectedBuildingId);
   const commitBuildingPos = useGameStore((s) => s.commitBuildingPos);
   const isSelected = selectedBuildingId === data.id;
-
-  const windowGlowRef = useRef<THREE.Mesh>(null!);
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     if (!editMode) return;
@@ -165,22 +131,9 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
   };
 
   useFrame(({ clock }) => {
+    if (!isNear || !glowRef.current) return;
     const t = clock.elapsedTime;
-    if (glowRef.current && isNear) {
-      glowRef.current.scale.setScalar(1 + Math.sin(t * 3) * 0.04);
-    }
-    if (trimRef.current) {
-      const mat = trimRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 0.8 + Math.sin(t * 2 + data.position[0]) * 0.3;
-    }
-    if (antennaRef.current) {
-      const mat = antennaRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.4 + Math.sin(t * 4 + data.position[2]) * 0.6;
-    }
-    if (windowGlowRef.current) {
-      const mat = windowGlowRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = (isNear ? 2.5 : 1.2) + Math.sin(t * 3 + data.position[0]) * 0.4;
-    }
+    glowRef.current.scale.setScalar(1 + Math.sin(t * 3) * 0.04);
   });
 
   const { label, position, color, roofColor, width, depth, height, emoji, visited } = data;
@@ -193,6 +146,8 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
   const firstWindowY = -height / 2 + 1.6;
   const frontPerRow = width >= 4 ? 3 : 2;
   const sidePerRow = depth >= 4 ? 2 : 1;
+  const showDetails = isNear || visited || (editMode && isSelected);
+  const showLabel = isNear || visited || editMode;
 
   return (
     <group
@@ -231,7 +186,7 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
       </mesh>
 
       {/* ─── Glass facade overlay (front face only) ─────── */}
-      <mesh position={[0, 0, depth / 2 + 0.02]} ref={windowGlowRef}>
+      <mesh position={[0, 0, depth / 2 + 0.02]}>
         <planeGeometry args={[width - 0.3, height - 0.5]} />
         <meshStandardMaterial
           color={color}
@@ -265,7 +220,7 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
       ))}
 
       {/* ─── Neon trim around base ──────────────────────── */}
-      <mesh ref={trimRef} position={[0, -height / 2 + 0.1, 0]}>
+      <mesh position={[0, -height / 2 + 0.1, 0]}>
         <boxGeometry args={[width + 0.18, 0.15, depth + 0.18]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1} />
       </mesh>
@@ -323,7 +278,7 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
           <meshStandardMaterial color="#334155" metalness={0.9} />
         </mesh>
         {/* Antenna tip light (pulses) */}
-        <mesh ref={antennaRef} position={[-width * 0.25, 1.7, depth * 0.15]}>
+        <mesh position={[-width * 0.25, 1.7, depth * 0.15]}>
           <sphereGeometry args={[0.08, 8, 8]} />
           <meshStandardMaterial
             color={roofColor}
@@ -334,47 +289,51 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
         </mesh>
       </group>
 
-      {/* ─── Windows: front + back ──────────────────────── */}
-      <WindowGrid
-        count={windowRows}
-        startY={firstWindowY}
-        spacing={windowSpacing}
-        faceWidth={width}
-        z={depth / 2 + 0.03}
-        color={color}
-        windowsPerRow={frontPerRow}
-      />
-      <WindowGrid
-        count={windowRows}
-        startY={firstWindowY}
-        spacing={windowSpacing}
-        faceWidth={width}
-        z={depth / 2 + 0.03}
-        rotationY={Math.PI}
-        color={color}
-        windowsPerRow={frontPerRow}
-      />
-      {/* ─── Windows: left + right sides ────────────────── */}
-      <WindowGrid
-        count={windowRows}
-        startY={firstWindowY}
-        spacing={windowSpacing}
-        faceWidth={depth}
-        z={width / 2 + 0.03}
-        rotationY={Math.PI / 2}
-        color={color}
-        windowsPerRow={sidePerRow}
-      />
-      <WindowGrid
-        count={windowRows}
-        startY={firstWindowY}
-        spacing={windowSpacing}
-        faceWidth={depth}
-        z={width / 2 + 0.03}
-        rotationY={-Math.PI / 2}
-        color={color}
-        windowsPerRow={sidePerRow}
-      />
+      {showDetails && (
+        <>
+          {/* ─── Windows: front + back ──────────────────────── */}
+          <WindowGrid
+            count={windowRows}
+            startY={firstWindowY}
+            spacing={windowSpacing}
+            faceWidth={width}
+            z={depth / 2 + 0.03}
+            color={color}
+            windowsPerRow={frontPerRow}
+          />
+          <WindowGrid
+            count={windowRows}
+            startY={firstWindowY}
+            spacing={windowSpacing}
+            faceWidth={width}
+            z={depth / 2 + 0.03}
+            rotationY={Math.PI}
+            color={color}
+            windowsPerRow={frontPerRow}
+          />
+          {/* ─── Windows: left + right sides ────────────────── */}
+          <WindowGrid
+            count={windowRows}
+            startY={firstWindowY}
+            spacing={windowSpacing}
+            faceWidth={depth}
+            z={width / 2 + 0.03}
+            rotationY={Math.PI / 2}
+            color={color}
+            windowsPerRow={sidePerRow}
+          />
+          <WindowGrid
+            count={windowRows}
+            startY={firstWindowY}
+            spacing={windowSpacing}
+            faceWidth={depth}
+            z={width / 2 + 0.03}
+            rotationY={-Math.PI / 2}
+            color={color}
+            windowsPerRow={sidePerRow}
+          />
+        </>
+      )}
 
       {/* ─── Door frame ─────────────────────────────────── */}
       <mesh position={[0, -height / 2 + doorH / 2, depth / 2 + 0.005]}>
@@ -438,18 +397,22 @@ function BuildingComponent({ data, isNear }: BuildingProps) {
       {/* ─── "Press E" prompt ───────────────────────────── */}
       {isNear && !editMode && <InteractPrompt y={height / 2 + 2.2} />}
 
-      {/* ─── Building label ─────────────────────────────── */}
-      <Text
-        position={[0, height / 2 + 0.85, depth / 2 + 0.3]}
-        fontSize={0.45}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.06}
-        outlineColor={color}
-      >
-        {emoji} {label}
-      </Text>
+      {showLabel && (
+        <>
+          {/* ─── Building label ─────────────────────────────── */}
+          <Text
+            position={[0, height / 2 + 0.85, depth / 2 + 0.3]}
+            fontSize={0.45}
+            color="#ffffff"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.06}
+            outlineColor={color}
+          >
+            {emoji} {label}
+          </Text>
+        </>
+      )}
     </group>
   );
 }

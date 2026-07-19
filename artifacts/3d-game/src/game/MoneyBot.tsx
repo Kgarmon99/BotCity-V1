@@ -95,7 +95,6 @@ export default function MoneyBot({ isMoving }: MoneyBotProps) {
       </mesh>
 
       {/* Glow point light following bot */}
-      <pointLight position={[0, 1.5, 0]} intensity={2} color="#22c55e" distance={8} />
 
       {/* Bot body */}
       <group ref={bodyRef} position={[0, 0.55, 0]}>
@@ -209,7 +208,6 @@ export default function MoneyBot({ isMoving }: MoneyBotProps) {
               toneMapped={false}
             />
           </mesh>
-          <pointLight position={[0, 0.5, 0]} intensity={1} color="#fbbf24" distance={4} />
 
           {/* Side fins */}
           <mesh position={[0.3, 0, 0]} rotation={[0, 0, -Math.PI / 8]}>

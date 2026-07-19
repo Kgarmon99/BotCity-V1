@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { PLAYER_BOUND } from "./cityConstants";
 
 export function getRealTimePhase(now: Date = new Date()): number {
   const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
@@ -89,22 +88,14 @@ export default function DayNightCycle() {
         position={[15, 30, 10]}
         intensity={0.7}
         color="#fef3c7"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0005}
-        shadow-camera-far={270}
-        shadow-camera-left={-PLAYER_BOUND}
-        shadow-camera-right={PLAYER_BOUND}
-        shadow-camera-top={PLAYER_BOUND}
-        shadow-camera-bottom={-PLAYER_BOUND}
       />
       <hemisphereLight ref={hemiRef} args={["#4ade80", "#16a34a", 0.6]} />
       <mesh ref={sunRef} position={[60, 30, 0]}>
-        <sphereGeometry args={[2.6, 24, 18]} />
+        <sphereGeometry args={[2.6, 16, 12]} />
         <meshBasicMaterial color="#fde047" toneMapped={false} />
       </mesh>
       <mesh ref={sunGlowRef} position={[60, 30, 0]}>
-        <sphereGeometry args={[4.8, 24, 18]} />
+        <sphereGeometry args={[4.8, 16, 12]} />
         <meshBasicMaterial
           color="#fde047"
           transparent
